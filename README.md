@@ -1,1 +1,1 @@
-# Lnear Algebra in Agda
+# Linear Algebra in Agda
