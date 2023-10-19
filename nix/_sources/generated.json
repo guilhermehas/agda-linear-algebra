@@ -1,0 +1,22 @@
+{
+    "agda-stdlib": {
+        "cargoLocks": null,
+        "date": "2023-10-19",
+        "extract": null,
+        "name": "agda-stdlib",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "agda",
+            "repo": "agda-stdlib",
+            "rev": "0c670dd1794cc55fc2e0887b840cc020e0360da8",
+            "sha256": "sha256-EF/2FEmtxRyEeKY433bc92zEgQ8gOILMtNdoZIVBJU4=",
+            "type": "github"
+        },
+        "version": "0c670dd1794cc55fc2e0887b840cc020e0360da8"
+    }
+}

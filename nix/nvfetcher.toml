@@ -1,0 +1,3 @@
+[agda-stdlib]
+src.git = "https://github.com/agda/agda-stdlib"
+fetch.github = "agda/agda-stdlib"

@@ -18,7 +18,6 @@ _build
 .vscode/*
 dist
 dist-newstyle
-Everything.agda
 EverythingSafe.agda
 EverythingSafeGuardedness.agda
 EverythingSafeSizedTypes.agda
