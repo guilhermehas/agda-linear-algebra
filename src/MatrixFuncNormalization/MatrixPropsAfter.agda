@@ -35,7 +35,7 @@ private variable
 <₋-totalOrder : StrictTotalOrder _ _ _
 <₋-totalOrder = record { isStrictTotalOrder = <₋-isStrictTotalOrder A′.isStrictTotalOrder }
 
-open module STO = StrictTotalOrder <₋-totalOrder renaming (Carrier to A) hiding (_≟_)
+open module STO = StrictTotalOrder <₋-totalOrder renaming (Carrier to A) hiding (_≟_; _>_)
 open module ≈ = IsEquivalence STO.isEquivalence hiding (sym)
 open StrictToNonStrict _≈_ _<_
 open Equality _≈_ renaming (≈∙-refl to ≈∙-refl′)

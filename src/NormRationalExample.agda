@@ -55,7 +55,7 @@ _+++_ : Matrix m n → Matrix p n → Matrix (m ℕ.+ p) n
 
 allZeros : ∀ m n → Matrix m n
 allZeros m zero = []
-allZeros m (suc n) = replicate 0ℚᵘ ∷ allZeros m n
+allZeros m (suc n) = replicate _ 0ℚᵘ ∷ allZeros m n
 
 SquareMatrix : ℕ → Set _
 SquareMatrix n = Matrix n n
@@ -69,8 +69,7 @@ idMat (suc n) = subst SquareMatrix (ℕ.+-comm n 1) matrixRes
   matrixN = idMat n +++ allZeros 1 n
 
   matrixRes : Matrix (n ℕ.+ 1) (n ℕ.+ 1)
-  matrixRes = matrixN ++ [ replicate 0ℚᵘ ++ [ 1ℚᵘ ]  ]
-
+  matrixRes = matrixN ++ [ replicate _ 0ℚᵘ ++ [ 1ℚᵘ ]  ]
 
 2ℚᵘ : ℚᵘ
 2ℚᵘ = ℤ.+ 2 / 1

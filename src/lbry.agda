@@ -153,7 +153,7 @@ punchIn-fromℕ (suc i) = cong suc (punchIn-fromℕ i)
     sj≤i = subst (λ x → suc x ℕ.≤ toℕ i) (trans (sym (cong toℕ isj≡j)) (toℕ-inject₁ sj)) i>j
 
     PSj : P (suc sj)
-    PSj = induct (rs _ sj>j) (F.<-cmp i (suc sj)) sj≤i
+    PSj = induct (rs sj>j) (F.<-cmp i (suc sj)) sj≤i
 
 ≤Rec : Recomputable (F._≤_ {_} {n} i)
 ≤Rec = dec⟶recomputable (F._≤?_ _)

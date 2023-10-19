@@ -121,11 +121,11 @@ data _≈ⱽ_ : Rel (Vector M n) (rr ⊔ mr ⊔ ℓm) where
 ... | no  _ | no ¬i<m rewrite splitAt-≥ m i (≮⇒≥ ¬i<m) = ≈ᴹ-refl
 ... | yes refl | yes i<m rewrite splitAt-< m i i<m with q ≟ fromℕ< i<m
 ...    | yes _ rewrite splitAt-< m (p ↑ˡ n)
-  (<-transʳ (ℕ.≤-reflexive (toℕ-↑ˡ _ _)) (toℕ<n _)) = +ᴹ-congˡ
+  (≤-<-trans (ℕ.≤-reflexive (toℕ-↑ˡ _ _)) (toℕ<n _)) = +ᴹ-congˡ
     (*ₗ-congˡ (≈ᴹ-reflexive (cong xs (toℕ-injective α)))) where
     open ≡-Reasoning
     α = begin
-      toℕ (fromℕ< (<-transʳ (ℕ.≤-reflexive (toℕ-↑ˡ p n)) (toℕ<n p))) ≡⟨ toℕ-fromℕ< _ ⟩
+      toℕ (fromℕ< (≤-<-trans (ℕ.≤-reflexive (toℕ-↑ˡ p n)) (toℕ<n p))) ≡⟨ toℕ-fromℕ< _ ⟩
       toℕ (p ↑ˡ n) ≡⟨ toℕ-↑ˡ _ _ ⟩
       toℕ p ∎
 ...    | no  q≠i = ⊥-elim (q≠i (≡.sym (toℕ-injective

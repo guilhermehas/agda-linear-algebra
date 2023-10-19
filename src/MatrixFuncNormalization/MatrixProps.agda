@@ -31,9 +31,9 @@ open AddSupMod A′._<_
 <⁺-totalOrder : StrictTotalOrder _ _ _
 <⁺-totalOrder = record { isStrictTotalOrder = <⁺-isStrictTotalOrder A′.isStrictTotalOrder }
 
-open module STO = StrictTotalOrder <⁺-totalOrder renaming (Carrier to A) hiding (_≟_)
+open module STO = StrictTotalOrder <⁺-totalOrder renaming (Carrier to A) hiding (_≟_; _>_)
 open module ≈ = IsEquivalence STO.isEquivalence hiding (sym)
-open StrictToNonStrict _≈_ _<_
+open StrictToNonStrict _≈_ _<_ hiding (<-≤-trans)
 open Equality _≈_ renaming (≈∙-refl to ≈∙-refl′)
 open FinProps
 
@@ -125,37 +125,37 @@ proj₁ (rowsNormalizedBeforeIJ++′ i j i≤j xs ys (bef , after)
   (tri< _ _ _ , sameDiff , lift (ysI≈xsI , ysJ+1≈xsJ+1))) h h<i k h<k
   with k ≟ i | k ≟ suc j
 ... | yes refl | _ = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i)
-  (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
+  (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (≈.sym ysI≈xsI) (bef _ h<i _ h<k))
-... | no k≢i | yes refl = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i) (<⇒≢ (<-transˡ h<i
+... | no k≢i | yes refl = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i) (<⇒≢ (<-≤-trans h<i
   (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (≈.sym ysJ+1≈xsJ+1) (bef _ h<i _ h<k))
 ... | no k≢i | no k≢j+1 = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i)
-  (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
+  (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (sameDiff _ k≢i k≢j+1) (bef _ h<i _ h<k))
 proj₁ (rowsNormalizedBeforeIJ++′ i j i≤j xs ys (bef , after)
   (tri≈ _ _ _ , sameDiff , ysI≈xsI , ysJ+1>xsJ+1)) h h<i k h<k
   with k ≟ i | k ≟ suc j
 ... | yes refl | _ = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i)
-  (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
+  (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (≈.sym ysI≈xsI) (bef _ h<i _ h<k))
 ... | no k≢i | yes refl = <′-trans (<′-respˡ-≈ (sameDiff _ (<⇒≢ h<i)
-  (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j))))) (bef _ h<i _ h<k)) ysJ+1>xsJ+1
+  (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j))))) (bef _ h<i _ h<k)) ysJ+1>xsJ+1
 ... | no k≢i | no k≢j+1 = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i)
-  (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
+  (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (sameDiff _ k≢i k≢j+1) (bef _ h<i _ h<k))
 proj₁ (rowsNormalizedBeforeIJ++′ i j i≤j xs ys (bef , after)
   (tri> _ _ _ , sameDiff , lift (ysI≈xsJ+1 , ysJ+1≈xsI))) h h<i k h<k
   with k ≟ i | k ≟ suc j
 ... | _ | yes refl = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i) (<⇒≢
-  (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
+  (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (≈.sym ysJ+1≈xsI) (bef _ h<i _ h<i))
 ... | yes refl | no k≢j+1 = <′-respˡ-≈
-  (sameDiff _ (<⇒≢ h<i) (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
+  (sameDiff _ (<⇒≢ h<i) (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (≈.sym ysI≈xsJ+1)
-  (bef _ h<i _ (s≤s (ℕ.<⇒≤ (<-transˡ h<k (dec⟶recomputable (_≤?_ _) i≤j))))) )
+  (bef _ h<i _ (s≤s (ℕ.<⇒≤ (<-≤-trans h<k (dec⟶recomputable (_≤?_ _) i≤j))))) )
 ... | no k≢i | no k≢j+1 = <′-respˡ-≈ (sameDiff _ (<⇒≢ h<i)
-  (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
+  (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (_≤?_ _) i≤j)))))
   (<′-respʳ-≈ (sameDiff _ k≢i k≢j+1) (bef _ h<i _ h<k))
 
 proj₂ (rowsNormalizedBeforeIJ++′ i j i≤j xs ys (bef , after)

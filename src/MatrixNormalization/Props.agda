@@ -123,7 +123,7 @@ module PropNorm {c ℓ₁ ℓ₂} (rel : StrictTotalOrder c ℓ₁ ℓ₂) where
     → normalizeTwoLines i (suc j) (<⇒≢ (s≤s i≤j)) xs ys
     → linesNormalizedBeforeIJ i (suc j) (m≤n⇒m≤1+n i≤j) ys
   proj₁ (linesNormalizedBeforeIJ++ i j i≤j xs ys (bef , after) (sameDiff , cases)) h h<i k h<k
-    rewrite sym (sameDiff h (<⇒≢ h<i) (<⇒≢ (<-transˡ h<i (m≤n⇒m≤1+n (dec⟶recomputable (F._≤?_ _) i≤j)))))
+    rewrite sym (sameDiff h (<⇒≢ h<i) (<⇒≢ (<-≤-trans h<i (m≤n⇒m≤1+n (dec⟶recomputable (F._≤?_ _) i≤j)))))
     with A.compare (lookup xs i) (lookup xs (suc j)) | k F.≟ i | k F.≟ suc j
   ... | tri< a ¬b ¬c | yes refl | _ rewrite cases .proj₁ = bef _ h<i _ h<i
   ... | tri< a ¬b ¬c | no k≢i | yes refl rewrite cases .proj₂ = bef _ h<i _ h<k
@@ -133,7 +133,7 @@ module PropNorm {c ℓ₁ ℓ₂} (rel : StrictTotalOrder c ℓ₁ ℓ₂) where
   ... | tri≈ ¬a b ¬c | no k≢i | no k≢sj rewrite sym (sameDiff _ k≢i k≢sj) = bef _ h<i _ h<k
   ... | tri> ¬a ¬b c | p | yes refl rewrite cases .proj₂ = bef _ h<i _ h<i
   ... | tri> ¬a ¬b c | yes refl | no k≢sj rewrite cases .proj₁ = bef _ h<k _
-    (s≤s (<⇒≤ (<-transˡ h<k (dec⟶recomputable (F._≤?_ _) i≤j))))
+    (s≤s (<⇒≤ (<-≤-trans h<k (dec⟶recomputable (F._≤?_ _) i≤j))))
   ... | tri> ¬a ¬b c | no k≢i | no k≢sj rewrite sym (sameDiff _ k≢i k≢sj) = bef _ h<i _ h<k
   proj₂ (linesNormalizedBeforeIJ++ i j i≤j xs ys (bef , after) (sameDiff , cases)) k i<k k≤sj
     with A.compare (lookup xs i) (lookup xs (suc j)) | k F.≟ suc j

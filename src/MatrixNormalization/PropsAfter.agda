@@ -62,7 +62,7 @@ module PropNormAfter {c ℓ₁} (rel : StrictTotalOrder c ℓ₁ c) where
   normII : ∀ i (xs : Vec A (suc n)) → LinesAfterINormalized (suc i) xs
     → LinesNormalizedAfterIJ (inject₁ i) (inject₁ i) F.≤-refl xs
   proj₁ (normII i xs p) h h>i k h>k =
-    p _ (<-transʳ (subst (toℕ i ℕ.≤_) (sym (toℕ-inject₁ _)) F.≤-refl) h>i) _ h>k
+    p _ (≤-<-trans (subst (toℕ i ℕ.≤_) (sym (toℕ-inject₁ _)) F.≤-refl) h>i) _ h>k
   proj₂ (normII i xs p) k i>k k≥i = ⊥-elim (≤⇒≯ k≥i i>k)
 
   NormalizeTwoLines : ∀ (i j : Fin n) → .(i F.> j) → Rel (Vec A n) _

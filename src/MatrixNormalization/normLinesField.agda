@@ -235,7 +235,7 @@ normMatrix : ∀ (xs : Matrix m n) i j i≢j →
   Σ[ ys ∈ Matrix m n ] (
     (vec→space xs ≅ vec→space ys) ×
     normalizeTwoLines i j i≢j (matrixZeros xs) (matrixZeros ys))
-normMatrix {m} {n} xs i j i≢j = yss , swapSameVec i≢j ysPropMod , lookupXs≢Ys , normVec
+normMatrix {m} {n} xs i j i≢j = yss , swapSameVec {xs = xs} i≢j ysPropMod , lookupXs≢Ys , normVec
   where
   xsi = lookup xs i
   xsj = lookup xs j
@@ -257,8 +257,8 @@ normMatrix {m} {n} xs i j i≢j = yss , swapSameVec i≢j ysPropMod , lookupXs�
     lookup (matrixZeros yss) k    ∎ where
     open ≡-Reasoning
 
-    helper = lookup yss k             ≡⟨ lookup∘update′ k≢j _ _ ⟩
-             lookup (xs [ i ]≔ ysi) k ≡⟨ lookup∘update′ k≢i _ _ ⟩
+    helper = lookup yss k             ≡⟨ lookup∘update′ k≢j (xs [ i ]≔ ysi) _ ⟩
+             lookup (xs [ i ]≔ ysi) k ≡⟨ lookup∘update′ k≢i xs _ ⟩
              lookup xs k              ∎
 
   sameNormTwoVectors : ∀ {p q r s} → p ≡ q → r ≡ s → normTwoVectors {m} p r → normTwoVectors q s
@@ -272,8 +272,8 @@ normMatrix {m} {n} xs i j i≢j = yss , swapSameVec i≢j ysPropMod , lookupXs�
     projSame : ∀ i → findNonZeroPos (lookup xs i) ≡ lookup (V.map findNonZeroPos xs) i
     projSame i = ≡.sym (lookup-map i findNonZeroPos xs)
 
-    lookupYssI≡ysi = lookup yss i             ≡⟨ lookup∘update′ i≢j _ _ ⟩
-                     lookup (xs [ i ]≔ ysi) i ≡⟨ lookup∘update i _ _    ⟩
+    lookupYssI≡ysi = lookup yss i             ≡⟨ lookup∘update′ i≢j (xs [ i ]≔ ysi) ysj ⟩
+                     lookup (xs [ i ]≔ ysi) i ≡⟨ lookup∘update i xs _    ⟩
                      ysi ∎
 
     α = lookup (V.map findNonZeroPos yss) i ≡⟨ lookup-map i findNonZeroPos yss ⟩
@@ -281,7 +281,7 @@ normMatrix {m} {n} xs i j i≢j = yss , swapSameVec i≢j ysPropMod , lookupXs�
         findNonZeroPos ysi ∎
 
     β = lookup (matrixZeros yss) j    ≡⟨ lookup-map j findNonZeroPos yss ⟩
-        findNonZeroPos (lookup yss j) ≡⟨ cong findNonZeroPos {y = ysj} (lookup∘update j (V.updateAt i (const ysi) xs) _) ⟩
+        findNonZeroPos (lookup yss j) ≡⟨ cong findNonZeroPos {y = ysj} (lookup∘update j (V.updateAt xs i (const ysi)) _) ⟩
         findNonZeroPos ysj            ∎
 
 funcNorm : FuncNormAllLines m n (Matrix m (suc n))

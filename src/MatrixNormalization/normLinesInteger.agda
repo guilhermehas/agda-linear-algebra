@@ -97,7 +97,7 @@ findNonZeroEq : VecPivotPos xs p → findNonZeroPos xs ≡ p
 findNonZeroEq {xs = xs} = alwaysSamePivot _ _ _ (findNonZero xs .proj₂)
 
 vecZeros : ∀ n → Vec ℤ n
-vecZeros n = replicate (+ 0)
+vecZeros n = replicate _ (+ 0)
 
 allZerosVecZero : AllZeros (vecZeros n)
 allZerosVecZero {ℕ.suc n} zero = refl
@@ -211,8 +211,8 @@ normMatrix {m} {n} xs i j i≢j = yss , lookupXs≢Ys , normVec
     findNonZeroPos (lookup yss k) ≡˘⟨ lookup-map k findNonZeroPos yss ⟩
     lookup (matrixZeros yss) k    ∎ where
 
-    helper = lookup yss k             ≡⟨ lookup∘update′ k≢j _ _ ⟩
-             lookup (xs [ i ]≔ ysi) k ≡⟨ lookup∘update′ k≢i _ _ ⟩
+    helper = lookup yss k             ≡⟨ lookup∘update′ k≢j (xs [ i ]≔ ysi) _ ⟩
+             lookup (xs [ i ]≔ ysi) k ≡⟨ lookup∘update′ k≢i xs _ ⟩
              lookup xs k              ∎
 
   sameNormTwoVectors : ∀ {p q r s} → p ≡ q → r ≡ s → normTwoVectors {m} p r → normTwoVectors q s
@@ -225,8 +225,8 @@ normMatrix {m} {n} xs i j i≢j = yss , lookupXs≢Ys , normVec
     projSame : ∀ i → findNonZeroPos (lookup xs i) ≡ lookup (V.map findNonZeroPos xs) i
     projSame i = sym (lookup-map i findNonZeroPos xs)
 
-    lookupYssI≡ysi = lookup yss i             ≡⟨ lookup∘update′ i≢j _ _ ⟩
-                     lookup (xs [ i ]≔ ysi) i ≡⟨ lookup∘update i _ _    ⟩
+    lookupYssI≡ysi = lookup yss i             ≡⟨ lookup∘update′ i≢j (xs [ i ]≔ ysi) _ ⟩
+                     lookup (xs [ i ]≔ ysi) i ≡⟨ lookup∘update i xs _    ⟩
                      ysi ∎
 
     α = lookup (V.map findNonZeroPos yss) i ≡⟨ lookup-map i findNonZeroPos yss ⟩
@@ -234,5 +234,5 @@ normMatrix {m} {n} xs i j i≢j = yss , lookupXs≢Ys , normVec
         findNonZeroPos ysi ∎
 
     β = lookup (matrixZeros yss) j    ≡⟨ lookup-map j findNonZeroPos yss ⟩
-        findNonZeroPos (lookup yss j) ≡⟨ cong findNonZeroPos (lookup∘update j _ _) ⟩
+        findNonZeroPos (lookup yss j) ≡⟨ cong findNonZeroPos (lookup∘update j (xs [ i ]≔ ysi) _) ⟩
         findNonZeroPos ysj            ∎

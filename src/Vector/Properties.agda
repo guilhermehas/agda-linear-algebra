@@ -51,7 +51,7 @@ swapCons _ _ _ _ (suc _) = refl
 ...  | inj₂ _ = refl
 
 cong-updateAt : ∀ {xs ys : Vector A n} p f → xs ≗ ys →
-  updateAt p f xs ≗ updateAt p f ys
+  updateAt xs p f ≗ updateAt ys p f
 cong-updateAt zero f xs≡ys zero = cong f (xs≡ys zero)
 cong-updateAt (suc p) f xs≡ys zero = xs≡ys zero
 cong-updateAt zero f xs≡ys (suc i) = xs≡ys (suc i)

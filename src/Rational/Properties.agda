@@ -17,7 +17,7 @@ open import Algebra.Field
 private variable
   p q : ℚᵘ
 
-inv : (p : ℚᵘ) → p ≠ 0ℚᵘ → ℚᵘ
+inv : (p : ℚᵘ) → p ≄ 0ℚᵘ → ℚᵘ
 inv p p≠0 = 1/_ p ⦃ ≢-nonZero p≠0 ⦄
 
 +-*-inv-isField : IsField _≃_ 0ℚᵘ 1ℚᵘ -_ _+_ _*_ inv
@@ -30,8 +30,8 @@ inv p p≠0 = 1/_ p ⦃ ≢-nonZero p≠0 ⦄
 ℚᵘ-Field : Field _ _
 ℚᵘ-Field = record { isField = +-*-inv-isField }
 
-0ℚᵘ≠1ℚᵘ : 0ℚᵘ ≠ 1ℚᵘ
+0ℚᵘ≠1ℚᵘ : 0ℚᵘ ≄ 1ℚᵘ
 0ℚᵘ≠1ℚᵘ = from-no (0ℚᵘ ≃? 1ℚᵘ)
 
-_≠?_ : Decidable _≠_
+_≠?_ : Decidable _≄_
 x ≠? y = ¬? (x ≃? y)

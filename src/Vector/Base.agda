@@ -21,7 +21,7 @@ private variable
 infixl 6 _[_]≔_
 
 _[_]≔_ : Vector A n → Fin n → A → Vector A n
-xs [ i ]≔ x = updateAt i (const x) xs
+xs [ i ]≔ x = updateAt xs i (const x)
 
 swapV : Vector A n → (i j : Fin n) → Vector A n
 swapV xs i j = xs [ i ]≔ xs j [ j ]≔ xs i

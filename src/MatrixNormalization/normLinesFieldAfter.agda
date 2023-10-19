@@ -97,15 +97,15 @@ VecPivotsRight xs = Σ[ p ∈ _ ] VecPivotPosRight xs p
 
 findNonZeroRight : (xs : Vector F n) → VecPivotsRight xs
 findNonZeroRight {zero} xs = inj₂ _ , λ ()
-findNonZeroRight {suc n} xs with xs (fromℕ _) ≟ 0# | findNonZeroRight (VF.remove (fromℕ _) xs)
+findNonZeroRight {suc n} xs with xs (fromℕ _) ≟ 0# | findNonZeroRight (VF.removeAt xs (fromℕ _))
 ... | yes c#0 | _ = inj₁ (fromℕ _) , c#0 , (λ i i>n → ⊥-elim (≤⇒≯ (≤fromℕ _) i>n))
 ... | no  c≈0 | inj₂ _  , allZeros = inj₂ _ , all0Xs where
   all0Xs : AllZeros xs
   all0Xs p with p F.≟ fromℕ _
   ... | yes refl = tight _ _ .proj₁ c≈0
   ... | no   p≢n = begin
-    xs p                     ≡˘⟨ VF.remove-punchOut xs (p≢n ∘ sym) ⟩
-    VF.remove (fromℕ n) xs _ ≈⟨ allZeros _ ⟩
+    xs p                     ≡˘⟨ VF.removeAt-punchOut xs (p≢n ∘ sym) ⟩
+    VF.removeAt xs (fromℕ n) _ ≈⟨ allZeros _ ⟩
     0# ∎ where open ReasonSetoid setoid
 ... | no  c≈0 | inj₁ fn , xs#0 , xs≈0 = inj₁ pn , xs#0 , all0Xs where
   removeN = punchIn (fromℕ n)
@@ -115,7 +115,7 @@ findNonZeroRight {suc n} xs with xs (fromℕ _) ≟ 0# | findNonZeroRight (VF.re
   all0Xs i i>fn with i F.≟ fromℕ _
   ... | yes refl = tight _ _ .proj₁ c≈0
   ... | no   i≢n = begin
-    xs i ≡˘⟨ VF.remove-punchOut xs (i≢n ∘ sym) ⟩
+    xs i ≡˘⟨ VF.removeAt-punchOut xs (i≢n ∘ sym) ⟩
     xs (removeN pI≢N) ≈⟨ xs≈0 pI≢N fn≤PIN ⟩
     0# ∎ where
       pI≢N = punchOut {i = fromℕ n} {i} (i≢n ∘ sym)

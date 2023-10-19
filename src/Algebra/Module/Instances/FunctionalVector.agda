@@ -34,7 +34,7 @@ _+ᴹ_ : Op₂ $ VC n
 _+ᴹ_ = zipWith _+_
 
 0ᴹ : VC n
-0ᴹ = replicate 0#
+0ᴹ = replicate _ 0#
 
 -ᴹ_ : Op₁ $ VC n
 -ᴹ_ = map $ -_

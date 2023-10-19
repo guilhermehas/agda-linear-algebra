@@ -3,7 +3,7 @@ module Algebra.Field.Properties where
 open import Level
 open import Function
 open import Data.Nat hiding (_+_; _*_; _^_; NonZero; nonZero; _⊔_)
-open import Data.Integer hiding (_+_; _*_; _^_; NonZero; _⊔_)
+open import Data.Integer hiding (_+_; _*_; _^_; NonZero; nonZero; _⊔_)
 open import Data.Product
 open import Data.Vec
 open import Algebra
