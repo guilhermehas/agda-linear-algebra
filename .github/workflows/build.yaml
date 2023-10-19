@@ -14,5 +14,8 @@ jobs:
           echo '
             experimental-features = nix-command flakes
             substituters = https://cache.nixos.org/ https://hydra.iohk.io https://guilherme.cachix.org' > ~/.config/nix/nix.conf
+      - uses: cachix/cachix-action@v8
+        with:
+          name: guilherme
       - name: Build
         run:  nix build -v --print-build-logs
