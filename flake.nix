@@ -19,8 +19,8 @@
           agdaPackages.mkDerivation {
             pname = "agda-dimensional-stdlib";
             version = "1.0.0";
-            src = ./src;
-            everythingFile = "Everything.agda";
+            src = ./.;
+            everythingFile = "src/EverythingUseful.agda";
             buildInputs = [ standard-library ];
             LC_ALL = "en_US.UTF-8";
             nativeBuildInputs = [ glibcLocales ];
