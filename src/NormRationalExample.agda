@@ -1,0 +1,141 @@
+-- A example for normalization of a matrix of a matrix of rational numbers
+
+open import Level using (0ℓ)
+open import Data.Nat as ℕ hiding (_/_; _≟_)
+import Data.Nat.Properties as ℕ
+import Data.Integer as ℤ
+open import Data.Fin hiding (_≟_)
+open import Data.Product
+open import Data.Vec
+import Data.Vec.Relation.Binary.Pointwise.Inductive as PI
+open import Data.Rational.Unnormalised hiding (truncate)
+open import Data.Rational.Unnormalised.Properties
+open import Relation.Binary
+open import Relation.Binary.PropositionalEquality hiding ([_])
+open import Relation.Unary hiding (Decidable)
+open import Relation.Nullary.Decidable
+open import Algebra
+open import Algebra.Module
+import Algebra.Module.Instances.FunctionalVector as AMIF
+open import Algebra.Apartness
+
+open import Algebra.SubModule
+open import Rational.Properties
+import MatrixNormalization.normLinesField as NormField
+
+open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
+open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
+open CommutativeRing commutativeRing using (ring)
+open AMIF ring using (leftModule; _≈ᴹ_)
+
+module NormRationalExample (theoEq : {n : ℕ} {x y : Fin n → ℚᵘ}
+      {VS : Cᴹ (leftModule n) 0ℓ} →
+      x ≈ᴹ y → x ∈ VS → y ∈ VS) where
+
+private variable
+  m n p : ℕ
+
+open NormField +-*-heytingField _≠?_ theoEq hiding (Matrix) renaming (MatrixData to Matrix)
+
+_≋v_ : Rel (Vec ℚᵘ n) 0ℓ
+_≋v_ = PI.Pointwise _≈_
+
+_≋_ : Rel (Matrix m n) 0ℓ
+_≋_ = PI.Pointwise _≋v_
+
+_≟v_ : Decidable (_≋v_ {n})
+_≟v_ = PI.decidable _≃?_
+
+_≟_ : Decidable (_≋_ {m} {n})
+_≟_ = PI.decidable _≟v_
+
+_+++_ : Matrix m n → Matrix p n → Matrix (m ℕ.+ p) n
+[] +++ [] = []
+(x ∷ xs) +++ (y ∷ ys) = (x ++ y) ∷ (xs +++ ys)
+
+allZeros : ∀ m n → Matrix m n
+allZeros m zero = []
+allZeros m (suc n) = replicate 0ℚᵘ ∷ allZeros m n
+
+SquareMatrix : ℕ → Set _
+SquareMatrix n = Matrix n n
+
+idMat : ∀ n → SquareMatrix n
+idMat zero = []
+idMat (suc n) = subst SquareMatrix (ℕ.+-comm n 1) matrixRes
+  where
+
+  matrixN : Matrix (n ℕ.+ 1) n
+  matrixN = idMat n +++ allZeros 1 n
+
+  matrixRes : Matrix (n ℕ.+ 1) (n ℕ.+ 1)
+  matrixRes = matrixN ++ [ replicate 0ℚᵘ ++ [ 1ℚᵘ ]  ]
+
+
+2ℚᵘ : ℚᵘ
+2ℚᵘ = ℤ.+ 2 / 1
+
+-1ℚᵘ : ℚᵘ
+-1ℚᵘ = (ℤ.- (ℤ.+ 1)) / 1
+
+-2ℚᵘ : ℚᵘ
+-2ℚᵘ = (ℤ.- (ℤ.+ 2)) / 1
+
+matrix22 : Matrix 2 2
+matrix22 = (1ℚᵘ ∷ [ 1ℚᵘ ] )
+        ∷ [ 1ℚᵘ ∷ [ 2ℚᵘ ] ]
+
+normedMatrix22 : Matrix _ _
+normedMatrix22 = normalizeD matrix22
+
+normedMatrix22Res : Matrix 2 2
+normedMatrix22Res = (1ℚᵘ ∷ [ 1ℚᵘ ])
+                 ∷ [ 0ℚᵘ ∷ [ 1ℚᵘ ] ]
+
+normed22≡res : normedMatrix22 ≋ normedMatrix22Res
+normed22≡res = from-yes (normedMatrix22 ≟ normedMatrix22Res)
+
+nCol = 3
+nRow = 5
+
+pendulumExample : Matrix nCol nRow
+pendulumExample =
+  -- L   M      T
+  (1ℚᵘ ∷ 0ℚᵘ ∷ -2ℚᵘ ∷ []) ∷ -- acceleration
+  (0ℚᵘ ∷ 1ℚᵘ ∷  0ℚᵘ ∷ []) ∷ -- mass
+  (1ℚᵘ ∷ 0ℚᵘ ∷  0ℚᵘ ∷ []) ∷ -- time
+  (0ℚᵘ ∷ 0ℚᵘ ∷  1ℚᵘ ∷ []) ∷
+  (0ℚᵘ ∷ 0ℚᵘ ∷  0ℚᵘ ∷ []) ∷
+  []
+
+pendulum++id : Matrix (nCol ℕ.+ nRow) nRow
+pendulum++id = pendulumExample +++ idMat _
+
+-- 1 0 -2 | 1 0 0 0 0
+-- 0 1  0 | 0 1 0 0 0
+-- 1 0  0 | 0 0 1 0 0
+-- 0 0  1 | 0 0 0 1 0 line 3
+-- 0 0  0 | 0 0 0 0 1
+
+pendulumNormed : Matrix (nCol ℕ.+ nRow) nRow
+pendulumNormed = normalizeD pendulum++id
+
+-- 1  0 -2 |
+-- 0  2  0 |
+-- 0  0  2 |
+-- 0  0  0 | line 3 is the first line with all zeros
+-- 0  0  0 |
+
+coeff : Vec ℚᵘ nRow
+coeff = drop nCol (lookup pendulumNormed (fromℕ<″ 3 (less-than-or-equal refl)))
+
+-- | 0 0 0 | 1 0 -1 2 0
+
+coeffRes : Vec ℚᵘ nRow
+coeffRes = 1ℚᵘ ∷ 0ℚᵘ ∷ -1ℚᵘ ∷ 2ℚᵘ ∷ 0ℚᵘ ∷ []
+
+coeff≡coeffRes : coeff ≋v coeffRes
+coeff≡coeffRes = from-yes (coeff ≟v coeffRes)
+
+coeff2 : Vec ℚᵘ nRow
+coeff2 = drop nCol (lookup pendulumNormed (fromℕ<″ 4 (less-than-or-equal refl)))
