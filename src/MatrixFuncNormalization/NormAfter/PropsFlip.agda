@@ -28,6 +28,7 @@ open import Algebra
 import Algebra.Properties.Ring as RingProps
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; refl; cong; subst)
 open import Relation.Binary.Construct.Add.Infimum.Strict
+open import Relation.Binary.Construct.Add.Supremum.Strict
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
@@ -36,7 +37,7 @@ open import Relation.Nullary.Construct.Add.Supremum
 import Algebra.Module.Instances.FunctionalVector as AMIF
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
-open import Vector.Base
+open import Vector.Base hiding ([_])
 open import Algebra.Matrix
 open import Algebra.MatrixData renaming (Matrix to MatrixData)
 import Algebra.HeytingField.Properties as HFProps
@@ -63,7 +64,7 @@ open NormAfterBase hField _≟_
 open NormAfterProperties hField _≟_ renaming (MatrixWithPivots to MatrixWithPivotsRight)
 open M
 open PVec
-open PNormBef
+open PNormBef renaming (_<′_ to _<ᴮ_)
 open PNormAfter
 open HCRProps heytingCommutativeRing
 open RingProps ring
@@ -71,6 +72,13 @@ open ≋‵
 open ≋
 open FuncNormAllLines
 open FuncNormAndZeros
+open ≈∙-equiv
+  renaming
+  ( refl  to ≈∙-refl
+  ; sym   to ≈∙-sym
+  ; trans to ≈∙-trans
+  ; reflexive to ≈∙-reflexive
+  )
 
 private variable
   ℓ ℓ′ : Level
@@ -84,12 +92,15 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
 
   pYs′ : Vector (VecPivotPosΣ m) n
   proj₁ (pYs′ i) = ys i
-  proj₂ (pYs′ i) with pXs $ opposite i in pXsIEq
-  ... | ⊥₋     = ⊥₋ , _ , help (proofPXs _)
+  proj₁ (proj₂ (pYs′ i)) with pXs (opposite i)
+  ... | ⊥₋ = ⊥₋
+  ... | just p = just (opposite p)
+  proj₂ (proj₂ (pYs′ i)) with pXs (opposite i) in pXsIEq
+  ... | ⊥₋     = _ , help (proofPXs _)
     where
     help : VecPivotPosLeft (xs $ opposite i) (pXs $ opposite i) → AllZeros (ys i)
     help rewrite pXsIEq = λ f → lower f ∘ opposite
-  ... | just p = just (opposite p) , (ys i (opposite p) , help (proofPXs _)) , HF.refl , help2 (proofPXs _)
+  ... | just p = (ys i (opposite p) , help (proofPXs _)) , HF.refl , help2 (proofPXs _)
     where
     help : VecPivotPosLeft (xs $ opposite i) (pXs $ opposite i) → ys i (opposite p) # 0#
     help rewrite pXsIEq | opposite-involutive p  = proj₁
@@ -129,8 +140,34 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
 
   module NormedRows (allRowsNormed : AllRowsNormalized pXs) where
 
+    private
+      <-opposite : ∀ {n} {i j : Fin n} → i < j → opposite j < opposite i
+      <-opposite {i = i} {j} i<j  = helper
+        where
+        helper : toℕ (opposite j) ℕ.< toℕ (opposite i)
+        helper rewrite opposite-prop i | opposite-prop j = ∸-monoʳ-< (s<s i<j) (toℕ<n j)
+
+
+    rowsNormedOpposite : (i j : Fin n) (i<j : i < j) → pXs (opposite j) <ᴮ pXs (opposite i)
+    rowsNormedOpposite i j i<j = allRowsNormed (opposite j) (opposite i) (<-opposite i<j)
+
     allRowsNormedAfter : AllRowsNormalizedRight pivsYs
-    allRowsNormedAfter i j i<j = let j₋<i₋ = allRowsNormed (opposite j) (opposite i) {!!} in {!!}
+    allRowsNormedAfter i j i<j = helper (rowsNormedOpposite i j i<j)
+      where
+      helper : pXs (opposite j) <ᴮ pXs (opposite i) → pivsYs i <′ pivsYs j
+      helper with pXs (opposite i) | pXs (opposite j)
+      ... | ⊥₋ | ⊥₋  = const $ inj₁ (≈∙-refl , ≈∙-refl)
+      ... | ⊥₋ | just _ = const $ inj₂ ⊥₋<[ _ ]
+      ... | just pi | ⊥₋ = helper2
+        where
+        helper2 : ⊤⁺ <ᴮ just pi  → _
+        helper2 (inj₁ ())
+        helper2 (inj₂ ())
+
+      ... | just pi | just pj = helper2
+        where
+        helper2 : just pj <ᴮ just pi → just (opposite pi) <′ just (opposite pj)
+        helper2 (inj₁ [ pj<pi ]) = inj₂ [ <-opposite pj<pi ]
 
 
 module _ (xs : Matrix F n m) where
