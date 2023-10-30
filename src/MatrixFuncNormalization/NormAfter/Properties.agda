@@ -302,15 +302,17 @@ findPosSubMatrix {n = ℕ.suc n} pivsXs with pivsXs 0F .proj₁
 ... | just p = let m′ , xs = findPosSubMatrix $ tail pivsXs in suc m′ , p ∷ xs
 
 crescentPosSubMatrix : (pXs : Vector (PivWithValue m) n) (let _ , pYs = findPosSubMatrix pXs)
+  (let pivs = pivsWV→pivs pXs)
+  (crescXs : ∀ i j (i<j : i < j) → pivs i <′ pivs j)
   → ∀ i j (i<j : i < j) → pYs i < pYs j
-crescentPosSubMatrix {n = suc n} pXs with pXs 0F .proj₁
+crescentPosSubMatrix {n = suc n} pXs crescXs with pXs 0F .proj₁
 ... | just x = help
   where
   help : ∀ i j i<j → _
   help 0F (F.suc j) (s<s 0≤j) = {!!}
-  help (F.suc i) (F.suc j) (s<s i<j) = crescentPosSubMatrix (tail pXs) i j i<j
+  help (F.suc i) (F.suc j) (s<s i<j) = crescentPosSubMatrix (tail pXs) (λ i j i<j → crescXs (F.suc i) (F.suc j) (s<s i<j)) i j i<j
 
-... | ⊥₋ = λ i j → crescentPosSubMatrix (tail pXs) _ _
+... | ⊥₋ = λ i j → crescentPosSubMatrix (tail pXs) (λ i j i<j → crescXs (F.suc i) (F.suc j) (s<s i<j)) _ _
 
 findSubMatrix : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Matrix F n m′
 findSubMatrix xs pivsXs = let m′ , f = findPosSubMatrix pivsXs in m′ , λ i → xs i ∘ f
