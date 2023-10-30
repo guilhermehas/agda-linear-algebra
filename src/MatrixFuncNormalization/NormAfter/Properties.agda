@@ -295,6 +295,12 @@ normMatrixTwoRows≈ⱽ xs pivsXs i j i<j with pivsXs i in pivEq
   ... | yes ≡.refl rewrite dec-true (k F.≟ k) ≡.refl | pivEq = ≈.refl
   ... | no k≢j rewrite dec-false (j F.≟ k) (k≢j ∘ ≡.sym) = ≈.refl
 
+findSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
+findSubMatrix {n = zero} pivsXs = ℕ.zero , []
+findSubMatrix {n = ℕ.suc n} pivsXs with pivsXs 0F .proj₁
+... | ⊥₋ = findSubMatrix $ tail pivsXs
+... | just p = let n , xs = findSubMatrix $ tail pivsXs in suc n , p ∷ xs
+
 
 private
   <⁺→≤⁺ : {i j : Fin n ⁺} → i <⁺ j → i ≤⁺ j
