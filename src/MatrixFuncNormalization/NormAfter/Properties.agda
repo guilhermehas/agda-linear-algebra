@@ -15,7 +15,7 @@ open import Data.Bool using (Bool; false; true; T)
 open import Data.Unit.Polymorphic using (⊤)
 open import Data.Product hiding (map)
 open import Data.Maybe using (Maybe; maybe′; just)
-open import Data.Nat as ℕ using (ℕ; zero; suc)
+open import Data.Nat as ℕ using (ℕ; zero; suc; s<s)
 open import Data.Nat.Properties as ℕ using (≰⇒>)
 open import Data.Fin.Base as F hiding (_+_; _-_; lift; zero; suc)
 open import Data.Fin.Patterns
@@ -295,12 +295,33 @@ normMatrixTwoRows≈ⱽ xs pivsXs i j i<j with pivsXs i in pivEq
   ... | yes ≡.refl rewrite dec-true (k F.≟ k) ≡.refl | pivEq = ≈.refl
   ... | no k≢j rewrite dec-false (j F.≟ k) (k≢j ∘ ≡.sym) = ≈.refl
 
-findSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
-findSubMatrix {n = zero} pivsXs = ℕ.zero , []
-findSubMatrix {n = ℕ.suc n} pivsXs with pivsXs 0F .proj₁
-... | ⊥₋ = findSubMatrix $ tail pivsXs
-... | just p = let n , xs = findSubMatrix $ tail pivsXs in suc n , p ∷ xs
+findPosSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
+findPosSubMatrix {n = zero} pivsXs = ℕ.zero , []
+findPosSubMatrix {n = ℕ.suc n} pivsXs with pivsXs 0F .proj₁
+... | ⊥₋     = findPosSubMatrix $ tail pivsXs
+... | just p = let m′ , xs = findPosSubMatrix $ tail pivsXs in suc m′ , p ∷ xs
 
+crescentPosSubMatrix : (pXs : Vector (PivWithValue m) n) (let _ , pYs = findPosSubMatrix pXs)
+  → ∀ i j (i<j : i < j) → pYs i < pYs j
+crescentPosSubMatrix {n = suc n} pXs with pXs 0F .proj₁
+... | just x = help
+  where
+  help : ∀ i j i<j → _
+  help 0F (F.suc j) (s<s 0≤j) = {!!}
+  help (F.suc i) (F.suc j) (s<s i<j) = crescentPosSubMatrix (tail pXs) i j i<j
+
+... | ⊥₋ = λ i j → crescentPosSubMatrix (tail pXs) _ _
+
+findSubMatrix : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Matrix F n m′
+findSubMatrix xs pivsXs = let m′ , f = findPosSubMatrix pivsXs in m′ , λ i → xs i ∘ f
+
+subMatrixNormed : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n)
+  (mXsPivs : MatrixPivots xs pivsXs)
+  (let pivs = pivsWV→pivs pivsXs) (allRowsNormedRight : AllRowsNormalizedRight pivs)
+  (let m′ , ys = findSubMatrix xs pivsXs) (pivsYs : Vector (PivWithValue m′) n)
+  (let pivsYs′ = pivsWV→pivs pivsXs) (mYsPivs : MatrixPivots ys pivsYs)
+  → AllRowsNormalizedRight pivsYs′
+subMatrixNormed xs pivsXs mXsPivs allRowsNormedRight pivsYs mYsPivs i j i<j = {!pivsWV→pivs pivsXs i <′ ?!}
 
 private
   <⁺→≤⁺ : {i j : Fin n ⁺} → i <⁺ j → i ≤⁺ j
