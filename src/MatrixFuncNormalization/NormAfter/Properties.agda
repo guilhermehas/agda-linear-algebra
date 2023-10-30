@@ -95,13 +95,13 @@ private
   ≈∙-isEquivalence : IsEquivalence (_≈∙_ {A = A})
   ≈∙-isEquivalence = ≈∙-isEquivalence′ ≡.isEquivalence
 
-  open module ≈∙-equiv {ℓ} {A} = IsEquivalence (≈∙-isEquivalence {ℓ} {A = A})
-    renaming
-    ( refl  to ≈∙-refl
-    ; sym   to ≈∙-sym
-    ; trans to ≈∙-trans
-    ; reflexive to ≈∙-reflexive
-    )
+open module ≈∙-equiv {ℓ} {A} = IsEquivalence (≈∙-isEquivalence {ℓ} {A = A})
+  renaming
+  ( refl  to ≈∙-refl
+  ; sym   to ≈∙-sym
+  ; trans to ≈∙-trans
+  ; reflexive to ≈∙-reflexive
+  )
 
 Maybe≈0 : Vector F n → Fin n ₋ → Set _
 Maybe≈0 xs ⊥₋ = ⊤
