@@ -14,9 +14,16 @@ open import Function hiding (flip)
 open import Data.Bool using (Bool; false; true; T)
 open import Data.Unit.Polymorphic using (⊤)
 open import Data.Product hiding (map)
-open import Data.Maybe using (Maybe; maybe′; just)
+open import Data.Maybe using (Maybe; maybe′; just; is-just)
 open import Data.Nat as ℕ using (ℕ; zero; suc; s<s)
 open import Data.Nat.Properties as ℕ using (≰⇒>)
+open import Data.List as L using (List; applyDownFrom)
+open import Data.List.Relation.Unary.All as All using (All)
+open import Data.List.Relation.Unary.All.Properties as All
+open import Data.List.Relation.Unary.Linked using (Linked)
+open import Data.List.Relation.Unary.Linked.Properties
+open import Data.List.Relation.Unary.AllPairs as AP using (AllPairs)
+open import Data.List.Relation.Unary.AllPairs.Properties as AP
 open import Data.Fin.Base as F hiding (_+_; _-_; lift; zero; suc)
 open import Data.Fin.Patterns
 open import Data.Fin.Properties as F hiding (_≟_)
@@ -30,6 +37,7 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; re
 open import Relation.Binary.Construct.Add.Infimum.Strict hiding (_<₋_)
 import Relation.Binary.Construct.Add.Point.Equality as Equality
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
+open import Relation.Unary using (Pred)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
@@ -295,6 +303,48 @@ normMatrixTwoRows≈ⱽ xs pivsXs i j i<j with pivsXs i in pivEq
   ... | yes ≡.refl rewrite dec-true (k F.≟ k) ≡.refl | pivEq = ≈.refl
   ... | no k≢j rewrite dec-false (j F.≟ k) (k≢j ∘ ≡.sym) = ≈.refl
 
+private module _ {R : Rel A ℓ} where
+
+  tabulate⁺< : ∀ {n} {f : Fin n → A} → (∀ {i j} → i F.< j → R (f i) (f j)) →
+              AllPairs R (L.tabulate f)
+  tabulate⁺< {zero}  fᵢ~fⱼ = AllPairs.[]
+  tabulate⁺< {suc n} fᵢ~fⱼ =
+    All.tabulate⁺ (λ _ → fᵢ~fⱼ ℕ.z<s) AllPairs.∷
+    tabulate⁺< (fᵢ~fⱼ ∘ ℕ.s<s)
+
+
+allPairsNormedPivs : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
+  → AllPairs _<′_ $ L.tabulate $ proj₁ ∘ pXs
+allPairsNormedPivs pXs pXsNormed = tabulate⁺< (pXsNormed _ _)
+
+linkedNormedPivs : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
+  → Linked _<′_ $ L.tabulate $ proj₁ ∘ pXs
+linkedNormedPivs pXs pXsNormed = {!applyUpTo⁺₁!}
+
+findPosSubMatrixList : Vector (PivWithValue m) n → List (Fin m)
+findPosSubMatrixList = L.mapMaybe proj₁ ∘ L.tabulate
+
+linkedSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
+  → Linked _<_ $ findPosSubMatrixList pXs
+linkedSubMatrix = {!!}
+
+module _ {R : Rel A ℓ} (P? : A → Bool) where
+
+  filter⁺ᵇ : ∀ {xs} → AllPairs R xs → AllPairs R $ L.filterᵇ P? xs
+  filter⁺ᵇ {_}      AP.[]           = AP.[]
+  filter⁺ᵇ {x L.∷ xs} (x∉xs AP.∷ xs!) with P? x
+  ... | false = filter⁺ᵇ xs!
+  ... | true  = All.filter⁺ {!!} x∉xs AP.∷ filter⁺ᵇ xs!
+
+allPairsSubMatrix′ : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight (pivsWV→pivs pXs))
+  → AllPairs _<′_ $ L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs
+allPairsSubMatrix′ pXs pXsNormed = filter⁺ᵇ is-just (allPairsNormedPivs pXs pXsNormed)
+
+allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
+  → AllPairs _<_ $ findPosSubMatrixList pXs
+allPairsSubMatrix pXs pXsNormed = let w = allPairsSubMatrix′ pXs pXsNormed in {!!}
+
+
 findPosSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
 findPosSubMatrix {n = zero} pivsXs = ℕ.zero , []
 findPosSubMatrix {n = ℕ.suc n} pivsXs with pivsXs 0F .proj₁
@@ -308,7 +358,7 @@ crescentPosSubMatrix {n = suc n} pXs pXsNormed with pXs 0F .proj₁
 ... | just x = help
   where
   help : ∀ i j i<j → _
-  help 0F (F.suc j) (s<s 0≤j) = {!!}
+  help 0F (F.suc j) (s<s 0≤j) = let w = crescentPosSubMatrix (tail pXs) {!!} {!!} j {!!}  in {!!}
   help (F.suc i) (F.suc j) (s<s i<j) = crescentPosSubMatrix (tail pXs) (λ i j i<j → pXsNormed (F.suc i) (F.suc j) (s<s i<j)) i j i<j
 
 ... | ⊥₋ = λ i j → crescentPosSubMatrix (tail pXs) (λ i j i<j → pXsNormed (F.suc i) (F.suc j) (s<s i<j)) _ _
