@@ -328,21 +328,33 @@ linkedSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormaliz
   → Linked _<_ $ findPosSubMatrixList pXs
 linkedSubMatrix = {!!}
 
+module _ {B : Set ℓ} {q}  {Q : Pred B q} (P? : B → Bool) where
+
+  filter⁺All : {xs : List B} → All Q xs → All Q (L.filterᵇ P? xs)
+  filter⁺All {xs = _}     All.[] = All.[]
+  filter⁺All {xs = x L.∷ _} (Qx All.∷ Qxs) with P? x
+  ... | false = filter⁺All Qxs
+  ... | true  = Qx All.∷ filter⁺All Qxs
+
+
 module _ {R : Rel A ℓ} (P? : A → Bool) where
 
   filter⁺ᵇ : ∀ {xs} → AllPairs R xs → AllPairs R $ L.filterᵇ P? xs
   filter⁺ᵇ {_}      AP.[]           = AP.[]
   filter⁺ᵇ {x L.∷ xs} (x∉xs AP.∷ xs!) with P? x
   ... | false = filter⁺ᵇ xs!
-  ... | true  = All.filter⁺ {!!} x∉xs AP.∷ filter⁺ᵇ xs!
+  ... | true  = filter⁺All P? x∉xs AP.∷ filter⁺ᵇ xs!
 
-allPairsSubMatrix′ : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight (pivsWV→pivs pXs))
+allPairsSubMatrix′ : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<′_ $ L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs
-allPairsSubMatrix′ pXs pXsNormed = filter⁺ᵇ is-just (allPairsNormedPivs pXs pXsNormed)
+allPairsSubMatrix′ pXs  = filter⁺ᵇ is-just ∘ allPairsNormedPivs pXs
 
 allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<_ $ findPosSubMatrixList pXs
-allPairsSubMatrix pXs pXsNormed = let w = allPairsSubMatrix′ pXs pXsNormed in {!!}
+allPairsSubMatrix pXs pXsNormed =
+  let w1 = allPairsSubMatrix′ pXs pXsNormed
+      w2 = AP.map⁺ w1
+  in {!w2!}
 
 
 findPosSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
