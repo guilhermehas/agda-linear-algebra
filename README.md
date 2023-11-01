@@ -11,12 +11,12 @@ Clone the repository and inside the project directory run these commands:
 Get the nix environment:
 
 ``` sh
-    nix develop
+nix develop
 ```
 
 ### Agda
 Compile agda files:
 
 ``` sh
-    agda src/EverythingUseful.agda
+agda src/EverythingUseful.agda
 ```
