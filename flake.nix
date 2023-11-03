@@ -8,14 +8,14 @@
   };
 
   outputs = { self, flake-utils, flake-compat, nixpkgs }:
+    let overlays = import ./nix/overlay.nix nixpkgs.lib; in
     flake-utils.lib.eachDefaultSystem (system:
-    let overlays = import ./nix/overlay.nix nixpkgs.lib;
-        pkgs = import nixpkgs { inherit system overlays; };
-        agda-all = pkgs.agda.withPackages (with pkgs.agdaPackagesNew; [ standard-library ]);
+        let pkgs = import nixpkgs { inherit system overlays; };
+        agda-all = pkgs.agda.withPackages (p: with p; [ standard-library ]);
     in rec {
       packages = {
         inherit agda-all;
-        linear-algebra = with pkgs; with agdaPackagesNew;
+        linear-algebra = with pkgs; with agdaPackages;
           agdaPackages.mkDerivation {
             pname = "agda-dimensional-stdlib";
             version = "1.0.0";

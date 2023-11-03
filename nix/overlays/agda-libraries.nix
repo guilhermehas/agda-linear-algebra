@@ -3,8 +3,8 @@ let
   generated = import ../_sources/generated.nix;
   gen = prev.callPackage generated {};
 in with gen; {
-  agdaPackagesNew = {
-    standard-library = prev.agdaPackages.standard-library.overrideAttrs (_: {src = agda-stdlib.src;});
-    cubical = prev.agdaPackages.cubical.overrideAttrs (_: {src = cubical.src;});
+  agdaPackages = next.agdaPackages // {
+    standard-library = next.agdaPackages.standard-library.overrideAttrs (_: { inherit (agda-stdlib) src;});
+    cubical = next.agdaPackages.cubical.overrideAttrs (_: { inherit (cubical) src;});
   };
 }
