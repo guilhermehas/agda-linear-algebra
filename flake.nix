@@ -24,7 +24,8 @@
               };
             };
           };
-        overlays = import ./nix/overlay.nix nixpkgs.lib ++ [ linear-algebra-overlay ];
+        standard-library-overlay = import ./nix/overlay.nix nixpkgs.lib;
+        overlays = standard-library-overlay ++ [ linear-algebra-overlay ];
     in
     flake-utils.lib.eachDefaultSystem (system:
         let pkgs = import nixpkgs { inherit system overlays; };
@@ -35,5 +36,10 @@
         inherit agda-all linear-algebra;
       };
       defaultPackage = packages.linear-algebra;
-    }) // { inherit overlays; };
+    }) // rec {
+      overlays = {
+        inherit standard-library-overlay linear-algebra-overlay;
+        default = linear-algebra-overlay;
+      };
+    };
 }
