@@ -9,9 +9,9 @@
 
   outputs = { self, flake-utils, flake-compat, nixpkgs }:
     let
-        linear-algebra-overlay = self: super: with super.agdaPackages;
+        linear-algebra-overlay = final: prev: with prev.agdaPackages;
           {
-            agdaPackages = super.agdaPackages // {
+            agdaPackages = prev.agdaPackages // {
                 linear-algebra = mkDerivation {
                 pname = "agda-dimensional-stdlib";
                 version = "1.0.0";
@@ -19,7 +19,7 @@
                 everythingFile = "src/EverythingUseful.agda";
                 buildInputs = [ standard-library ];
                 LC_ALL = "en_US.UTF-8";
-                nativeBuildInputs = [ self.glibcLocales ];
+                nativeBuildInputs = [ final.glibcLocales ];
                 meta = {};
               };
             };

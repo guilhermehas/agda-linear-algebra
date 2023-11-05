@@ -1,9 +1,9 @@
-prev: super:
+final: prev:
 let
   generated = import ../_sources/generated.nix;
-  gen = super.callPackage generated {};
+  gen = prev.callPackage generated {};
 in with gen; {
-  agdaPackages = super.agdaPackages // {
-    standard-library = super.agdaPackages.standard-library.overrideAttrs (_: { inherit (agda-stdlib) src;});
+  agdaPackages = prev.agdaPackages // {
+    standard-library = prev.agdaPackages.standard-library.overrideAttrs (_: { inherit (agda-stdlib) src;});
   };
 }
