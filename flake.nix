@@ -35,5 +35,5 @@
         inherit agda-all linear-algebra;
       };
       defaultPackage = packages.linear-algebra;
-    });
+    }) // { inherit overlays; };
 }
