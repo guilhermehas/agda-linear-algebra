@@ -9,9 +9,9 @@
 
   outputs = { self, flake-utils, flake-compat, nixpkgs }:
     let
-        linear-algebra-overlay = prev: next: with next.agdaPackages;
+        linear-algebra-overlay = self: super: with super.agdaPackages;
           {
-            agdaPackages = next.agdaPackages // {
+            agdaPackages = super.agdaPackages // {
                 linear-algebra = mkDerivation {
                 pname = "agda-dimensional-stdlib";
                 version = "1.0.0";
@@ -19,13 +19,13 @@
                 everythingFile = "src/EverythingUseful.agda";
                 buildInputs = [ standard-library ];
                 LC_ALL = "en_US.UTF-8";
-                nativeBuildInputs = [ prev.glibcLocales ];
+                nativeBuildInputs = [ self.glibcLocales ];
                 meta = {};
               };
             };
           };
-        standard-library-overlay = import ./nix/overlay.nix nixpkgs.lib;
-        overlays = standard-library-overlay ++ [ linear-algebra-overlay ];
+        standard-library-overlay = builtins.elemAt (import ./nix/overlay.nix nixpkgs.lib) 0;
+        overlays = [ standard-library-overlay linear-algebra-overlay ];
     in
     flake-utils.lib.eachDefaultSystem (system:
         let pkgs = import nixpkgs { inherit system overlays; };
