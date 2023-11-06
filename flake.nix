@@ -15,7 +15,12 @@
                 linear-algebra = mkDerivation {
                 pname = "agda-dimensional-stdlib";
                 version = "1.0.0";
-                src = ./.;
+                src = with lib; cleanSourceWith {
+                  filter = name: type:
+                    !(hasSuffix ".nix" name) && (name != "flake.lock")
+                  ;
+                  src = ./.;
+                };
                 everythingFile = "src/EverythingUseful.agda";
                 buildInputs = [ standard-library ];
                 LC_ALL = "en_US.UTF-8";
