@@ -10,17 +10,21 @@
   outputs = { self, flake-utils, flake-compat, nixpkgs }:
     let
         linear-algebra-overlay = final: prev: with prev.agdaPackages;
+          let filter = with lib; with builtins; name: type:
+                    !(hasSuffix ".nix" name && type == "regular") && !(baseNameOf name == "flake.lock" && type == "regular") &&
+                    !(baseNameOf name == "nix" && type == "directory");
+              src = with lib; cleanSourceWith {
+                  inherit filter;
+                  src = ./.;
+                };
+
+          in
           {
             agdaPackages = prev.agdaPackages // {
                 linear-algebra = mkDerivation {
                 pname = "agda-dimensional-stdlib";
                 version = "1.0.0";
-                src = with lib; cleanSourceWith {
-                  filter = name: type:
-                    !(hasSuffix ".nix" name) && (name != "flake.lock")
-                  ;
-                  src = ./.;
-                };
+                inherit src;
                 everythingFile = "src/EverythingUseful.agda";
                 buildInputs = [ standard-library ];
                 LC_ALL = "en_US.UTF-8";
@@ -28,6 +32,14 @@
                 meta = {};
               };
             };
+            agda-linear-algebra-src = prev.stdenv.mkDerivation {
+                name = "agda-linear-algebra-src";
+                inherit src;
+                phases = [ "unpackPhase" "installPhase" ];
+                installPhase = ''
+                  cp -r $src $out
+                '';
+              };
           };
         standard-library-overlay = builtins.elemAt (import ./nix/overlay.nix nixpkgs.lib) 0;
         overlays = [ standard-library-overlay linear-algebra-overlay ];
@@ -39,6 +51,7 @@
     in rec {
       packages = {
         inherit agda-all linear-algebra;
+        inherit (pkgs) agda-linear-algebra-src;
       };
       defaultPackage = packages.linear-algebra;
     }) // rec {
