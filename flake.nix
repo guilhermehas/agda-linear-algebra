@@ -22,15 +22,15 @@
           {
             agdaPackages = prev.agdaPackages // {
                 linear-algebra = mkDerivation {
-                pname = "linear-algebra";
-                version = "1.0.0";
-                inherit src;
-                everythingFile = "src/EverythingUseful.agda";
-                buildInputs = [ standard-library ];
-                LC_ALL = "en_US.UTF-8";
-                nativeBuildInputs = [ final.glibcLocales ];
-                meta = {};
-              };
+                  pname = "linear-algebra";
+                  version = "1.0.0";
+                  inherit src;
+                  everythingFile = "src/EverythingUseful.agda";
+                  buildInputs = [ standard-library ];
+                  LC_ALL = "en_US.UTF-8";
+                  nativeBuildInputs = [ final.glibcLocales ];
+                  meta = {};
+                };
             };
             agda-linear-algebra-src = prev.stdenv.mkDerivation {
                 name = "agda-linear-algebra-src";
