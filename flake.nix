@@ -47,10 +47,11 @@
     flake-utils.lib.eachDefaultSystem (system:
         let pkgs = import nixpkgs { inherit system overlays; };
         agda-all = pkgs.agda.withPackages (p: with p; [ standard-library ]);
+        agda-with-linear-algebra = pkgs.agda.withPackages (p: with p; [ standard-library linear-algebra ]);
         linear-algebra = pkgs.agdaPackages.linear-algebra;
     in rec {
       packages = {
-        inherit agda-all linear-algebra;
+        inherit agda-all linear-algebra agda-with-linear-algebra;
         inherit (pkgs) agda-linear-algebra-src;
       };
       defaultPackage = packages.linear-algebra;
