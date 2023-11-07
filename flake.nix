@@ -22,7 +22,7 @@
           {
             agdaPackages = prev.agdaPackages // {
                 linear-algebra = mkDerivation {
-                pname = "agda-dimensional-stdlib";
+                pname = "linear-algebra";
                 version = "1.0.0";
                 inherit src;
                 everythingFile = "src/EverythingUseful.agda";
