@@ -22,7 +22,7 @@ module _ {ℓ ℓ'} (GAb : AbelianGroup ℓ ℓ') where
     _∙v_ = zipWith _∙_
 
     εv : Vec G n
-    εv = replicate ε
+    εv = replicate _ ε
 
     _⁻¹v : Op₁ $ Vec G n
     _⁻¹v = map _⁻¹
