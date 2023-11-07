@@ -1,5 +1,6 @@
 -- Useful for importing
 open import Algebra.Instances.VecAbGroup
+open import Rational.Literals
 
 -- Normalize a matrix of integers
 open import MatrixNormalization.normLinesInteger
