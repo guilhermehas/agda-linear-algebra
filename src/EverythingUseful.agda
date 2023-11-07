@@ -1,3 +1,6 @@
+-- Useful for importing
+open import Algebra.Instances.VecAbGroup
+
 -- Normalize a matrix of integers
 open import MatrixNormalization.normLinesInteger
 -- Normalize a matrix of a field and proved that vector space is preserved
