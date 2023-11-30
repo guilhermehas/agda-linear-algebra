@@ -14,7 +14,9 @@ open import Function hiding (flip)
 open import Data.Bool using (Bool; false; true; T)
 open import Data.Unit.Polymorphic using (⊤)
 open import Data.Product hiding (map)
-open import Data.Maybe using (Maybe; maybe′; just; is-just)
+open import Data.Maybe as Maybe using (Maybe; maybe′; just; is-just; to-witness-T)
+open import Data.Maybe.Relation.Binary.Pointwise as Maybe using ()
+open import Data.Maybe.Relation.Unary.All as Maybe using ()
 open import Data.Nat as ℕ using (ℕ; zero; suc; s<s)
 open import Data.Nat.Properties as ℕ using (≰⇒>)
 open import Data.List as L using (List; applyDownFrom)
@@ -37,7 +39,7 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; re
 open import Relation.Binary.Construct.Add.Infimum.Strict hiding (_<₋_)
 import Relation.Binary.Construct.Add.Point.Equality as Equality
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
-open import Relation.Unary using (Pred)
+open import Relation.Unary as RU using (Pred)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
@@ -92,7 +94,7 @@ open module <₋ {n} = <₋′ (F._<_ {n}) using (_<₋_)
 
 private variable
   ℓ ℓ′ : Level
-  A : Set ℓ
+  A B : Set ℓ
   m m′ n n′ : ℕ
 
 private
@@ -345,9 +347,27 @@ module _ {R : Rel A ℓ} (P? : A → Bool) where
   ... | false = filter⁺ᵇ xs!
   ... | true  = filter⁺All P? x∉xs AP.∷ filter⁺ᵇ xs!
 
+
+module _ {p} {q} {R : Rel A ℓ} {Rb : Rel B ℓ′} {P : Pred A p} {Q : Pred B q} (P? : A → Maybe B)
+  (P?All : ∀ (x y : A) (let px = P? x; py = P? y) (px? : T (is-just px)) (py? : T (is-just py))
+    → Rb (to-witness-T _ px?) (to-witness-T _ py?))
+  where
+
+  mapMaybe⁺₂ : ∀ {xs} → AllPairs (Maybe.Pointwise R) (L.map {!P?!} {!!}) → AllPairs {!!} (L.mapMaybe P? xs)
+  mapMaybe⁺₂ {_}      AP.[]           = AP.[]
+  mapMaybe⁺₂ {x L.∷ xs} (x∉xs AP.∷ xs!) with P? x
+  ... | ⊥₋  = mapMaybe⁺₂ xs!
+  ... | just x = {!!} AP.∷ mapMaybe⁺₂ xs!
+
 allPairsSubMatrix′ : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<′_ $ L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs
-allPairsSubMatrix′ pXs  = filter⁺ᵇ is-just ∘ allPairsNormedPivs pXs
+allPairsSubMatrix′ pXs pXsNormed  = filter⁺ᵇ is-just {!allPairsNormedPivs pXs pXsNormed!}
+
+
+filterJust≡findPosSubMatrixList : (pXs : Vector (PivWithValue m) n)
+  → L.map {!!} (L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs) ≡ {!findPosSubMatrixList pXs!}
+filterJust≡findPosSubMatrixList = {!!}
+
 
 allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<_ $ findPosSubMatrixList pXs
