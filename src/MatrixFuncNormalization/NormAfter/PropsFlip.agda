@@ -29,6 +29,7 @@ import Algebra.Properties.Ring as RingProps
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; refl; cong; subst)
 open import Relation.Binary.Construct.Add.Infimum.Strict
 open import Relation.Binary.Construct.Add.Supremum.Strict
+open import Relation.Binary.Construct.Add.Infimum.NonStrict
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
@@ -156,8 +157,8 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
       where
       helper : pXs (opposite j) <ᴮ pXs (opposite i) → pivsYs i <′ pivsYs j
       helper with pXs (opposite i) | pXs (opposite j)
-      ... | ⊥₋ | ⊥₋  = const $ inj₁ (≈∙-refl , ≈∙-refl)
-      ... | ⊥₋ | just _ = const $ inj₂ ⊥₋<[ _ ]
+      ... | ⊥₋ | ⊥₋  = const $ (⊥₋≤ _)
+      ... | ⊥₋ | just _ = const $ (⊥₋≤ _)
       ... | just pi | ⊥₋ = helper2
         where
         helper2 : ⊤⁺ <ᴮ just pi  → _
@@ -167,7 +168,7 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
       ... | just pi | just pj = helper2
         where
         helper2 : just pj <ᴮ just pi → just (opposite pi) <′ just (opposite pj)
-        helper2 (inj₁ [ pj<pi ]) = inj₂ [ <-opposite pj<pi ]
+        helper2 (inj₁ [ pj<pi ]) = [ <-opposite pj<pi ]
 
 
 module _ (xs : Matrix F n m) where
