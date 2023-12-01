@@ -13,27 +13,19 @@ open import Data.Bool using (Bool; false; true; T)
 open import Data.Unit.Polymorphic using (⊤)
 open import Data.Product
 open import Data.Maybe
-open import Data.Maybe.Relation.Unary.Any
 open import Data.Nat using (ℕ)
-open import Data.Nat.Properties as ℕ using (≰⇒>)
 open import Data.Fin.Base hiding (_+_; lift)
 open import Data.Fin.Properties as F hiding (_≟_)
-open import Data.Sum
 open import Data.Vec.Functional
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as EqSetoids
 open import Algebra
 import Algebra.Properties.Ring as RingProps
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; refl; subst)
-open import Relation.Binary.Construct.Add.Infimum.Strict
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
-open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
-open import Relation.Nullary.Construct.Add.Supremum
 import Algebra.Module.Instances.FunctionalVector as AMIF
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
-open import Vector.Base
 open import Algebra.Matrix
 open import Algebra.MatrixData renaming (Matrix to MatrixData)
 import Algebra.HeytingField.Properties as HFProps
@@ -44,8 +36,6 @@ open import MatrixFuncNormalization.FinInduction
 import Algebra.Module.VecSpace as VecSpace
 open import lbry
 
-open hFieldProps hField
-open HFProps hField
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
 open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_)
@@ -54,15 +44,9 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_)
            ; normTwoRows to normTwoRowsLeft
            )
 open module M = AMIF ring hiding (_+ᴹ_)
-open module PVec {n} = VecSpace (leftModule n)
-open module PNormBef {n} = MatrixPropsBefore (<-strictTotalOrder n) using (NormedTwoBeforeAfter; compare⊤⁺)
 open module PNormAfter {n} = MatrixPropsAfter (<-strictTotalOrder n) using (_<′_; AllRowsNormalizedRight; simpleFinProps)
-open HCRProps heytingCommutativeRing
-open RingProps ring
 module ≈-Reasoning = ReasonSetoid setoid
-module ≈ = Setoid setoid
 open module ≋‵ = EqSetoids setoid using (≋-setoid)
-open module ≋ {n} = EqSetoids (≋-setoid n)
 open FuncNormAllLines
 open FuncNormAndZeros
 

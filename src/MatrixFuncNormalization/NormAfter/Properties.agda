@@ -78,13 +78,15 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; sameVecPiv; al
            ; findNonZero to findNonZeroLeft
            )
 open M hiding (_+ᴹ_)
-open PVec
+open module PVec {n} = VecSpace (leftModule n)
+open module PNormBef {n} = MatrixPropsBefore (<-strictTotalOrder n) using (NormedTwoBeforeAfter; compare⊤⁺)
 open PNormBef using (NormedTwoBeforeAfter; NormedTwoBeforeAfter′; compare⊤⁺; _>′_)
 open PNormAfter using (_<′_; AllRowsNormalizedRight; simpleFinProps)
 open HCRProps heytingCommutativeRing
 open RingProps ring
+module ≈ = Setoid setoid
 open ≋‵ using (≋-setoid)
-open ≋
+open module ≋ {n} = EqSetoids (≋-setoid n)
 open FuncNormAllLines
 open FuncNormAndZeros
 open module PNorm {n} = MatrixPropsBefore (<-strictTotalOrder n)
@@ -363,7 +365,7 @@ filterJust≡findPosSubMatrixList = {!!}
 
 allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<_ $ findPosSubMatrixList pXs
-allPairsSubMatrix pXs pXsNormed = subst (AllPairs _<_) (≡.cong L.catMaybes (≡.sym (L.map-tabulate pXs proj₁)))
+allPairsSubMatrix pXs pXsNormed = subst (AllPairs _<_) {!≡.cong L.catMaybes (≡.sym (L.map-tabulate pXs proj₁))!}
   (≤₋⁺ (allPairsNormedPivs pXs pXsNormed))
 
 
