@@ -9,13 +9,8 @@ module MatrixFuncNormalization.NormAfter.PropsFlip {c ℓ₁ ℓ₂}
 
 open import Level using (Level; Lift; lift; lower; _⊔_)
 open import Function hiding (flip)
-open import Data.Empty
-open import Data.Unit.Polymorphic using (⊤)
-open import Data.Bool using (Bool; false; true; T)
 open import Data.Product
 open import Data.Maybe
-open import Data.Maybe.Relation.Unary.Any
-open import Data.Maybe.Relation.Binary.Pointwise
 open import Data.Nat as ℕ using (ℕ; _∸_; s<s; ≢-nonZero)
 open import Data.Nat.Properties as ℕ
   using (≰⇒>; m>n⇒m∸n≢0; pred[m∸n]≡m∸[1+n]; m∸[m∸n]≡n; ∸-monoʳ-<; module ≤-Reasoning)
@@ -23,36 +18,24 @@ open import Data.Fin.Base as F hiding (_+_; lift)
 open import Data.Fin.Properties as F hiding (_≟_)
 open import Data.Sum
 open import Data.Vec.Functional as V
-import Data.Vec.Functional.Relation.Binary.Equality.Setoid as EqSetoids
 open import Algebra
 import Algebra.Properties.Ring as RingProps
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; refl; cong; subst)
-open import Relation.Binary.Construct.Add.Infimum.Strict
 open import Relation.Binary.Construct.Add.Supremum.Strict
 open import Relation.Binary.Construct.Add.Infimum.NonStrict
-import Relation.Binary.Reasoning.Setoid as ReasonSetoid
-open import Relation.Nullary
-open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
 open import Relation.Nullary.Construct.Add.Supremum
-import Algebra.Module.Instances.FunctionalVector as AMIF
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
-open import Vector.Base hiding ([_])
 open import Algebra.Matrix
-open import Algebra.MatrixData renaming (Matrix to MatrixData)
 import Algebra.HeytingField.Properties as HFProps
-import MatrixFuncNormalization.MatrixProps as MatrixPropsBefore
-import MatrixFuncNormalization.MatrixPropsAfter as MatrixPropsAfter
 import MatrixFuncNormalization.normBef as NormBef
 import MatrixFuncNormalization.NormAfter.Base as NormAfterBase
 import MatrixFuncNormalization.NormAfter.Properties as NormAfterProperties
 open import MatrixFuncNormalization.FinInduction
-import Algebra.Module.VecSpace as VecSpace
 open import lbry
 
 open hFieldProps hField
-open HFProps hField
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
 open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; matrix→matPivs; MatrixWithPivots; matrixPivs)
@@ -63,26 +46,12 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; matrix→matPi
            )
 open NormAfterBase hField _≟_
 open NormAfterProperties hField _≟_ renaming (MatrixWithPivots to MatrixWithPivotsRight)
-open M
 open PVec
 open PNormBef renaming (_<′_ to _<ᴮ_)
 open PNormAfter
-open HCRProps heytingCommutativeRing
-open RingProps ring
-open ≋‵
-open ≋
-open FuncNormAllLines
-open FuncNormAndZeros
-open ≈∙-equiv
-  renaming
-  ( refl  to ≈∙-refl
-  ; sym   to ≈∙-sym
-  ; trans to ≈∙-trans
-  ; reflexive to ≈∙-reflexive
-  )
 
 private variable
-  ℓ ℓ′ : Level
+  ℓ : Level
   A : Set ℓ
   m n : ℕ
 
