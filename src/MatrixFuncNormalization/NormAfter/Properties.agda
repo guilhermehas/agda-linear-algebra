@@ -20,6 +20,7 @@ open import Data.Maybe.Relation.Unary.All as Maybe using ()
 open import Data.Nat as ℕ using (ℕ; zero; suc; s<s)
 open import Data.Nat.Properties as ℕ using (≰⇒>)
 open import Data.List as L using (List; applyDownFrom)
+import Data.List.Properties as L
 open import Data.List.Relation.Unary.All as All using (All)
 open import Data.List.Relation.Unary.All.Properties as All
 open import Data.List.Relation.Unary.Linked using (Linked)
@@ -362,24 +363,8 @@ filterJust≡findPosSubMatrixList = {!!}
 
 allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<_ $ findPosSubMatrixList pXs
-allPairsSubMatrix pXs pXsNormed = {!!}
-  where
-  w1 = allPairsSubMatrix′ pXs pXsNormed
-  w2 = AP.map⁺ w1
-
-  w3 : AllPairs _<′_ (L.tabulate $ proj₁ ∘ pXs)
-  w3 = allPairsNormedPivs pXs pXsNormed
-
-  w5 : AllPairs _<′_ {!!}
-  w5 = {!!}
-
-  w4 : AllPairs _<_ (L.catMaybes (L.tabulate $ proj₁ ∘ pXs))
-  w4 = pointwise⁺ {_∼_ = _<_} {!AP.map help w3!}
-    where
-    help : _<′_ ⇒ _
-    help (⊥₋≤ just x) = {!!}
-    help (⊥₋≤ ⊥₋) = Maybe.nothing
-    help _≤₋_.[ x ] = Maybe.just x
+allPairsSubMatrix pXs pXsNormed = subst (AllPairs _<_) (≡.cong L.catMaybes (≡.sym (L.map-tabulate pXs proj₁)))
+  (≤₋⁺ (allPairsNormedPivs pXs pXsNormed))
 
 
 findPosSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
