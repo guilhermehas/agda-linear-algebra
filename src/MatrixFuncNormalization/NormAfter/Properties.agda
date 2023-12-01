@@ -26,6 +26,7 @@ open import Data.List.Relation.Unary.Linked using (Linked)
 open import Data.List.Relation.Unary.Linked.Properties
 open import Data.List.Relation.Unary.AllPairs as AP using (AllPairs)
 open import Data.List.Relation.Unary.AllPairs.Properties as AP
+open import Relation.Binary.Construct.Add.Infimum.NonStrict
 open import Data.Fin.Base as F hiding (_+_; _-_; lift; zero; suc)
 open import Data.Fin.Patterns
 open import Data.Fin.Properties as F hiding (_≟_)
@@ -51,6 +52,7 @@ import Algebra.Module.Instances.FunctionalVector as AMIF
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
 open import Vector.Base as V
+open import AllPairs.Properties
 open import Algebra.Matrix
 open import Algebra.MatrixData renaming (Matrix to MatrixData)
 import Algebra.HeytingField.Properties as HFProps
@@ -142,10 +144,10 @@ normTwoRowsPropsVecPiv : ∀ {xs ys : Vector F n} {px py : Fin n ₋} {vx} {vy}
   → let ys′ = normTwoRows xs ys px py vx in
     VecPivotPos ys′ py vy
 normTwoRowsPropsVecPiv {ys = ys} {⊥₋} _ fys _ = fys
-normTwoRowsPropsVecPiv {xs = xs} {ys} px′@{[ px ]} py′@{[ py ]} vx′@{vx , vx#0} {_ , vy#0}
-  (vx≈xsPx , fxs) (vy≈ysPy , fys) (inj₂ [ px<py ]) =
-
+normTwoRowsPropsVecPiv {xs = xs} {ys} {px′@(just px)} {py′@(just py)} {vx′@(vx , vx#0)}
+  {_ , vy#0} (vx≈xsPx , fxs) (vy≈ysPy , fys) _≤₋_.[ px<py ] =
   ≈.trans vy≈ysPy (≈.sym ysnPy≈ysPy) , ysnXs>≈0
+
   where
   open ≈-Reasoning
 
@@ -178,7 +180,7 @@ normTwoRowsPropsMaybe : ∀ {xs ys : Vector F n} {px py : Fin n ₋} {vx} {vy}
     Maybe≈0 ys′ px
 normTwoRowsPropsMaybe {ys = ys} {⊥₋} _ fys _ = _
 normTwoRowsPropsMaybe {xs = xs} {ys} px′@{[ px ]} py′@{[ py ]} vx′@{vx , vx#0} {_ , vy#0}
-  (vx≈xsPx , fxs) (vy≈ysPy , fys) (inj₂ _) =
+  (vx≈xsPx , fxs) (vy≈ysPy , fys) (_≤₋_.[ _ ]) =
 
   ysnXs≈0
   where
@@ -324,7 +326,7 @@ linkedNormedPivs : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormali
 linkedNormedPivs pXs pXsNormed = {!applyUpTo⁺₁!}
 
 findPosSubMatrixList : Vector (PivWithValue m) n → List (Fin m)
-findPosSubMatrixList = L.mapMaybe proj₁ ∘ L.tabulate
+findPosSubMatrixList = L.catMaybes ∘ L.map proj₁ ∘ L.tabulate
 
 linkedSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → Linked _<_ $ findPosSubMatrixList pXs
@@ -348,17 +350,6 @@ module _ {R : Rel A ℓ} (P? : A → Bool) where
   ... | true  = filter⁺All P? x∉xs AP.∷ filter⁺ᵇ xs!
 
 
-module _ {p} {q} {R : Rel A ℓ} {Rb : Rel B ℓ′} {P : Pred A p} {Q : Pred B q} (P? : A → Maybe B)
-  (P?All : ∀ (x y : A) (let px = P? x; py = P? y) (px? : T (is-just px)) (py? : T (is-just py))
-    → Rb (to-witness-T _ px?) (to-witness-T _ py?))
-  where
-
-  mapMaybe⁺₂ : ∀ {xs} → AllPairs (Maybe.Pointwise R) (L.map {!P?!} {!!}) → AllPairs {!!} (L.mapMaybe P? xs)
-  mapMaybe⁺₂ {_}      AP.[]           = AP.[]
-  mapMaybe⁺₂ {x L.∷ xs} (x∉xs AP.∷ xs!) with P? x
-  ... | ⊥₋  = mapMaybe⁺₂ xs!
-  ... | just x = {!!} AP.∷ mapMaybe⁺₂ xs!
-
 allPairsSubMatrix′ : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<′_ $ L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs
 allPairsSubMatrix′ pXs pXsNormed  = filter⁺ᵇ is-just {!allPairsNormedPivs pXs pXsNormed!}
@@ -371,10 +362,24 @@ filterJust≡findPosSubMatrixList = {!!}
 
 allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<_ $ findPosSubMatrixList pXs
-allPairsSubMatrix pXs pXsNormed =
-  let w1 = allPairsSubMatrix′ pXs pXsNormed
-      w2 = AP.map⁺ w1
-  in {!w2!}
+allPairsSubMatrix pXs pXsNormed = {!!}
+  where
+  w1 = allPairsSubMatrix′ pXs pXsNormed
+  w2 = AP.map⁺ w1
+
+  w3 : AllPairs _<′_ (L.tabulate $ proj₁ ∘ pXs)
+  w3 = allPairsNormedPivs pXs pXsNormed
+
+  w5 : AllPairs _<′_ {!!}
+  w5 = {!!}
+
+  w4 : AllPairs _<_ (L.catMaybes (L.tabulate $ proj₁ ∘ pXs))
+  w4 = pointwise⁺ {_∼_ = _<_} {!AP.map help w3!}
+    where
+    help : _<′_ ⇒ _
+    help (⊥₋≤ just x) = {!!}
+    help (⊥₋≤ ⊥₋) = Maybe.nothing
+    help _≤₋_.[ x ] = Maybe.just x
 
 
 findPosSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
@@ -503,8 +508,10 @@ subMatrixNormedBeforeAfter xs pivsXs mXsPivs allRowsNormedRight fm′m ys isColX
 
       pivXsI<₋pivXsJ : just pivI <₋ pivsXs j .proj₁
       pivXsI<₋pivXsJ with pivXsI<pivXsJ
-      ... | inj₁ (xsI≈⊥ , _) = contradiction xsI≈⊥ λ ()
-      ... | inj₂ pivI<pivJ = pivI<pivJ
+      ... | p = {!!}
+
+      -- ... | inj₁ (xsI≈⊥ , _) = contradiction xsI≈⊥ λ ()
+      -- ... | inj₂ pivI<pivJ = pivI<pivJ
 
       help3 : VecPivotPos (xs j) (pivsXs j .proj₁) (pivsXs j .proj₂) → xs j pivI ≈ 0#
       help3 vecPiv = {!!}
@@ -569,8 +576,9 @@ subMatrixNormedBeforeAfter xs pivsXs mXsPivs allRowsNormedRight fm′m ys isColX
 
     helper2 : pivsYs i <⁺ pivsYs j
     helper2 with helper3
-    ... | inj₁ x = {!!}
-    ... | inj₂ y = {!y!}
+    ... | p = {!!}
+    -- ... | inj₁ x = {!!}
+    -- ... | inj₂ y = {!y!}
 
     pivZsJ≈pivMj : pivZs j >′ pivsYs j
     pivZsJ≈pivMj rewrite dec-true (j F.≟ j) ≡.refl = {!!}

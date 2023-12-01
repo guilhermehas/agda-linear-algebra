@@ -18,6 +18,7 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; re
 import Relation.Binary.Construct.Add.Infimum.Strict as AddInfMod
 import Relation.Binary.Construct.Add.Point.Equality as Equality
 import Relation.Binary.Construct.StrictToNonStrict as StrictToNonStrict
+import Relation.Binary.Construct.Add.Infimum.NonStrict as NonStrict
 open import Relation.Unary.Consequences
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
@@ -35,16 +36,18 @@ private variable
 <₋-totalOrder : StrictTotalOrder _ _ _
 <₋-totalOrder = record { isStrictTotalOrder = <₋-isStrictTotalOrder A′.isStrictTotalOrder }
 
+module TO = StrictTotalOrder totalOrder
 open module STO = StrictTotalOrder <₋-totalOrder renaming (Carrier to A) hiding (_≟_; _>_)
 open module ≈ = IsEquivalence STO.isEquivalence hiding (sym)
 open StrictToNonStrict _≈_ _<_
 open Equality _≈_ renaming (≈∙-refl to ≈∙-refl′)
 open FinProps
+open NonStrict TO._<_
 
 _>_ = flip _<_
 
 _<′_ : Rel A _
-x <′ y = (x ≈ ⊥₋ × y ≈ ⊥₋) ⊎ x < y
+_<′_ = _≤₋_
 _>′_ = flip _<′_
 
 AllRowsNormalizedRight : Vector A n → Set _
@@ -60,14 +63,3 @@ Pi→P simpleFinProps a pi = _
 Pi→Pii simpleFinProps i a pi = _
 Ps simpleFinProps i j i≤j a b pij pab = _
 P00 simpleFinProps a = _
-
--- finProps : FinProps (Vector A (suc n)) n
--- Pij finProps = {!!}
--- Pi finProps = {!!}
--- P finProps = {!!}
--- Pab finProps = {!!}
--- Pij→Pi finProps = {!!}
--- Pi→P finProps = {!!}
--- Pi→Pii finProps = {!!}
--- Ps finProps = {!!}
--- P00 finProps = {!!}
