@@ -365,7 +365,7 @@ filterJust≡findPosSubMatrixList = {!!}
 
 allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<_ $ findPosSubMatrixList pXs
-allPairsSubMatrix pXs pXsNormed = subst (AllPairs _<_) {!≡.cong L.catMaybes (≡.sym (L.map-tabulate pXs proj₁))!}
+allPairsSubMatrix pXs pXsNormed = subst (AllPairs _<_) (≡.cong L.catMaybes (≡.sym (L.map-tabulate pXs proj₁)))
   (≤₋⁺ (allPairsNormedPivs pXs pXsNormed))
 
 
