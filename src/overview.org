@@ -1,0 +1,34 @@
+* Overview of the linear algebra library
++ You need to present the "API" for the library early (here).
+** Key concepts / types:
++ |Vec A n|      -- the type of n-element vectors of type A
+  + Defined in stdlib in Data/Vec/Base.agda
++ |Vector A n|   -- the type of n-element vectors of type A
+  + Defined in stdlib in Data/Vec/Functional.agda (as Fin n -> A)
++ |Matrix A m n| -- the type of m-by-n matrices of elements of type A
+  + Defined in Algebra/Matrix.agda
+    + indirectly in Algebra/Matrix/Base.agda (implemented as vector of vectors)
++ TODO other types?
+    
+** Key operation / functions
++ |normalizeD : Matrix n m -> Matrix m n|
+  + TODO Correct type?
+  + TODO where defined?
+  + TODO (what does "D" mean)
++ TODO other operations? (build matrices, take them apart, multiply, etc.)
+  + not too many!
+
+** Key properties / theorems / lemmas
++ TODO
+  +   
+
+
+NormRationalExampleFunc.agda
+
+* Other comments
++ There are two files with similar names:
+  + NormRationalExample.agda
+  + NormRationalExampleFunc.agda
+** TODO are they implementing the same thing with different types? 
++ How are they related? (Examples/PendulumDimension.agda?)
+  

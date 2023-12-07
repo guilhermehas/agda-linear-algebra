@@ -1,0 +1,45 @@
+#+title: Design Choices
+
++ One of the main design choices is whether the matrix type should be defined in its inductive form or if it should be defined as a function (`Fin n -> Fin m -> A`).
++ I first defined it with the inductive definition, and after that, I decided to change to the function definition.
++ The reasons are that because the matrix has a fixed size, it should be more convenient to use functions because I will not need to do induction in the size of the matrix.
++ However, I can do induction in the indices so with that, I can look up values in the matrix.
+  Something like this:
+    lookup : Matrix m n A -> Fin m -> Vector n A
+    lookup m i = m i
+    assign : Matrix m n A -> Fin m -> A -> Matrix m n A
+    assign m i x = \i' -> if i == i' then x else m i 
+
++ In addition, both of the following expressions are definitional equal
+    lookup (assign xs fzer a) fzer  ==   a
+  - no proof needed, just evaluation (refl).
+  But not this:
+    lookup (assign xs i a) i  ==   a
+
++ Moreover, the problems with using functional vectors are that many properties about indices are needed. So most of the time, I am using theorems of `Fin n` to solve these problems (from Data.Fin.Properties).
+
++ However, in the end, I think that an inductive definition would be better for several reasons.
++ Firstly, it is because the standard library of Agda already has a lot of theorems for them (inductive vectors). However, when using functional vectors, many theorems for Fin n are available.
++ Secondly, it is better to deal with data instead of functions for several reasons.
+    - Type inference works very well for data, but not for functions.
+    - Data is easily debuggable because you can see the data, but you can't see the functions.
+    - It is simple to manipulate data, but not so simple to manipulate functions.
+
++ When dealing with functional vectors, it is better to deal with equality
+    eqV xs  ys  = forall i -> xs i == ys i
+    eqM xss yss = forall j -> eqV (xss j) (yss j)
+  instead of setoids.  (DecEq A -> DecEq (Vector m A))
++ The reason is that the interesting part of functional vectors is dealing with their indices because, in the end, most of the theorems will end with `cong xs ?` which means that you have to prove that both indices are the same.
++ Currently the implementation uses the function datatype (and uses
+  many Fin properties to deal with it).
+
+## Vector space and span
+
++ I choose to define vector space in a way that is close to what the algorithm is doing (and further from the classical mathematical definition).
++ For each matrix m there is a space |span m| which should be preserved by elementary matrix operations.
++ I have defined a relation eqSpan which relates (some) matrices with equal span.
+  eqSpan : Rel (Matrix n n A)
++ ?Perhaps not all pairs of matrices that have the same span can be written in my definition of eqSpan.?
+  (Perhaps the name should be different, because it is not a priory clear if it actually encodes the mathematical definition. It is now a "subrelation" of the proper vector space relation.)
++ There is a (non-constructive) definition of span of matrices using equality and it can't be used in my project because it is dealing with setoids.
++ However, it should be possible using Cubical Agda that if I substitute all setoids to equality, my definition of vector space preserves the vector space.

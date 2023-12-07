@@ -1,4 +1,5 @@
--- A example for normalization of a matrix of a matrix of rational numbers
+-- A example for normalization of a matrix of rational numbers
+-- Main example at the end: (TODO explain more)
 
 open import Level using (0ℓ)
 open import Data.Nat as ℕ hiding (_/_; _≟_)
