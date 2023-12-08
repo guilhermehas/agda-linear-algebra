@@ -29,7 +29,7 @@ open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (ring)
 open AMIF ring using (leftModule; _≈ᴹ_)
 
-module NormRationalExample (theoEq : {n : ℕ} {x y : Fin n → ℚᵘ}
+module Examples.PendulumCoefficients (theoEq : {n : ℕ} {x y : Fin n → ℚᵘ}
       {VS : Cᴹ (leftModule n) 0ℓ} →
       x ≈ᴹ y → x ∈ VS → y ∈ VS) where
 

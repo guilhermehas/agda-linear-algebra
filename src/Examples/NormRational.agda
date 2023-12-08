@@ -1,4 +1,4 @@
-module NormRationalExampleFunc where
+module Examples.NormRational where
 
 open import Data.Nat as ℕ hiding (_/_; _≟_)
 import Data.Integer as ℤ

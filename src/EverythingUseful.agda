@@ -6,10 +6,9 @@ open import Rational.Literals
 open import MatrixNormalization.normLinesInteger
 -- Normalize a matrix of a field and proved that vector space is preserved
 open import MatrixNormalization.normLinesField
--- One example of normalization of a matrix of rational numbers
-open import NormRationalExample
+-- Examples of normalization of a matrix of rational numbers
+open import Examples
 
 open import MatrixNormalization.normLinesFieldAfter
 
 open import MatrixFuncNormalization.normBef
-open import NormRationalExampleFunc
