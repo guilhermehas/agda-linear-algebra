@@ -13,8 +13,9 @@ open import Relation.Nullary.Decidable
 open import Algebra
 open import Algebra.MatrixData
 open import Algebra.Apartness
-import MatrixFuncNormalization.normBef as NormField
-import MatrixFuncNormalization.NormAfter as NormAll
+import MatrixDataNormalization.NormBef as NormField
+import MatrixDataNormalization.Base as NormAll
+
 import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Rational.Properties
 
@@ -25,7 +26,7 @@ open MSetoid setoid
 private variable
   m n p : ℕ
 
-open NormField +-*-heytingField _≠?_ renaming (normalizeData to normalizeDataBef)
+open NormField +-*-heytingField _≠?_
 open NormAll +-*-heytingField _≠?_
 
 _≟_ : Decidable (_≋_ {m} {n})
@@ -45,7 +46,7 @@ matrix22 = (1ℚᵘ ∷ [ 1ℚᵘ ] )
         ∷ [ 1ℚᵘ ∷ [ 2ℚᵘ ] ]
 
 normedMatrix22 : Matrix ℚᵘ _ _
-normedMatrix22 = normalizeDataBef matrix22
+normedMatrix22 = normalizeBef matrix22
 
 normedMatrix22Res : Matrix ℚᵘ 2 2
 normedMatrix22Res = (1ℚᵘ ∷ [ 1ℚᵘ ])
@@ -61,7 +62,7 @@ normed22Coeff = getCoeff matrix22
 -- Testing Normalize all the matrix
 
 normedMatrix22End : Matrix ℚᵘ _ _
-normedMatrix22End = normalizeData matrix22
+normedMatrix22End = normalize matrix22
 
 normedMatrix22ResEnd : Matrix ℚᵘ 2 2
 normedMatrix22ResEnd = (1ℚᵘ ∷ [ 0ℚᵘ ])
