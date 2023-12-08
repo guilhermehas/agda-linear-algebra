@@ -12,7 +12,7 @@ import Data.Vec.Relation.Binary.Pointwise.Inductive as PI
 open import Data.Rational.Unnormalised hiding (truncate)
 open import Data.Rational.Unnormalised.Properties
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality hiding ([_])
+open import Relation.Binary.PropositionalEquality hiding ([_]; setoid)
 open import Relation.Unary hiding (Decidable)
 open import Relation.Nullary.Decidable
 open import Algebra
@@ -21,7 +21,9 @@ import Algebra.Module.Instances.FunctionalVector as AMIF
 open import Algebra.Apartness
 
 open import Algebra.SubModule
+import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Rational.Properties
+open import Rational.Unnormalized.Literals
 import MatrixNormalization.normLinesField as NormField
 
 open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
@@ -36,19 +38,17 @@ module Examples.PendulumCoefficients (theoEq : {n : ℕ} {x y : Fin n → ℚᵘ
 private variable
   m n p : ℕ
 
+open MSetoid setoid
 open NormField +-*-heytingField _≠?_ theoEq hiding (Matrix) renaming (MatrixData to Matrix)
 
 _≋v_ : Rel (Vec ℚᵘ n) 0ℓ
 _≋v_ = PI.Pointwise _≈_
 
-_≋_ : Rel (Matrix m n) 0ℓ
-_≋_ = PI.Pointwise _≋v_
-
 _≟v_ : Decidable (_≋v_ {n})
 _≟v_ = PI.decidable _≃?_
 
 _≟_ : Decidable (_≋_ {m} {n})
-_≟_ = PI.decidable _≟v_
+_≟_ = decidable _≃?_
 
 _+++_ : Matrix m n → Matrix p n → Matrix (m ℕ.+ p) n
 [] +++ [] = []
@@ -71,15 +71,6 @@ idMat (suc n) = subst SquareMatrix (ℕ.+-comm n 1) matrixRes
 
   matrixRes : Matrix (n ℕ.+ 1) (n ℕ.+ 1)
   matrixRes = matrixN ++ [ replicate _ 0ℚᵘ ++ [ 1ℚᵘ ]  ]
-
-2ℚᵘ : ℚᵘ
-2ℚᵘ = ℤ.+ 2 / 1
-
--1ℚᵘ : ℚᵘ
--1ℚᵘ = (ℤ.- (ℤ.+ 1)) / 1
-
--2ℚᵘ : ℚᵘ
--2ℚᵘ = (ℤ.- (ℤ.+ 2)) / 1
 
 matrix22 : Matrix 2 2
 matrix22 = (1ℚᵘ ∷ [ 1ℚᵘ ] )

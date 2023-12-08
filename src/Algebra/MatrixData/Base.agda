@@ -12,7 +12,7 @@ import Algebra.Matrix as F
 private variable
   a : Level
   A : Set a
-  m n : ℕ
+  m n p : ℕ
 
 Matrix : Set a → (n m : ℕ) → Set a
 Matrix A n m = Vec (Vec A m) n

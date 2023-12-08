@@ -18,6 +18,7 @@ import MatrixDataNormalization.Base as NormAll
 
 import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Rational.Properties
+open import Rational.Unnormalized.Literals
 
 open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
 open ≈ setoid renaming (_≋_ to _≋v_)
@@ -31,15 +32,6 @@ open NormAll +-*-heytingField _≠?_
 
 _≟_ : Decidable (_≋_ {m} {n})
 _≟_ = decidable _≃?_
-
-2ℚᵘ : ℚᵘ
-2ℚᵘ = ℤ.+ 2 / 1
-
--1ℚᵘ : ℚᵘ
--1ℚᵘ = (ℤ.- (ℤ.+ 1)) / 1
-
--2ℚᵘ : ℚᵘ
--2ℚᵘ = (ℤ.- (ℤ.+ 2)) / 1
 
 matrix22 : Matrix ℚᵘ 2 2
 matrix22 = (1ℚᵘ ∷ [ 1ℚᵘ ] )
