@@ -355,11 +355,11 @@ module _ {R : Rel A ℓ} (P? : A → Bool) where
 
 allPairsSubMatrix′ : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<′_ $ L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs
-allPairsSubMatrix′ pXs pXsNormed  = filter⁺ᵇ is-just {!allPairsNormedPivs pXs pXsNormed!}
+allPairsSubMatrix′ pXs pXsNormed  = filter⁺ᵇ is-just (allPairsNormedPivs pXs pXsNormed)
 
 
 filterJust≡findPosSubMatrixList : (pXs : Vector (PivWithValue m) n)
-  → L.map {!!} (L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs) ≡ {!findPosSubMatrixList pXs!}
+  → L.map {!!} (L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs) ≡ findPosSubMatrixList pXs
 filterJust≡findPosSubMatrixList = {!!}
 
 
