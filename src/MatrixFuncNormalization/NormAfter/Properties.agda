@@ -324,71 +324,20 @@ allPairsNormedPivs : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNorma
   → AllPairs _<′_ $ L.tabulate $ proj₁ ∘ pXs
 allPairsNormedPivs pXs pXsNormed = tabulate⁺< (pXsNormed _ _)
 
-linkedNormedPivs : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
-  → Linked _<′_ $ L.tabulate $ proj₁ ∘ pXs
-linkedNormedPivs pXs pXsNormed = {!applyUpTo⁺₁!}
-
 findPosSubMatrixList : Vector (PivWithValue m) n → List (Fin m)
 findPosSubMatrixList = L.catMaybes ∘ L.map proj₁ ∘ L.tabulate
-
-linkedSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
-  → Linked _<_ $ findPosSubMatrixList pXs
-linkedSubMatrix = {!!}
-
-module _ {B : Set ℓ} {q}  {Q : Pred B q} (P? : B → Bool) where
-
-  filter⁺All : {xs : List B} → All Q xs → All Q (L.filterᵇ P? xs)
-  filter⁺All {xs = _}     All.[] = All.[]
-  filter⁺All {xs = x L.∷ _} (Qx All.∷ Qxs) with P? x
-  ... | false = filter⁺All Qxs
-  ... | true  = Qx All.∷ filter⁺All Qxs
-
-
-module _ {R : Rel A ℓ} (P? : A → Bool) where
-
-  filter⁺ᵇ : ∀ {xs} → AllPairs R xs → AllPairs R $ L.filterᵇ P? xs
-  filter⁺ᵇ {_}      AP.[]           = AP.[]
-  filter⁺ᵇ {x L.∷ xs} (x∉xs AP.∷ xs!) with P? x
-  ... | false = filter⁺ᵇ xs!
-  ... | true  = filter⁺All P? x∉xs AP.∷ filter⁺ᵇ xs!
-
-
-allPairsSubMatrix′ : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
-  → AllPairs _<′_ $ L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs
-allPairsSubMatrix′ pXs pXsNormed  = filter⁺ᵇ is-just (allPairsNormedPivs pXs pXsNormed)
-
-
-filterJust≡findPosSubMatrixList : (pXs : Vector (PivWithValue m) n)
-  → L.map {!!} (L.filterᵇ is-just $ L.tabulate $ proj₁ ∘ pXs) ≡ findPosSubMatrixList pXs
-filterJust≡findPosSubMatrixList = {!!}
-
 
 allPairsSubMatrix : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<_ $ findPosSubMatrixList pXs
 allPairsSubMatrix pXs pXsNormed = subst (AllPairs _<_) (≡.cong L.catMaybes (≡.sym (L.map-tabulate pXs proj₁)))
   (≤₋⁺ (allPairsNormedPivs pXs pXsNormed))
 
-
 findPosSubMatrix : (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Vector (Fin m) m′
-findPosSubMatrix {n = zero} pivsXs = ℕ.zero , []
-findPosSubMatrix {n = ℕ.suc n} pivsXs with pivsXs 0F .proj₁
-... | ⊥₋     = findPosSubMatrix $ tail pivsXs
-... | just p = let m′ , xs = findPosSubMatrix $ tail pivsXs in suc m′ , p ∷ xs
-
-crescentPosSubMatrix : (pXs : Vector (PivWithValue m) n) (let _ , pYs = findPosSubMatrix pXs)
-  (let pivs = pivsWV→pivs pXs) (pXsNormed : AllRowsNormalizedRight pivs)
-  → ∀ i j (i<j : i < j) → pYs i < pYs j
-crescentPosSubMatrix {n = suc n} pXs pXsNormed with pXs 0F .proj₁
-... | just x = help
-  where
-  help : ∀ i j i<j → _
-  help 0F (F.suc j) (s<s 0≤j) = let w = crescentPosSubMatrix (tail pXs) {!!} {!!} j {!!}  in {!!}
-  help (F.suc i) (F.suc j) (s<s i<j) = crescentPosSubMatrix (tail pXs) (λ i j i<j → pXsNormed (F.suc i) (F.suc j) (s<s i<j)) i j i<j
-
-... | ⊥₋ = λ i j → crescentPosSubMatrix (tail pXs) (λ i j i<j → pXsNormed (F.suc i) (F.suc j) (s<s i<j)) _ _
+findPosSubMatrix = -,_ ∘ fromList ∘ findPosSubMatrixList
 
 findSubMatrix : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n) → Σ[ m′ ∈ ℕ ] Matrix F n m′
-findSubMatrix xs pivsXs = let m′ , f = findPosSubMatrix pivsXs in m′ , λ i → xs i ∘ f
+findSubMatrix xs pivsXs .proj₁ = _
+findSubMatrix xs pivsXs .proj₂ i = xs i ∘ findPosSubMatrix pivsXs .proj₂
 
 subMatrixNormed : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n)
   (mXsPivs : MatrixPivots xs pivsXs)
