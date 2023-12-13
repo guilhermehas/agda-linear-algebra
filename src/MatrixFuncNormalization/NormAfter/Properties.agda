@@ -339,13 +339,18 @@ findSubMatrix : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n) → Σ[
 findSubMatrix xs pivsXs .proj₁ = _
 findSubMatrix xs pivsXs .proj₂ i = xs i ∘ findPosSubMatrix pivsXs .proj₂
 
-subMatrixNormed : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n)
-  (mXsPivs : MatrixPivots xs pivsXs)
-  (let pivs = pivsWV→pivs pivsXs) (allRowsNormedRight : AllRowsNormalizedRight pivs)
-  (let m′ , ys = findSubMatrix xs pivsXs) (pivsYs : Vector (PivWithValue m′) n)
-  (let pivsYs′ = pivsWV→pivs pivsXs) (mYsPivs : MatrixPivots ys pivsYs)
-  → AllRowsNormalizedRight pivsYs′
-subMatrixNormed xs pivsXs mXsPivs allRowsNormedRight pivsYs mYsPivs i j i<j = {!pivsWV→pivs pivsXs i <′ ?!}
+module SubMatrix (xs : Matrix F n m)
+  (pivsXs : Vector (PivWithValue m) n) (mXsPivs : MatrixPivots xs pivsXs)
+  where
+
+  open Σ (findSubMatrix xs pivsXs) renaming (proj₁ to m′; proj₂ to subMatrix)
+
+  isNormed :
+    (let pivs = pivsWV→pivs pivsXs) (allRowsNormedRight : AllRowsNormalizedRight pivs)
+    (let m′ , ys = findSubMatrix xs pivsXs) (pivsYs : Vector (PivWithValue m′) n)
+    (let pivsYs′ = pivsWV→pivs pivsXs) (mYsPivs : MatrixPivots ys pivsYs)
+    → AllRowsNormalizedRight pivsYs′
+  isNormed allRowsNormedRight pivsYs mYsPivs i j i<j = {!pivsWV→pivs pivsXs i <′ ?!}
 
 private
   <⁺→≤⁺ : {i j : Fin n ⁺} → i <⁺ j → i ≤⁺ j
