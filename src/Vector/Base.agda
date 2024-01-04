@@ -15,7 +15,7 @@ module Vector.Base where
 private variable
   c ℓ : Level
   A : Set ℓ
-  n : ℕ
+  m n : ℕ
   xs ys zs : Vector A n
 
 infixl 6 _[_]≔_
@@ -51,3 +51,6 @@ module SetoidProps (S : Setoid c ℓ) where
 
   ≋-consˡ : xs‵ ≋ ys‵ → (x ∷ xs‵) ≋ (x ∷ ys‵)
   ≋-consˡ = ≋-cons ≈.refl
+
+Crescent : Vector (Fin m) n → Set _
+Crescent xs = xs Preserves _<_ ⟶ _<_

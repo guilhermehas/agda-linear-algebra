@@ -214,10 +214,6 @@ normTwoRowsPropsMaybe {xs = xs} {ys} px′@{[ px ]} py′@{[ py ]} vx′@{vx , v
     vy + - vy                ≈⟨ -‿inverseʳ _ ⟩
     0# ∎
 
-private
-  Crescent : Vector (Fin m) n → Set _
-  Crescent xs = xs Preserves _<_ ⟶ _<_
-
 crescentPiv : ∀ (xs : Vector F n) (p : Fin n) piv piv#0
   (columns : Vector (Fin n) m) (ys : Vector F m) j
   → Lookup≢0 xs p piv piv#0
