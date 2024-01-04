@@ -51,7 +51,7 @@ _<′_ = _≤₋_
 _>′_ = flip _<′_
 
 AllRowsNormalizedRight : Vector A n → Set _
-AllRowsNormalizedRight xs = ∀ i j → i F.< j → xs i <′ xs j
+AllRowsNormalizedRight = _Preserves F._<_ ⟶ _<′_
 
 simpleFinProps : FinProps (Vector A (ℕ.suc n)) n
 Pij simpleFinProps i j i≤j a = ⊤

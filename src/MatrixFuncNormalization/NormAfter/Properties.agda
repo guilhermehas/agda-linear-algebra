@@ -232,7 +232,7 @@ normMatrixTwoRowsPropsVecPos : ∀ (xs : Matrix F n m) (pivsXs : Vector (PivWith
     let ys = normMatrixTwoRowsF′ xs pivsXs i j k k≟j in
     VecPivotPos ys (pivs k) (pivsXs k .proj₂)
 normMatrixTwoRowsPropsVecPos xs pivsXs mXsPivs allRowsNormedRight i j i<j .j true (ofʸ ≡.refl) =
- normTwoRowsPropsVecPiv (mXsPivs _) (mXsPivs _) (allRowsNormedRight _ _ i<j)
+ normTwoRowsPropsVecPiv (mXsPivs _) (mXsPivs _) (allRowsNormedRight i<j)
 normMatrixTwoRowsPropsVecPos xs pivsXs mXsPivs allRowsNormedRight i j i<j k false (ofⁿ _) = mXsPivs k
 
 normMatrixTwoRowsPropsMaybe : ∀ (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n)
@@ -242,7 +242,7 @@ normMatrixTwoRowsPropsMaybe : ∀ (xs : Matrix F n m) (pivsXs : Vector (PivWithV
     let ys = normMatrixTwoRowsF′ xs pivsXs i j k true in
       Maybe≈0 ys (pivs i)
 normMatrixTwoRowsPropsMaybe xs pivsXs mXsPivs allRowsNormedRight i j i<j _ (ofʸ ≡.refl) =
-  normTwoRowsPropsMaybe (mXsPivs _) (mXsPivs _) (allRowsNormedRight _ _ i<j)
+  normTwoRowsPropsMaybe (mXsPivs _) (mXsPivs _) (allRowsNormedRight i<j)
 
 ListFin : ℕ → Set _
 ListFin m = ListVec (Fin m)
@@ -322,7 +322,7 @@ private module _ {R : Rel A ℓ} where
 
 allPairsNormedPivs : (pXs : Vector (PivWithValue m) n) (pXsNormed : AllRowsNormalizedRight $ pivsWV→pivs pXs)
   → AllPairs _<′_ $ L.tabulate $ proj₁ ∘ pXs
-allPairsNormedPivs pXs pXsNormed = tabulate⁺< (pXsNormed _ _)
+allPairsNormedPivs pXs pXsNormed = tabulate⁺< pXsNormed
 
 findPosSubMatrixList : Vector (PivWithValue m) n → List (Fin m)
 findPosSubMatrixList = L.catMaybes ∘ L.map proj₁ ∘ L.tabulate
@@ -350,7 +350,7 @@ module SubMatrix (xs : Matrix F n m)
     (let m′ , ys = findSubMatrix xs pivsXs) (pivsYs : Vector (PivWithValue m′) n)
     (let pivsYs′ = pivsWV→pivs pivsXs) (mYsPivs : MatrixPivots ys pivsYs)
     → AllRowsNormalizedRight pivsYs′
-  isNormed allRowsNormedRight pivsYs mYsPivs i j i<j = {!pivsWV→pivs pivsXs i <′ ?!}
+  isNormed allRowsNormedRight pivsYs mYsPivs i<j = {!pivsWV→pivs pivsXs i <′ ?!}
 
 private
   <⁺→≤⁺ : {i j : Fin n ⁺} → i <⁺ j → i ≤⁺ j
@@ -442,7 +442,7 @@ subMatrixNormedBeforeAfter xs pivsXs mXsPivs allRowsNormedRight fm′m ys isColX
       where
 
       pivXsI<pivXsJ : just pivI <′ pivsXs j .proj₁
-      pivXsI<pivXsJ = helper3 (allRowsNormedRight _ _ i<j)
+      pivXsI<pivXsJ = helper3 (allRowsNormedRight i<j)
         where
         helper3 : pivsXs i .proj₁ <′ pivsXs j .proj₁ → just pivI <′ pivsXs j .proj₁
         helper3 rewrite pivIEq = id
@@ -513,7 +513,7 @@ subMatrixNormedBeforeAfter xs pivsXs mXsPivs allRowsNormedRight fm′m ys isColX
 
 
     helper3 : pivsXs i .proj₁ <′ pivsXs j .proj₁
-    helper3 = allRowsNormedRight _ _ i<j
+    helper3 = allRowsNormedRight i<j
 
     helper2 : pivsYs i <⁺ pivsYs j
     helper2 with helper3
