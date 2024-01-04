@@ -53,6 +53,7 @@ import Algebra.Module.Instances.FunctionalVector as AMIF
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
 open import Vector.Base as V
+open import Vector.SubVector
 open import AllPairs.Properties
 open import Algebra.Matrix
 open import Algebra.MatrixData renaming (Matrix to MatrixData)
@@ -213,6 +214,22 @@ normTwoRowsPropsMaybe {xs = xs} {ys} px′@{[ px ]} py′@{[ py ]} vx′@{vx , v
     vy + - vy                ≈⟨ -‿inverseʳ _ ⟩
     0# ∎
 
+private
+  Crescent : Vector (Fin m) n → Set _
+  Crescent xs = xs Preserves _<_ ⟶ _<_
+
+crescentPiv : ∀ (xs : Vector F n) (p : Fin n) piv piv#0
+  (columns : Vector (Fin n) m) (ys : Vector F m) j
+  → Lookup≢0 xs p piv piv#0
+  → columns j ≡ p
+  → Crescent columns → SubVector xs columns ys → Lookup≢0 ys j _ piv#0
+crescentPiv xs p piv piv#0 columns ys j (piv≡xsP , isPiv) colJ≡p cresc (subProp subVecProp) .proj₁ =
+  trans piv≡xsP (reflexive $ ≡.sym $ ≡.trans (subVecProp _) (≡.cong xs colJ≡p))
+crescentPiv xs p piv piv#0 columns ys j (piv≡xsP , isPiv) colJ≡p cresc (subProp subVecProp) .proj₂ i i>j =
+  trans (reflexive (subVecProp _)) (isPiv _ (ℕ.≤-<-trans (≤-reflexive (≡.sym colJ≡p)) (cresc i>j)))
+
+-- Properties of Matrix
+
 MatrixPivots : Matrix F n m → Vector (PivWithValue m) n → Set _
 MatrixPivots xs pivsXs = ∀ i → VecPivotPos (xs i) (pivsXs i .proj₁) (pivsXs i .proj₂)
 
@@ -339,7 +356,7 @@ findSubMatrix : (xs : Matrix F n m) (pivsXs : Vector (PivWithValue m) n) → Σ[
 findSubMatrix xs pivsXs .proj₁ = _
 findSubMatrix xs pivsXs .proj₂ i = xs i ∘ findPosSubMatrix pivsXs .proj₂
 
-module SubMatrix (xs : Matrix F n m)
+module SubMatrix′ (xs : Matrix F n m)
   (pivsXs : Vector (PivWithValue m) n) (mXsPivs : MatrixPivots xs pivsXs)
   where
 
