@@ -323,6 +323,62 @@ normMatrixTwoRows≈ⱽ xs pivsXs i j i<j with pivsXs i in pivEq
   ... | yes ≡.refl rewrite dec-true (k F.≟ k) ≡.refl | pivEq = ≈.refl
   ... | no k≢j rewrite dec-false (j F.≟ k) (k≢j ∘ ≡.sym) = ≈.refl
 
+module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValue m) (ℕ.suc n))
+  (mPivsStart : MatrixPivots matrixStart pivsStart) where
+
+  MatrixFromStart : Set _
+  MatrixFromStart = Σ[ xs ∈ Matrix F (ℕ.suc n) m ] (matrixStart ≈ⱽ xs × MatrixPivots xs pivsStart)
+
+  private
+    RemainSame : (i : Fin (ℕ.suc n)) (xs ys : Matrix F (ℕ.suc n) m) → Set _
+    RemainSame i xs ys = ∀ k → k ≢ i → xs k ≡ ys k
+
+  Pij′ : (i j : Fin (ℕ.suc n)) .(i≤j : i ≤ j) (xs : MatrixFromStart) → Set ℓ₁
+  Pij′ i j i≤j (xs , _ , _) =
+    (∀ k p → k < i → k < p → Maybe≈0 (xs p) (pivsStart k .proj₁)) × (∀ k → i < k → k ≤ j → Maybe≈0 (xs k) (pivsStart i .proj₁))
+
+  Pi′ : (i : Fin (ℕ.suc n)) (xs : MatrixFromStart) → Set ℓ₁
+  Pi′ i (xs , _ , _) = ∀ k p → k ≤ i → k < p → Maybe≈0 (xs p) (pivsStart k .proj₁)
+
+  P′ : (xs : MatrixFromStart) → Set ℓ₁
+  P′ (xs , _ , _) = ∀ i j → i < j → Maybe≈0 (xs j) (pivsStart i .proj₁)
+
+
+  Pab′ : (i j : Fin (ℕ.suc n)) .(i≢j : i ≢ j) (xs ys : MatrixFromStart) → Set _
+  Pab′ i j _ (xs , mStart≈ⱽxs , mpivsXs) (ys , mStart≈ⱽys , mpivsYs) =
+    (∀ k → k ≤ i → Maybe≈0 (ys j) (pivsStart k .proj₁)) × RemainSame j xs ys
+
+  P00′ : (xs : MatrixFromStart) → Pij′ F.zero F.zero ℕ.z≤n xs
+  proj₁ (P00′ _) _ _ ()
+  proj₂ (P00′ _) _ _ ()
+
+  Pij→Pi′ : ∀ (i : Fin (ℕ.suc n)) xs (pij : Pij′ i (fromℕ _) (≤fromℕ _) xs) → Pi′ i xs
+  Pij→Pi′ i (xs , mStart≈ⱽxs , mpivsXs) (bef , after) k p k≤i k<p with k F.≟ i
+  ... | no k≢i = bef _ _ (≤∧≢⇒< k≤i k≢i) k<p
+  ... | yes ≡.refl = after _ k<p (≤fromℕ _)
+    -- bef _ _ {!!} k<p
+
+  Pi→P′ : ∀ xs (pi : Pi′ (fromℕ n) xs) → P′ xs
+  Pi→P′ (xs , mStart≈ⱽxs , mpivsXs) pi i j i<j = pi _ _ (≤fromℕ _) i<j
+
+  Pi→Pii′ : ∀ (i : Fin n) xs (pi : Pi′ (inject₁ i) xs) → Pij′ (F.suc i) (F.suc i) F.≤-refl xs
+  proj₁ (Pi→Pii′ i (xs , mStart≈ⱽxs , mpivsXs) pi) k p (ℕ.s≤s k<si) k<p = pi _ _ {!!} k<p
+  proj₂ (Pi→Pii′ i (xs , mStart≈ⱽxs , mpivsXs) pi) k si<k k<si = contradiction (ℕ.≤-<-trans k<si si<k) ℕ.1+n≰n
+
+  Ps′ : ∀ i (j : Fin n) .(i≤j : i ≤ j) xs ys
+    (pij : Pij′ i (inject₁ j) (cong≤ʳ (≡.sym (toℕ-inject₁ _)) i≤j) xs)
+    (pab : Pab′ i (F.suc j) (F.<⇒≢ (ℕ.s≤s i≤j)) xs ys)
+    → Pij′ i (F.suc j) (ℕ.m≤n⇒m≤1+n i≤j) ys
+  proj₁ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness)) k p k<i k<p with p F.≟ F.suc j
+  ... | no p≢sj = subst (λ x → Maybe≈0 x (pivsStart k .proj₁)) (sameness _ p≢sj) (bef _ _ k<i k<p)
+  ... | yes ≡.refl = maybe _ $ ℕ.≤-pred $ ℕ.m<n⇒m<1+n k<i
+  proj₂ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness)) k i<k k<j with k F.≟ F.suc j
+  ... | no k≢sj = subst (λ x → Maybe≈0 x (pivsStart i .proj₁)) (sameness _ k≢sj) (after _ i<k {!!})
+  ... | yes ≡.refl = maybe _ ≤-refl
+
+
+-- Related to submatrix
+
 private module _ {R : Rel A ℓ} where
 
   tabulate⁺< : ∀ {n} {f : Fin n → A} → (∀ {i j} → i F.< j → R (f i) (f j)) →
