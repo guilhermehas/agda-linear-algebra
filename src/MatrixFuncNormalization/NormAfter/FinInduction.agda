@@ -19,19 +19,19 @@ private variable
 
 record ToInduct {ℓ₁} {ℓ₂} (A : Set ℓ) (n : ℕ) : Set (lsuc $ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
   field
-    f : A → A
+    f : ∀ i j i<j → A → A
     finProps : FinProps {ℓ₁ = ℓ₁} {ℓ₂} A n
 
   open FinProps finProps
 
   field
-    fPab : ∀ i j i≢j → (a : A) → Pab i j i≢j a (f a)
+    fPab : ∀ i j i<j → (a : A) → Pab i j (<⇒≢ i<j) a (f i j i<j a)
 
   normalizeStep : ∀ (a : A) i j i≤j
     (normBefore : Pij i (inject₁ {n = n} j) (cong≤ʳ (sym (toℕ-inject₁ _)) i≤j) a)
     → Σ[ a ∈ A ] Pij i (suc j) (ℕ.<⇒≤ (s≤s i≤j)) a
   normalizeStep a i j i≤j normBefore = _ ,
-    Ps i j i≤j a (f a) normBefore (fPab i (suc j) (<⇒≢ (s≤s i≤j)) a)
+    Ps i j i≤j a (f i (suc j) (ℕ.s<s i≤j) a) normBefore (fPab i (suc j) (ℕ.s<s i≤j) a)
 
 
   normalizeStepLine' : ∀ (a : A) i

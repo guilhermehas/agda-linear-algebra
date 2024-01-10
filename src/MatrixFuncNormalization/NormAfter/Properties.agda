@@ -350,7 +350,7 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
 
   Pab′ : (i j : Fin (ℕ.suc n)) .(i≢j : i ≢ j) (xs ys : MatrixFromStart) → Set _
   Pab′ i j _ (xs , mStart≈ⱽxs , mpivsXs) (ys , mStart≈ⱽys , mpivsYs) =
-    (∀ k → k ≤ i → Maybe≈0 (ys j) (pivsStart k .proj₁)) × RemainSame j xs ys
+    Maybe≈0 (ys j) (pivsStart i .proj₁) × RemainSame j xs ys × ∀ k → xs i k ≈ 0# → ys j k ≈ xs j k
 
   P00′ : (xs : MatrixFromStart) → Pij′ F.zero F.zero ℕ.z≤n xs
   proj₁ (P00′ _) _ _ ()
@@ -372,12 +372,15 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
     (pij : Pij′ i (inject₁ j) (cong≤ʳ (≡.sym (toℕ-inject₁ _)) i≤j) xs)
     (pab : Pab′ i (F.suc j) (F.<⇒≢ (ℕ.s≤s i≤j)) xs ys)
     → Pij′ i (F.suc j) (ℕ.m≤n⇒m≤1+n i≤j) ys
-  proj₁ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness)) k p k<i k<p with p F.≟ F.suc j
+  proj₁ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness , 0NotMod)) k p k<i k<p with p F.≟ F.suc j
   ... | no p≢sj = subst (λ x → Maybe≈0 x (pivsStart k .proj₁)) (sameness _ p≢sj) (bef _ _ k<i k<p)
-  ... | yes ≡.refl = maybe _ $ ℕ.≤-pred $ ℕ.m<n⇒m<1+n k<i
-  proj₂ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness)) k i<k k<j with k F.≟ F.suc j
+  ... | yes ≡.refl with pivsStart k .proj₁ in eq
+  ... | just pivK = let befN = subst (Maybe≈0 (xs i)) eq (bef k i k<i k<i) in ≈.trans (0NotMod _ befN)
+    let afterN = bef k (F.suc j) k<i k<p in subst (Maybe≈0 (xs (Fin.suc j))) eq afterN
+  ... | ⊥₋ = _
+  proj₂ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness , 0NotMod)) k i<k k<j with k F.≟ F.suc j
   ... | no k≢sj = subst (λ x → Maybe≈0 x (pivsStart i .proj₁)) (sameness _ k≢sj) (after _ i<k {!!})
-  ... | yes ≡.refl = maybe _ ≤-refl
+  ... | yes ≡.refl = {!maybe _ ≤-refl!}
 
   open FinProps
 
@@ -397,12 +400,20 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   getNextMat i j i<j (xs , mStart≈xs , mPivs) = normMatrixTwoRowsF xs pivsStart i j ,
     ≈ⱽ-trans mStart≈xs (normMatrixTwoRows≈ⱽ _ _ _ _ i<j) , normMatrixTwoRowsPivots _ _ mPivs allRowsNormedRight _ _ i<j
 
+  pab : ∀ i j i<j xs → Pab′ i j (<⇒≢ i<j) xs (getNextMat i j i<j xs)
+  proj₁ (pab i j i<j (xs , mStart≈xs , mPivs)) = normMatrixTwoRowsMaybe xs pivsStart mPivs allRowsNormedRight _ j i<j
+  proj₁ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) = {!!}
+  proj₂ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) = {!!}
+
   open ToInduct
 
   ind : ToInduct MatrixFromStart n
-  f ind = {!!}
+  f ind = getNextMat
   finProps ind = propsMatrix
-  fPab ind i j i≢j x = {!!}
+  fPab ind = pab
+
+  normMatrix : MatrixFromStart → Σ MatrixFromStart P′
+  normMatrix = getProperty ind
 
 
 
