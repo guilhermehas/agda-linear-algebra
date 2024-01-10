@@ -220,7 +220,7 @@ crescentPiv : ∀ (xs : Vector F n) (p : Fin n) piv piv#0
   (columns : Vector (Fin n) m) (ys : Vector F m) j
   → Lookup≢0 xs p piv piv#0
   → columns j ≡ p
-  → Crescent columns → SubVector xs columns ys → Lookup≢0 ys j _ piv#0
+  → Monotone columns → SubVector xs columns ys → Lookup≢0 ys j _ piv#0
 crescentPiv xs p piv piv#0 columns ys j (piv≡xsP , isPiv) colJ≡p cresc (subProp subVecProp) .proj₁ =
   trans piv≡xsP (reflexive $ ≡.sym $ ≡.trans (subVecProp _) (≡.cong xs colJ≡p))
 crescentPiv xs p piv piv#0 columns ys j (piv≡xsP , isPiv) colJ≡p cresc (subProp subVecProp) .proj₂ i i>j =
