@@ -62,6 +62,8 @@ import MatrixFuncNormalization.MatrixProps as MatrixPropsBefore
 import MatrixFuncNormalization.MatrixPropsAfter as MatrixPropsAfter
 import MatrixFuncNormalization.normBef as NormBef
 import MatrixFuncNormalization.NormAfter.Base as NormAfterBase
+open import MatrixFuncNormalization.NormAfter.FinInduction
+open import MatrixNormalization.FinProps
 open import MatrixFuncNormalization.FinInduction
 import Algebra.Module.VecSpace as VecSpace
 open import lbry
@@ -324,7 +326,9 @@ normMatrixTwoRows≈ⱽ xs pivsXs i j i<j with pivsXs i in pivEq
   ... | no k≢j rewrite dec-false (j F.≟ k) (k≢j ∘ ≡.sym) = ≈.refl
 
 module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValue m) (ℕ.suc n))
-  (mPivsStart : MatrixPivots matrixStart pivsStart) where
+  (mPivsStart : MatrixPivots matrixStart pivsStart)
+  (allRowsNormedRight : AllRowsNormalizedRight (pivsWV→pivs pivsStart))
+  where
 
   MatrixFromStart : Set _
   MatrixFromStart = Σ[ xs ∈ Matrix F (ℕ.suc n) m ] (matrixStart ≈ⱽ xs × MatrixPivots xs pivsStart)
@@ -356,7 +360,6 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   Pij→Pi′ i (xs , mStart≈ⱽxs , mpivsXs) (bef , after) k p k≤i k<p with k F.≟ i
   ... | no k≢i = bef _ _ (≤∧≢⇒< k≤i k≢i) k<p
   ... | yes ≡.refl = after _ k<p (≤fromℕ _)
-    -- bef _ _ {!!} k<p
 
   Pi→P′ : ∀ xs (pi : Pi′ (fromℕ n) xs) → P′ xs
   Pi→P′ (xs , mStart≈ⱽxs , mpivsXs) pi i j i<j = pi _ _ (≤fromℕ _) i<j
@@ -375,6 +378,32 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   proj₂ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness)) k i<k k<j with k F.≟ F.suc j
   ... | no k≢sj = subst (λ x → Maybe≈0 x (pivsStart i .proj₁)) (sameness _ k≢sj) (after _ i<k {!!})
   ... | yes ≡.refl = maybe _ ≤-refl
+
+  open FinProps
+
+  propsMatrix : FinProps MatrixFromStart n
+  Pij propsMatrix = Pij′
+  Pi propsMatrix = Pi′
+  P propsMatrix = P′
+  Pab propsMatrix = Pab′
+  Pij→Pi propsMatrix = Pij→Pi′
+  Pi→P propsMatrix = Pi→P′
+  Pi→Pii propsMatrix = Pi→Pii′
+  Ps propsMatrix = Ps′
+  P00 propsMatrix = P00′
+
+
+  getNextMat : ∀ i j i<j → Op₁ MatrixFromStart
+  getNextMat i j i<j (xs , mStart≈xs , mPivs) = normMatrixTwoRowsF xs pivsStart i j ,
+    ≈ⱽ-trans mStart≈xs (normMatrixTwoRows≈ⱽ _ _ _ _ i<j) , normMatrixTwoRowsPivots _ _ mPivs allRowsNormedRight _ _ i<j
+
+  open ToInduct
+
+  ind : ToInduct MatrixFromStart n
+  f ind = {!!}
+  finProps ind = propsMatrix
+  fPab ind i j i≢j x = {!!}
+
 
 
 -- Related to submatrix

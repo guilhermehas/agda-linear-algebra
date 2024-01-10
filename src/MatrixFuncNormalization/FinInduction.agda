@@ -37,7 +37,7 @@ record FuncNormAllLines (m n : ℕ) (Amn : Set ℓ) : Set (lsuc lzero ⊔ ℓ) w
 
   field
     numberZeros : Amn → Vector (Fin m ⁺) (suc n)
-    normProps : FinProps {ℓ₁ = lzero} (Vector (Fin m ⁺) (suc n)) n
+    normProps : FinProps {ℓ₁ = lzero} {ℓ₂ = lzero} (Vector (Fin m ⁺) (suc n)) n
 
   open FinProps normProps
 

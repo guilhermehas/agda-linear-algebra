@@ -14,13 +14,13 @@ private variable
   ℓ ℓ₁ : Level
   n : ℕ
 
-record FinProps {ℓ₁} (A : Set ℓ) (n : ℕ) : Set (lsuc $ ℓ ⊔ ℓ₁) where
+record FinProps {ℓ₁} {ℓ₂} (A : Set ℓ) (n : ℕ) : Set (lsuc $ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
   field
     Pij : (i j : Fin (suc n)) .(i≤j : i ≤ j) (a : A) → Set ℓ₁
     Pi : (i : Fin (suc n)) (a : A) → Set ℓ₁
     P : (a : A) → Set ℓ₁
 
-    Pab : ∀ (i j : Fin (suc n)) .(i≢j : i ≢ j) (a b : A) → Set ℓ₁
+    Pab : ∀ (i j : Fin (suc n)) .(i≢j : i ≢ j) (a b : A) → Set ℓ₂
 
     Pij→Pi : ∀ (i : Fin (ℕ.suc n)) a (pij : Pij i (fromℕ _) (≤fromℕ _) a) → Pi i a
     Pi→P : ∀ a (pi : Pi (fromℕ n) a) → P a
