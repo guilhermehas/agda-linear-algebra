@@ -156,7 +156,7 @@ punchIn-fromℕ (suc i) = cong suc (punchIn-fromℕ i)
     PSj = induct (rs sj>j) (F.<-cmp i (suc sj)) sj≤i
 
 ≤Rec : Recomputable (F._≤_ {_} {n} i)
-≤Rec = dec⟶recomputable (F._≤?_ _)
+≤Rec = dec⇒recomputable (F._≤?_ _)
 
 module hFieldProps (hField : HeytingField c ℓ₁ ℓ₂) where
 

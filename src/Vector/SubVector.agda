@@ -12,7 +12,10 @@ private variable
   A : Set a
   m n : ℕ
 
+-- This is a 3-arg. predicate, but the "corresponding" SubMatrix is a 2-arg. "container" of a matrix.
 record SubVector (xs : Vector A n) (columns : Vector (Fin n) m) (ys : Vector A m) : Set (levelOfType A) where
   constructor subProp
   field
     subVecProp : ∀ i → ys i ≡ xs (columns i)
+
+-- Another way could be to have SubVector xs ys where field columns : ...

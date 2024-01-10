@@ -21,3 +21,11 @@ record SubMatrix (matrix : Matrix A n m) (columns : Vector (Fin m) p) : Set (lev
 
 SubMatrixΣ : Matrix A n m → Set _
 SubMatrixΣ {m = m} xs = Σ ℕ (Vector (Fin m))
+
+
+-- TODO Can this be used instead?
+record SubMatrix' (matrix : Matrix A n m) (columns : Vector (Fin m) p) : Set (levelOfType A) where
+  subMatrix : Matrix A n p
+  subMatrix i j = matrix i (columns j)
+
+-- Another way could be to have SubMatrix matrix subMatrix where field columns : ...

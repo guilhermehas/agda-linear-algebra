@@ -52,5 +52,6 @@ module SetoidProps (S : Setoid c ℓ) where
   ≋-consˡ : xs‵ ≋ ys‵ → (x ∷ xs‵) ≋ (x ∷ ys‵)
   ≋-consˡ = ≋-cons ≈.refl
 
+-- TODO: Monotone?
 Crescent : Vector (Fin m) n → Set _
 Crescent xs = xs Preserves _<_ ⟶ _<_
