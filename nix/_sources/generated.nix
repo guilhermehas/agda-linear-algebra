@@ -3,14 +3,14 @@
 {
   agda-stdlib = {
     pname = "agda-stdlib";
-    version = "0c670dd1794cc55fc2e0887b840cc020e0360da8";
+    version = "3515c22f3a2c1bd2eeb5fdd504072f67aab3de4d";
     src = fetchFromGitHub {
       owner = "agda";
       repo = "agda-stdlib";
-      rev = "0c670dd1794cc55fc2e0887b840cc020e0360da8";
+      rev = "3515c22f3a2c1bd2eeb5fdd504072f67aab3de4d";
       fetchSubmodules = false;
-      sha256 = "sha256-EF/2FEmtxRyEeKY433bc92zEgQ8gOILMtNdoZIVBJU4=";
+      sha256 = "sha256-O0239u7nl9RhAajk+1cIIDAowt//fWfdmsQweigjgGg=";
     };
-    date = "2023-10-19";
+    date = "2024-01-03";
   };
 }
