@@ -21,7 +21,3 @@ Compile agda files:
 ``` sh
 agda src/EverythingUseful.agda
 ```
-
-TODO: currently the nix version hard-codes stdlib 1.7.3(or so), and
-  thus agda ignores the linear-algebra.agda-lib file which specifies
-  dependency on version 2.0
