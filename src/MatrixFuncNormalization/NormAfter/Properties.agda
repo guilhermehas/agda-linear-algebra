@@ -37,7 +37,7 @@ open import Data.Vec.Functional.Properties
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as EqSetoids
 open import Algebra
 import Algebra.Properties.Ring as RingProps
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; refl; subst)
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; _≗_; refl; subst)
 open import Relation.Binary.Construct.Add.Infimum.Strict hiding (_<₋_)
 import Relation.Binary.Construct.Add.Point.Equality as Equality
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
@@ -335,7 +335,7 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
 
   private
     RemainSame : (i : Fin (ℕ.suc n)) (xs ys : Matrix F (ℕ.suc n) m) → Set _
-    RemainSame i xs ys = ∀ k → k ≢ i → xs k ≡ ys k
+    RemainSame i xs ys = ∀ k → k ≢ i → xs k ≗ ys k
 
   Pij′ : (i j : Fin (ℕ.suc n)) .(i≤j : i ≤ j) (xs : MatrixFromStart) → Set ℓ₁
   Pij′ i j i≤j (xs , _ , _) =
@@ -373,14 +373,14 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
     (pab : Pab′ i (F.suc j) (F.<⇒≢ (ℕ.s≤s i≤j)) xs ys)
     → Pij′ i (F.suc j) (ℕ.m≤n⇒m≤1+n i≤j) ys
   proj₁ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness , 0NotMod)) k p k<i k<p with p F.≟ F.suc j
-  ... | no p≢sj = subst (λ x → Maybe≈0 x (pivsStart k .proj₁)) (sameness _ p≢sj) (bef _ _ k<i k<p)
+  ... | no p≢sj = subst (λ x → Maybe≈0 x (pivsStart k .proj₁)) {!sameness _ p≢sj ?!} (bef _ _ k<i k<p)
   ... | yes ≡.refl with pivsStart k .proj₁ in eq
   ... | just pivK = let befN = subst (Maybe≈0 (xs i)) eq (bef k i k<i k<i) in ≈.trans (0NotMod _ befN)
     let afterN = bef k (F.suc j) k<i k<p in subst (Maybe≈0 (xs (Fin.suc j))) eq afterN
   ... | ⊥₋ = _
   proj₂ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness , 0NotMod)) k i<k k<j with k F.≟ F.suc j
-  ... | no k≢sj = subst (λ x → Maybe≈0 x (pivsStart i .proj₁)) (sameness _ k≢sj) (after _ i<k {!!})
-  ... | yes ≡.refl = {!maybe _ ≤-refl!}
+  ... | no k≢sj = subst (λ x → Maybe≈0 x (pivsStart i .proj₁)) {!sameness _ k≢sj ?!} (after _ i<k {!!})
+  ... | yes ≡.refl = maybe
 
   open FinProps
 
@@ -402,8 +402,22 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
 
   pab : ∀ i j i<j xs → Pab′ i j (<⇒≢ i<j) xs (getNextMat i j i<j xs)
   proj₁ (pab i j i<j (xs , mStart≈xs , mPivs)) = normMatrixTwoRowsMaybe xs pivsStart mPivs allRowsNormedRight _ j i<j
-  proj₁ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) = {!!}
-  proj₂ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) = {!!}
+  proj₁ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) k k≢j p
+    rewrite dec-no (k F.≟ j) k≢j = {!≡.refl!}
+  proj₂ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) k xsIk≈0
+    rewrite dec-yes (j F.≟ j) ≡.refl .proj₂ = helper
+    where
+    open ≈-Reasoning
+
+    helper : normTwoRows (xs i) (xs j) (pivsStart i .proj₁) (pivsStart j .proj₁) (pivsStart i .proj₂) k HF.≈ xs j k
+    helper with pivsStart i  in eq
+    ... | ⊥₋ , _ = ≈.refl
+    ... | just piv , pInv = begin
+      xs j k + _ * xs i k ≈⟨ +-congˡ (*-congˡ xsIk≈0) ⟩
+      xs j k + _ * 0#     ≈⟨ +-congˡ (zeroʳ _) ⟩
+      xs j k + 0#         ≈⟨ +-identityʳ _ ⟩
+      xs j k ∎
+
 
   open ToInduct
 
