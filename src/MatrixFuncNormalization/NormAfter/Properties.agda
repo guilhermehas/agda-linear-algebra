@@ -403,7 +403,7 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   pab : ∀ i j i<j xs → Pab′ i j (<⇒≢ i<j) xs (getNextMat i j i<j xs)
   proj₁ (pab i j i<j (xs , mStart≈xs , mPivs)) = normMatrixTwoRowsMaybe xs pivsStart mPivs allRowsNormedRight _ j i<j
   proj₁ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) k k≢j p
-    rewrite dec-no (k F.≟ j) k≢j = {!≡.refl!}
+    rewrite dec-no (k F.≟ j) k≢j = ≡.refl
   proj₂ (proj₂ (pab i j i<j (xs , mStart≈xs , mPivs))) k xsIk≈0
     rewrite dec-yes (j F.≟ j) ≡.refl .proj₂ = helper
     where
@@ -429,9 +429,20 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   normMatrix : MatrixFromStart → Σ MatrixFromStart P′
   normMatrix = getProperty ind
 
+AllRowsNormalizedLeft : Matrix F (ℕ.suc n) m → Vector (PivWithValue m) (ℕ.suc n) → Set _
+AllRowsNormalizedLeft xs pivs = ∀ i j → i < j → Maybe≈0 (xs j) (pivs i .proj₁)
+
+-- Matrix with the properties
+
+module _ (xs : Matrix F (ℕ.suc n) m) (pivsWithValue : Vector (PivWithValue m) (ℕ.suc n))
+  (matrixPivots : MatrixPivots xs pivsWithValue)
+  (let pivs = pivsWV→pivs pivsWithValue)
+  (allRowsNormedRight : AllRowsNormalizedRight pivs)
+  (allNormedLeft : AllRowsNormalizedLeft xs pivsWithValue)
+  where
 
 
--- Related to submatrix
+-- Old related to submatrix
 
 private module _ {R : Rel A ℓ} where
 
