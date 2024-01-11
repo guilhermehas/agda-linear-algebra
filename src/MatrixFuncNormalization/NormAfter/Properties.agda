@@ -430,7 +430,10 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   normMatrix = getProperty ind
 
 AllRowsNormalizedLeft : Matrix F (ℕ.suc n) m → Vector (PivWithValue m) (ℕ.suc n) → Set _
-AllRowsNormalizedLeft xs pivs = ∀ i j → i < j → Maybe≈0 (xs j) (pivs i .proj₁)
+AllRowsNormalizedLeft xs pivs = ∀ i j → i ≢ j → Maybe≈0 (xs j) (pivs i .proj₁)
+
+AllRowsNormalizedLeftBelow : Matrix F (ℕ.suc n) m → Vector (PivWithValue m) (ℕ.suc n) → Set _
+AllRowsNormalizedLeftBelow xs pivs = ∀ i j → i < j → Maybe≈0 (xs j) (pivs i .proj₁)
 
 -- Matrix with the properties
 
@@ -438,8 +441,33 @@ module _ (xs : Matrix F (ℕ.suc n) m) (pivsWithValue : Vector (PivWithValue m) 
   (matrixPivots : MatrixPivots xs pivsWithValue)
   (let pivs = pivsWV→pivs pivsWithValue)
   (allRowsNormedRight : AllRowsNormalizedRight pivs)
-  (allNormedLeft : AllRowsNormalizedLeft xs pivsWithValue)
+  (allNormedLeftBelow : AllRowsNormalizedLeftBelow xs pivsWithValue)
   where
+
+  allNormedLeft : AllRowsNormalizedLeft xs pivsWithValue
+  allNormedLeft i j i≢j with <-cmp i j
+  ... | tri< i<j _ _ = allNormedLeftBelow _ _ i<j
+  ... | tri≈ _ i≡j _ = contradiction i≡j i≢j
+  ... | tri> _ _ i>j with pivsWithValue i in eq
+  ... | ⊥₋ , _  = _
+  ... | just p , _ , _  with pivsWithValue j in eqJ
+  ... | ⊥₋ , _ = helper (matrixPivots j)
+    where
+    helper : VecPivotPos (xs j) (pivsWithValue j .proj₁) (pivsWithValue j .proj₂) → xs j p ≈ 0#
+    helper w rewrite eqJ = helper2 w where
+      helper2 : _ → _
+      helper2 allZ = allZ _
+
+  ... | just v , _ , _ = helper (matrixPivots j)
+    where
+    helper : VecPivotPos (xs j) (pivsWithValue j .proj₁) (pivsWithValue j .proj₂) → xs j p ≈ 0#
+    helper w rewrite eqJ = helper2 w where
+      helper2 : _ → _
+      helper2 (_ , eqZ) = eqZ _ (helper3 (allRowsNormedRight i>j)) where
+        helper3 : proj₁ (pivsWithValue j) <′ proj₁ (pivsWithValue i) → p > v
+        helper3 w2 rewrite eq | eqJ = helper4 w2 where
+          helper4 : _ → _
+          helper4 _≤₋_.[ v<p ] = v<p
 
 
 -- Old related to submatrix
