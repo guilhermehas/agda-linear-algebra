@@ -16,6 +16,7 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 open import Relation.Nullary
 import Relation.Binary.Reasoning.Setoid as ≈-Reasoning
 
+open import Algebra.Matrix.Base renaming (flip to flipM) using ()
 open import Algebra.Matrix.Structures
 open import Algebra.BigOps
 
@@ -301,3 +302,6 @@ module MRingProps (ring : Ring a ℓ) where
     α : (ys zero V.∷ N) [ zero ]≔ r *[ zero ] ≈ᴹ zs zero V.∷ N
     α zero = mYs≈y zero
     α (suc i) = ≋-refl
+
+  flip-flip : (xs : Matrix n m) → flipM (flipM xs) ≈ᴹ xs
+  flip-flip xs i j rewrite opposite-involutive i | opposite-involutive j = refl

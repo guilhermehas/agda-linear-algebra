@@ -49,6 +49,7 @@ open NormAfterProperties hField _≟_ renaming (MatrixWithPivots to MatrixWithPi
 open PVec
 open PNormBef renaming (_<′_ to _<ᴮ_)
 open PNormAfter
+open MRingProps ring
 
 private variable
   ℓ : Level
@@ -122,7 +123,7 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
     rowsNormedOpposite i j i<j = allRowsNormed (opposite j) (opposite i) (<-opposite i<j)
 
     allRowsNormedAfter : AllRowsNormalizedRight pivsYs
-    allRowsNormedAfter i j i<j = helper (rowsNormedOpposite i j i<j)
+    allRowsNormedAfter {i} {j} i<j = helper (rowsNormedOpposite i j i<j)
       where
       helper : pXs (opposite j) <ᴮ pXs (opposite i) → pivsYs i <′ pivsYs j
       helper with pXs (opposite i) | pXs (opposite j)
@@ -166,5 +167,15 @@ module _ (xs : Matrix F n m) where
   open FlipProps ysWithPivots using (module NormedRows) renaming (ys to zs; pYs to pvZs; pivsYs to pivsZs)
   open NormedRows allRowsNormedYsPivs
 
+  open ≈-Reasoning
+
   zs→ws⇒xs≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → xs ≈ⱽ flip ws
-  zs→ws⇒xs≈ⱽws zs≈ⱽws = {!!}
+  zs→ws⇒xs≈ⱽws {ws} (idR zs≈ws) = ≈ⱽ-trans {!!} {!≈ᵛ-sym!}
+    -- idR λ i j → begin
+    -- xs i j ≈⟨ {!!} ⟩
+    -- {!!} ≈⟨ {!!} ⟩
+    -- -- ≈˘⟨ flip-flip xs i _ ⟩
+    -- flip (flip xs) i j ≡⟨ {!zs!} ⟩
+    -- flip zs i j ≈⟨ zs≈ws _ _ ⟩
+    -- flip ws i j ∎
+  zs→ws⇒xs≈ⱽws (rec mOps zs≈ⱽws x) = {!!}

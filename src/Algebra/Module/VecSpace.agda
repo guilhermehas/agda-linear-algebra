@@ -19,7 +19,7 @@ open import Data.Vec.Functional.Properties hiding (++-cong)
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as ≋-props
 open import Relation.Binary
 import Relation.Binary.Reasoning.Setoid as ≈-Reasoning
-open import Relation.Binary.PropositionalEquality as ≡
+open import Relation.Binary.PropositionalEquality as ≡ hiding (sym)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 
@@ -63,6 +63,23 @@ data VecOp (n : ℕ) : Set rr where
 matOps→func : VecOp n → Vector M n → Vector M n
 matOps→func (swapOp p q p≢q)    xs = swapV xs p q
 matOps→func (addCons p q p≢q r) xs = xs [ q ]← r *[ p ]
+
+matOps→func-cong : (xs ys : Vector M n) (mOps : VecOp n) → xs ≋ ys → matOps→func mOps xs ≋ matOps→func mOps ys
+matOps→func-cong xs ys (swapOp p q p≢q) xs≈ys i = {!!}
+matOps→func-cong xs ys (addCons p q p≢q r) xs≈ys i = {!!}
+
+invVecOp : Op₁ $ VecOp n
+invVecOp (swapOp p q p≢q) = swapOp q p (p≢q ∘ ≡.sym)
+invVecOp (addCons p q p≢q r) = addCons {!!} {!!} {!!} {!!}
+
+involute-inv : (xs : Vector M n) (mOps : VecOp n)
+  → matOps→func (invVecOp mOps) (matOps→func mOps xs) ≋ xs
+involute-inv xs (swapOp p q p≢q) i = begin
+  swapV (swapV xs p q) q p i ≡⟨ swap-exchange (swapV xs p q) _ _ i ⟩
+  swapV (swapV xs p q) p q i ≡⟨ swap-involute xs _ _ _ ⟩
+  xs i ∎
+  where open ≈ᴹ-Reasoning
+involute-inv xs (addCons p q p≢q r) i = {!!}
 
 data _≈ⱽ_ : Rel (Vector M n) (rr ⊔ mr ⊔ ℓm) where
   idR : xs ≋ ys → xs ≈ⱽ ys
@@ -162,6 +179,15 @@ data _≈ⱽ_ : Rel (Vector M n) (rr ⊔ mr ⊔ ℓm) where
 ≈ⱽ-trans (idR xs≋ys) (idR ys≋zs) = idR (≋-trans xs≋ys ys≋zs)
 ≈ⱽ-trans (rec mOps xs≈ⱽys mOpsXs) (idR ys≋zs) = rec mOps xs≈ⱽys (≋-trans mOpsXs ys≋zs)
 ≈ⱽ-trans xs≈ⱽys (rec {ys = ws} mOpsYsZs ys≈ⱽzs mOpsYs) = rec mOpsYsZs (≈ⱽ-trans xs≈ⱽys ys≈ⱽzs) mOpsYs
+
+≈ⱽ-sym : Symmetric (_≈ⱽ_ {n = n})
+≈ⱽ-sym (idR xs≋ys) = idR (≋-sym xs≋ys)
+≈ⱽ-sym (rec {xs = xs} {ys} {zs} mOps xs≈ⱽys mOpsYs) = ≈ⱽ-trans (rec (invVecOp mOps) (idR ≋-refl)
+  λ i → begin
+    matOps→func (invVecOp mOps) zs i ≈⟨ matOps→func-cong zs _ (invVecOp mOps) (≋-sym mOpsYs) i ⟩
+    matOps→func (invVecOp mOps) (matOps→func mOps ys) i ≈⟨ involute-inv ys mOps i ⟩
+    ys i ∎)
+  (≈ⱽ-sym xs≈ⱽys) where open ≈ᴹ-Reasoning
 
 [_,,_] : M → M → Vector M 2
 [ x ,, y ] zero = x
