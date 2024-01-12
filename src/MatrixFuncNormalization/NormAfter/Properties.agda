@@ -369,7 +369,7 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   Pi→P′ (xs , mStart≈ⱽxs , mpivsXs) pi i j i<j = pi _ _ (≤fromℕ _) i<j
 
   Pi→Pii′ : ∀ (i : Fin n) xs (pi : Pi′ (inject₁ i) xs) → Pij′ (F.suc i) (F.suc i) F.≤-refl xs
-  proj₁ (Pi→Pii′ i (xs , mStart≈ⱽxs , mpivsXs) pi) k p (ℕ.s≤s k<si) k<p = pi _ _ {!!} k<p
+  proj₁ (Pi→Pii′ i (xs , mStart≈ⱽxs , mpivsXs) pi) k p (ℕ.s≤s k≤i) k<p = pi _ _ (cong≤ˡ k≤i (≡.sym (toℕ-inject₁ _))) k<p
   proj₂ (Pi→Pii′ i (xs , mStart≈ⱽxs , mpivsXs) pi) k si<k k<si = contradiction (ℕ.≤-<-trans k<si si<k) ℕ.1+n≰n
 
   Ps′ : ∀ i (j : Fin n) .(i≤j : i ≤ j) xs ys
@@ -383,7 +383,9 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
     let afterN = bef k (F.suc j) k<i k<p in subst (Maybe≈0 (xs (Fin.suc j))) eq afterN
   ... | ⊥₋ = _
   proj₂ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness , 0NotMod)) k i<k k<j with k F.≟ F.suc j
-  ... | no k≢sj = maybeSameness (pivsStart i .proj₁) (reflexive ∘ sameness _ k≢sj) (after _ i<k {!!})
+  ... | no k≢sj = maybeSameness (pivsStart i .proj₁) (reflexive ∘ sameness _ k≢sj)
+    (after _ i<k (ℕ.≤-pred (ℕ.≤∧≢⇒< (cong≤ʳ (≡.cong suc (≡.sym (toℕ-inject₁ _))) k<j)
+    λ k≡s₁j → k≢sj (toℕ-injective (≡.trans k≡s₁j (≡.cong suc (toℕ-inject₁ _)))))))
   ... | yes ≡.refl = maybe
 
   open FinProps
