@@ -138,6 +138,10 @@ VecPivotPos xs [ p ] (_ , piv#0) = Lookup≢0 xs p _ piv#0
 VecPivotPosΣ : ∀ n → Set _
 VecPivotPosΣ n = Σ[ xs ∈ Vector F n ] Σ[ p ∈ Fin n ₋ ] Σ[ pivValue ∈ PivValue p ] VecPivotPos xs p pivValue
 
+maybeSameness : ∀ {xs ys : Vector F n} p → xs ≋‵.≋ ys → Maybe≈0 xs p → Maybe≈0 ys p
+maybeSameness (just _) ys≈xs = ≈.trans (≈.sym (ys≈xs _))
+maybeSameness ⊥₋ _ _ = _
+
 PivLeft≤PivRight : ∀ {xs : Vector F n} {pₗ pᵣ : Fin n} {x} {x#0} → Lookup≢0Left xs pₗ → Lookup≢0 xs pᵣ x x#0 → pₗ ≤ pᵣ
 PivLeft≤PivRight {xs = xs} {pₗ} {pᵣ} {x} {x#0} (pₗ#0 , pₗ≈0) (x≈pr , pᵣ≈0) with pₗ ≤? pᵣ
 ... | yes pₗ≤pᵣ = pₗ≤pᵣ
@@ -373,13 +377,13 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
     (pab : Pab′ i (F.suc j) (F.<⇒≢ (ℕ.s≤s i≤j)) xs ys)
     → Pij′ i (F.suc j) (ℕ.m≤n⇒m≤1+n i≤j) ys
   proj₁ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness , 0NotMod)) k p k<i k<p with p F.≟ F.suc j
-  ... | no p≢sj = subst (λ x → Maybe≈0 x (pivsStart k .proj₁)) {!sameness _ p≢sj ?!} (bef _ _ k<i k<p)
+  ... | no p≢sj = maybeSameness (pivsStart k .proj₁) (reflexive ∘ sameness _ p≢sj) (bef _ _ k<i k<p)
   ... | yes ≡.refl with pivsStart k .proj₁ in eq
   ... | just pivK = let befN = subst (Maybe≈0 (xs i)) eq (bef k i k<i k<i) in ≈.trans (0NotMod _ befN)
     let afterN = bef k (F.suc j) k<i k<p in subst (Maybe≈0 (xs (Fin.suc j))) eq afterN
   ... | ⊥₋ = _
   proj₂ (Ps′ i j i≤j (xs , _) (ys , _) (bef , after) (maybe , sameness , 0NotMod)) k i<k k<j with k F.≟ F.suc j
-  ... | no k≢sj = subst (λ x → Maybe≈0 x (pivsStart i .proj₁)) {!sameness _ k≢sj ?!} (after _ i<k {!!})
+  ... | no k≢sj = maybeSameness (pivsStart i .proj₁) (reflexive ∘ sameness _ k≢sj) (after _ i<k {!!})
   ... | yes ≡.refl = maybe
 
   open FinProps
