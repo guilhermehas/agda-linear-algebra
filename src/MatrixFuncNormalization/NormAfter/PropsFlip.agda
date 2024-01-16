@@ -169,13 +169,28 @@ module _ (xs : Matrix F n m) where
 
   open ≈-Reasoning
 
-  zs→ws⇒xs≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → xs ≈ⱽ flip ws
-  zs→ws⇒xs≈ⱽws {ws} (idR zs≈ws) = ≈ⱽ-trans {!!} {!≈ᵛ-sym!}
-    -- idR λ i j → begin
-    -- xs i j ≈⟨ {!!} ⟩
-    -- {!!} ≈⟨ {!!} ⟩
-    -- -- ≈˘⟨ flip-flip xs i _ ⟩
-    -- flip (flip xs) i j ≡⟨ {!zs!} ⟩
-    -- flip zs i j ≈⟨ zs≈ws _ _ ⟩
-    -- flip ws i j ∎
-  zs→ws⇒xs≈ⱽws (rec mOps zs≈ⱽws x) = {!!}
+  mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps mOps) (flip zs) i j ≈
+    matOps→func mOps zs (opposite i) (opposite j)
+  mOpsInv≡ (swapOp p q p≢q) zs i j = begin
+    {!!} ≡⟨ {!!} ⟩
+    -- {!!} ≡⟨ {!!} ⟩
+    {!swap!} ∎
+  mOpsInv≡ (addCons p q p≢q r) zs i j = {!!}
+
+
+  zs≈ⱽws⇒ys≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → ys ≈ⱽ flip ws
+  zs≈ⱽws⇒ys≈ⱽws {ws} (idR zs≈ws) = idR $ λ i j → begin
+    ys i j            ≈˘⟨ flip-flip ys _ _ ⟩
+    flip (flip ys) i j ≈⟨ zs≈ws _ _ ⟩
+    flip ws i j ∎
+  zs≈ⱽws⇒ys≈ⱽws {ws} (rec {ys = zs} mOps zs≈ⱽws mOps≈) = rec (opVecOps mOps) (zs≈ⱽws⇒ys≈ⱽws zs≈ⱽws)
+    λ i j → begin
+      matOps→func (opVecOps mOps) (flip zs) i j ≈⟨ {!!} ⟩
+      -- {!!} ≈⟨ {!!} ⟩
+      {!!} ≈⟨ {!!} ⟩
+      matOps→func mOps zs (opposite i) (opposite j) ≈⟨ mOps≈ (opposite i) (opposite j) ⟩
+      flip ws i j ∎
+
+
+  zs≈ⱽws⇒xs≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → xs ≈ⱽ flip ws
+  zs≈ⱽws⇒xs≈ⱽws = ≈ⱽ-trans xs≈ⱽys ∘ zs≈ⱽws⇒ys≈ⱽws

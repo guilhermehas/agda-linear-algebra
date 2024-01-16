@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 open import Level using (Level; _⊔_)
 open import Function
 open import Algebra
@@ -6,7 +8,7 @@ open import Data.Empty
 open import Data.Bool hiding (_≟_)
 open import Data.Product
 open import Data.Sum renaming ([_,_] to [_⊕_])
-open import Data.Nat as ℕ using (ℕ)
+open import Data.Nat as ℕ using (ℕ; _∸_)
 open import Data.Nat.Properties as ℕ hiding (_≟_)
 open import Data.Fin
 open import Data.Fin.Properties
@@ -68,9 +70,23 @@ matOps→func-cong : (xs ys : Vector M n) (mOps : VecOp n) → xs ≋ ys → mat
 matOps→func-cong xs ys (swapOp p q p≢q) xs≈ys i = {!!}
 matOps→func-cong xs ys (addCons p q p≢q r) xs≈ys i = {!!}
 
+private
+  opposite-injective : Injective _≡_ _≡_ (opposite {n})
+  opposite-injective {ℕ.suc n} {i} {j} eq = toℕ-injective $ ∸-cancelˡ-≡ {m = n} (toℕ≤pred[n] i) (toℕ≤pred[n] j) (begin
+    n ∸ toℕ i       ≡˘⟨ opposite-prop i ⟩
+    toℕ (opposite i) ≡⟨ cong toℕ eq ⟩
+    toℕ (opposite j) ≡⟨ opposite-prop j ⟩
+    n ∸ toℕ j ∎)
+    where open ≡-Reasoning
+
+
+opVecOps : Op₁ $ VecOp n
+opVecOps (swapOp p q p≢q) = swapOp (opposite p) (opposite q) $ p≢q ∘ opposite-injective
+opVecOps (addCons p q p≢q r) = addCons (opposite p) (opposite q) (p≢q ∘ opposite-injective) r
+
 invVecOp : Op₁ $ VecOp n
 invVecOp (swapOp p q p≢q) = swapOp q p (p≢q ∘ ≡.sym)
-invVecOp (addCons p q p≢q r) = addCons {!!} {!!} {!!} {!!}
+invVecOp (addCons p q p≢q r) = addCons q p (p≢q ∘ ≡.sym) r
 
 involute-inv : (xs : Vector M n) (mOps : VecOp n)
   → matOps→func (invVecOp mOps) (matOps→func mOps xs) ≋ xs
@@ -326,7 +342,7 @@ stepVecSpace {n} xs ys i j i≢j (rec {ys = zs} (addCons p q p≢q r) xy≈ⱽys
     zs 0F                            ≈⟨ zs≋ys 0F ⟩
     ys 0F                            ≡˘⟨ updateAt-updates k xs ⟩
     (xs [ i ]≔ ys 0F) k             ≡˘⟨ updateAt-minimal _ j _ (j≢k ∘ ≡.sym) ⟩
-    (xs [ i ]≔ ys 0F [ j ]≔ ys 1F) k ∎ 
+    (xs [ i ]≔ ys 0F [ j ]≔ ys 1F) k ∎
   ... | no j≢k | no k≢i = begin
     (xs [ i ]≔ zs 0F [ j ]≔ zs 1F) k ≡⟨ updateAt-minimal _ j _ (j≢k ∘ ≡.sym) ⟩
     (xs [ i ]≔ zs 0F) k              ≡⟨ updateAt-minimal _ i _ k≢i ⟩
