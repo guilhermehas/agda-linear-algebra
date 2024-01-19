@@ -9,14 +9,14 @@ module MatrixFuncNormalization.NormAfter.PropsFlip {c ℓ₁ ℓ₂}
 
 open import Level using (Level; Lift; lift; lower; _⊔_)
 open import Function hiding (flip)
-open import Data.Product
+open import Data.Product hiding (swap)
 open import Data.Maybe
 open import Data.Nat as ℕ using (ℕ; _∸_; s<s; ≢-nonZero)
 open import Data.Nat.Properties as ℕ
   using (≰⇒>; m>n⇒m∸n≢0; pred[m∸n]≡m∸[1+n]; m∸[m∸n]≡n; ∸-monoʳ-<; module ≤-Reasoning)
 open import Data.Fin.Base as F hiding (_+_; lift)
 open import Data.Fin.Properties as F hiding (_≟_)
-open import Data.Sum
+open import Data.Sum hiding (swap)
 open import Data.Vec.Functional as V
 open import Algebra
 import Algebra.Properties.Ring as RingProps
@@ -28,6 +28,7 @@ open import Relation.Nullary.Construct.Add.Supremum
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
 open import Algebra.Matrix
+open import Vector.Base using (swapV)
 import Algebra.HeytingField.Properties as HFProps
 import MatrixFuncNormalization.normBef as NormBef
 import MatrixFuncNormalization.NormAfter.Base as NormAfterBase
@@ -50,6 +51,7 @@ open PVec
 open PNormBef renaming (_<′_ to _<ᴮ_)
 open PNormAfter
 open MRingProps ring
+
 
 private variable
   ℓ : Level
@@ -172,9 +174,10 @@ module _ (xs : Matrix F n m) where
   mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps mOps) (flip zs) i j ≈
     matOps→func mOps zs (opposite i) (opposite j)
   mOpsInv≡ (swapOp p q p≢q) zs i j = begin
+    swapV (flip zs) (opposite p) (opposite q) i j ≡⟨ {!!} ⟩
     {!!} ≡⟨ {!!} ⟩
     -- {!!} ≡⟨ {!!} ⟩
-    {!swap!} ∎
+    swapV zs p q (opposite i) (opposite j) ∎
   mOpsInv≡ (addCons p q p≢q r) zs i j = {!!}
 
 

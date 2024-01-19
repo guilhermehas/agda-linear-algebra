@@ -79,7 +79,6 @@ private
     n ∸ toℕ j ∎)
     where open ≡-Reasoning
 
-
 opVecOps : Op₁ $ VecOp n
 opVecOps (swapOp p q p≢q) = swapOp (opposite p) (opposite q) $ p≢q ∘ opposite-injective
 opVecOps (addCons p q p≢q r) = addCons (opposite p) (opposite q) (p≢q ∘ opposite-injective) r
