@@ -1,18 +1,54 @@
+* TODO Top-level description missing
++ There is a README (good) but, it points to one broken link and one
+  "API" which is not yet useful (see [[*Top level functionality: solve linear system of equations][Top level functionality: solve
+  linear system of equations]]).
+* Note: Comparing Agda and Lean
++ Agda stdlib provides many useful datastructures.
+* TODO Top level functionality: solve linear system of equations
+
 Starting from the linear equation system
+
   A * x = b
-the library will compute a "solution description" with a few
-alternatives:
+
+the library should be able to compute a "solution description" with a
+few alternatives:
   
     No
   | One Vec
   | Several SubSpace
 
 and a proof that
-  + all solutions generated from the "solution description" satisfy the equation.
-  + all solutions of the system are contained in the "solution description"
 
-----------------
+  + all solutions generated from the "solution description" satisfy
+    the equation.
+  + all solutions of the system are contained in the "solution
+    description"
 
+* TODO Generalised inverse?
 You may also want to present the "generalised inverse" of A and some
-more things. If the matrix is square you want to compute the
-determinant. And in combination with having polynomials as matrix elements that 
+more things.
+* TODO Determinant? (towards eigenvalues, etc.)
+If the matrix is square you want to compute the determinant. And in
+combination with having polynomials as matrix elements that depend som
+some parameter (which can be useful to use the library to compute
+eigenvalues and eigenvectors).
+
+Eigenvector(A,v,lambda) =   A*v == scale lambda v
+
+  A*v - scale lambda v == 0
+
+  (A - scaleM lambda I)*v == 0
+
+  B(lambda)*v == 0
+
+  where B(lambda) = (A - scaleM lambda I) = 
+    [ a11 - lambda   a12              a13
+      a21            a22 - lambda     a23
+      a31            a32              a33 - lambda ]
+
+One way is to compute the polynomial
+  p(lambda) = det(B(lambda))
+and solve the polynomial equation p(lambda)==0 for lambda.
+
+  
+  
