@@ -1,0 +1,18 @@
+Starting from the linear equation system
+  A * x = b
+the library will compute a "solution description" with a few
+alternatives:
+  
+    No
+  | One Vec
+  | Several SubSpace
+
+and a proof that
+  + all solutions generated from the "solution description" satisfy the equation.
+  + all solutions of the system are contained in the "solution description"
+
+----------------
+
+You may also want to present the "generalised inverse" of A and some
+more things. If the matrix is square you want to compute the
+determinant. And in combination with having polynomials as matrix elements that 
