@@ -42,7 +42,7 @@
               };
           };
         standard-library-overlay = builtins.elemAt (import ./nix/overlay.nix nixpkgs.lib) 0;
-        overlays = [ standard-library-overlay linear-algebra-overlay ];
+        overlays = [ linear-algebra-overlay ];
     in
     flake-utils.lib.eachDefaultSystem (system:
         let pkgs = import nixpkgs { inherit system overlays; };
