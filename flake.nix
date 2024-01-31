@@ -11,7 +11,8 @@
     let
         linear-algebra-overlay = final: prev: with prev.agdaPackages;
           let filter = with lib; with builtins; name: type:
-                    !(hasSuffix ".nix" name && type == "regular") && !(baseNameOf name == "flake.lock" && type == "regular") &&
+                    !(hasSuffix ".nix" name && type == "regular") &&
+                    !(baseNameOf name == "flake.lock" && type == "regular") &&
                     !(baseNameOf name == "nix" && type == "directory");
               src = with lib; cleanSourceWith {
                   inherit filter;
