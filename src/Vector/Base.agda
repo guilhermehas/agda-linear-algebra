@@ -17,7 +17,7 @@ module Vector.Base where
 
 private variable
   c ℓ : Level
-  A : Set ℓ
+  A B : Set ℓ
   m n : ℕ
   xs ys zs : Vector A n
 
@@ -65,3 +65,8 @@ findFirst {n = ℕ.suc n} xs f = if f (xs zero) then just (zero , (xs zero))
 
 findFirstElement : Vector A n → (A → Bool) → Maybe A
 findFirstElement = Maybe.map proj₂ ∘₂ findFirst
+
+findFirstWithProp : Vector A n → (A → Maybe B) → Maybe (Fin n × B)
+findFirstWithProp {n = ℕ.zero} xs f = nothing
+findFirstWithProp {n = ℕ.suc n} xs f = maybe′ (λ x → just (zero , x)) (Maybe.map (λ (i , a) → suc i , a)
+  (findFirstWithProp (tail xs) f)) $ f $ xs zero

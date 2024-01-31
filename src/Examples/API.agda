@@ -32,5 +32,8 @@ module _ (hField : HeytingField c ℓ₁ ℓ₂)
   normedMatrix : Matrix F 2 3
   normedMatrix = normalize matrix
 
+  normedAndDividedMatrix : Matrix F 2 3
+  normedAndDividedMatrix = normalizeAndDivide matrix
+
   inversedMatrix : Matrix F 2 2
   inversedMatrix = inverse matrix

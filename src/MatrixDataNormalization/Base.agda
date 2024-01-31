@@ -15,14 +15,13 @@ open import Algebra.MatrixData
 import MatrixFuncNormalization.NormAfter.Base as NormAfter
 import MatrixFuncNormalization.NormAfter.AppendIdentity as AppendIdentity
 
-module F = NormAfter hField _≟_
+open module F = NormAfter hField _≟_ using ()
+  renaming (normalizeData to normalize;
+            normalizeAndDivideData to normalizeAndDivide) public
 module AI = AppendIdentity hField _≟_
 
 private variable
   m n : ℕ
-
-normalize : Op₁ $ Matrix F n m
-normalize = matrixFunc→Data ∘ F.normalize ∘ matrixData→Fun
 
 inverse : Matrix F n m → Matrix F n n
 inverse = matrixFunc→Data ∘ AI.inverse ∘ matrixData→Fun

@@ -30,5 +30,8 @@ module MatrixFuncNormalization.NormAfter.AppendIdentity {c} {ℓ₁} {ℓ₂}
     norm_++id : Matrix F n (m ℕ.+ n)
     norm_++id = normalize _++id
 
+    inverseWithCoeff : Matrix F n n
+    inverseWithCoeff = dropⱽ m norm_++id
+
     inverse : Matrix F n n
-    inverse = dropⱽ m norm_++id
+    inverse = dropⱽ m (divideByCoeff norm_++id)

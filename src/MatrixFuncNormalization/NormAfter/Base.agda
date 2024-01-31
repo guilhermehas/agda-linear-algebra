@@ -10,13 +10,14 @@ module MatrixFuncNormalization.NormAfter.Base {c ℓ₁ ℓ₂}
 open import Level using (Level; Lift; lift; _⊔_)
 open import Function hiding (flip)
 open import Data.Bool using (Bool; false; true; T)
+open import Data.Unit renaming (⊤ to ⊤₂) using ()
 open import Data.Unit.Polymorphic using (⊤)
 open import Data.Product
-open import Data.Maybe
+open import Data.Maybe as Maybe
 open import Data.Nat using (ℕ)
 open import Data.Fin.Base hiding (_+_; lift)
 open import Data.Fin.Properties as F hiding (_≟_)
-open import Data.Vec.Functional
+open import Data.Vec.Functional as V
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as EqSetoids
 open import Algebra
 import Algebra.Properties.Ring as RingProps
@@ -25,6 +26,7 @@ open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
 import Algebra.Module.Instances.FunctionalVector as AMIF
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
+open import Relation.Binary.PropositionalEquality as ≡ hiding (setoid)
 
 open import Algebra.Matrix
 open import Algebra.MatrixData renaming (Matrix to MatrixData)
@@ -34,6 +36,7 @@ import MatrixFuncNormalization.MatrixPropsAfter as MatrixPropsAfter
 import MatrixFuncNormalization.normBef as NormBef
 open import MatrixFuncNormalization.FinInduction
 import Algebra.Module.VecSpace as VecSpace
+open import Vector
 open import lbry
 
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
@@ -109,15 +112,37 @@ nZerosProp (fNormLines funcNorm i j i≢j) _ = _
 
 normAfter : Op₁ $ Matrix F n m
 normAfter {n = ℕ.zero} xs ()
-normAfter {n = ℕ.suc n} xs = proj₁ (normalizeA funcNorm xs)
+normAfter {n = ℕ.suc n} = proj₁ ∘ normalizeA funcNorm
 
 normalize : Op₁ $ Matrix F n m
 normalize xs = let
-  ((ys₁ , _) , _) = normalizeMatrix xs
+  (ys₁ , _) , _ = normalizeMatrix xs
   ys₂ = flip ys₁
   ys₃ = normAfter ys₂
   ys₄ = flip ys₃
   in ys₄
 
+
+is≠0 : F → Bool
+is≠0 x = does $ x ≟ 0#
+
+divideVec : Op₁ $ Vector F n
+divideVec {n = n} xs = fromMaybe xs (Maybe.map (λ (_ , inv) i → inv * xs i) (findFirstWithProp xs fMaybe))
+  where
+  fMaybe : (x : F) → Maybe F
+  fMaybe x = Maybe.map (proj₁ ∘ #⇒invertible) (decToMaybe $ x ≟ 0#)
+
+divideByCoeff : Op₁ $ Matrix F n m
+divideByCoeff = V.map divideVec
+
+normalizeAndDivide : Op₁ $ Matrix F n m
+normalizeAndDivide = divideByCoeff ∘ normalize
+
+func⇒op₁⇒data : Op₁ $ Matrix F n m → Op₁ $ MatrixData F n m
+func⇒op₁⇒data f = matrixFunc→Data ∘ f ∘ matrixData→Fun
+
 normalizeData : Op₁ $ MatrixData F n m
-normalizeData = matrixFunc→Data ∘ normalize ∘ matrixData→Fun
+normalizeData = func⇒op₁⇒data normalize
+
+normalizeAndDivideData : Op₁ $ MatrixData F n m
+normalizeAndDivideData = func⇒op₁⇒data normalizeAndDivide
