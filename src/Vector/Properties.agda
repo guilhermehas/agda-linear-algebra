@@ -2,7 +2,11 @@ module Vector.Properties where
 
 open import Level using (Level)
 open import Function
+open import Data.Unit using (⊤)
+open import Data.Product
 open import Data.Sum
+open import Data.Bool using (Bool; T; false; true)
+open import Data.Maybe
 open import Data.Nat using (ℕ)
 open import Data.Fin
 open import Data.Fin.Properties
@@ -131,3 +135,12 @@ swap-involute xs i j k with k ≟ i | k ≟ j | i ≟ j
   _ ≡⟨ updateAt-minimal _ _ _ k≢j ⟩
   _ ≡⟨ updateAt-minimal _ _ _ k≢i ⟩
   _ ∎
+
+firstHasProperty : {A : Set ℓ} (xs : Vector A n) (f : A → Bool) →
+  maybe (λ (_ , a) → T (f a)) ⊤ (findFirst xs f)
+firstHasProperty {n = ℕ.zero} xs f = _
+firstHasProperty {n = ℕ.suc n} xs f with f (xs zero) in eqF0
+... | true rewrite eqF0 = _
+... | false rewrite eqF0 with findFirst (tail xs) f in eqF | firstHasProperty (tail xs) f
+... | just _ | prop = prop
+... | nothing | _ rewrite eqF = _
