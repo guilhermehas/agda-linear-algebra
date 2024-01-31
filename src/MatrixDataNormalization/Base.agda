@@ -13,11 +13,16 @@ open import Data.Nat using (ℕ)
 
 open import Algebra.MatrixData
 import MatrixFuncNormalization.NormAfter.Base as NormAfter
+import MatrixFuncNormalization.NormAfter.AppendIdentity as AppendIdentity
 
 module F = NormAfter hField _≟_
+module AI = AppendIdentity hField _≟_
 
 private variable
   m n : ℕ
 
 normalize : Op₁ $ Matrix F n m
 normalize = matrixFunc→Data ∘ F.normalize ∘ matrixData→Fun
+
+inverse : Matrix F n m → Matrix F n n
+inverse = matrixFunc→Data ∘ AI.inverse ∘ matrixData→Fun
