@@ -22,7 +22,7 @@ private variable
 open ≡-Reasoning
 
 evalFromListUpdates : (xs : Vector A n) {indices : Vec (Fin n) m} (values : Vec A m) (i : Fin n)
-  (firstOrNot : FirstOrNot (_≡ i) indices b) → A
+  (firstOrNot : FirstOrNot (i ≡_) indices b) → A
 evalFromListUpdates xs values i (there _ firstOrNot) =
   evalFromListUpdates xs (tail values) i firstOrNot
 evalFromListUpdates {b = false} xs values i firstOrNot = xs i
@@ -33,11 +33,11 @@ vecUpdates xs [] [] = xs
 vecUpdates xs (ind ∷ indices) (val ∷ values) = vecUpdates xs indices values [ ind ]≔ val
 
 vecUpdates≡listUpdates : ∀ (xs : Vector A n) {indices : Vec (Fin n) m} (values : Vec A m) i
-  (firstOrNot : FirstOrNot (_≡ i) indices b)
+  (firstOrNot : FirstOrNot (i ≡_) indices b)
   → vecUpdates xs indices values i ≡ evalFromListUpdates xs values i firstOrNot
 vecUpdates≡listUpdates xs [] i notHere = refl
 vecUpdates≡listUpdates xs {.(i ∷ _)} (_ ∷ values) i (here refl _) = updateAt-updates i _
 vecUpdates≡listUpdates xs {ind ∷ inds} (val ∷ values) i (there ¬p firstOrNot) = begin
-  (vecUpdates xs inds values [ ind ]≔ val) i ≡⟨ updateAt-minimal _ _ _ (¬p ∘ sym) ⟩
-  vecUpdates xs inds values i ≡⟨ vecUpdates≡listUpdates xs values i firstOrNot ⟩
+  (vecUpdates xs inds values [ ind ]≔ val) i ≡⟨ updateAt-minimal _ _ _ ¬p ⟩
+  vecUpdates xs inds values i                ≡⟨ vecUpdates≡listUpdates xs values i firstOrNot ⟩
   evalFromListUpdates xs (val ∷ values) i (there ¬p firstOrNot) ∎
