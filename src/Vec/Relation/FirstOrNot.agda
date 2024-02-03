@@ -24,6 +24,9 @@ data FirstOrNot (P : A → Set ℓ) : Vec A n → Bool → Set ℓ where
   here    : (p : P a) (xs : Vec A n) → FirstOrNot P (a ∷ xs) true
   there   : (¬p : ¬ P a) {xs : Vec A n} (firstOrNot : FirstOrNot P xs b) → FirstOrNot P (a ∷ xs) b
 
+FirstOrNotΣ : (P : A → Set ℓ) (xs : Vec A n) → Set ℓ
+FirstOrNotΣ P xs = Σ Bool $ FirstOrNot P xs
+
 firstOrNotPosition : ∀ {xs : Vec A n} → FirstOrNot P xs true → Fin n
 firstOrNotPosition (here p xs) = Fin.zero
 firstOrNotPosition (there ¬p xs) = Fin.suc (firstOrNotPosition xs)
@@ -35,12 +38,23 @@ firstOrNotPositionMaybe {b = true} fxs = just $ firstOrNotPosition fxs
 vReflect : (P : A → Set ℓ) → ℕ → Set _
 vReflect P n = Vec (Σ[ x ∈ _ ] Σ[ b ∈ Bool ] Reflects (P x) b) n
 
-boolVec→firstOrNot : (P : A → Set ℓ) (xs : vReflect P n) → Σ[ b ∈ Bool ] FirstOrNot P (Vec.map proj₁ xs) b
+boolVec→firstOrNot : (P : A → Set ℓ) (xs : vReflect P n) → FirstOrNotΣ P $ Vec.map proj₁ xs
 boolVec→firstOrNot P [] = false , notHere
 boolVec→firstOrNot P ((x , false , ofⁿ ¬p) ∷ xs) = _ , there ¬p (boolVec→firstOrNot P xs .proj₂)
 boolVec→firstOrNot P ((x , true , ofʸ p) ∷ xs) = true , here p (Vec.map proj₁ xs)
 
 firstOfVReflect : vReflect P n → Maybe $ Fin n
 firstOfVReflect [] = nothing
-firstOfVReflect ((_ , false , _) ∷ xs) = Maybe.map Fin.suc (firstOfVReflect xs)
+firstOfVReflect ((_ , false , _) ∷ xs) = Maybe.map Fin.suc $ firstOfVReflect xs
 firstOfVReflect ((_ , true , _) ∷ xs) = just $ Fin.zero
+
+firstOrNotFromDec : (P? : ∀ a → Dec $ P a) (xs : Vec A n) → FirstOrNotΣ P xs
+firstOrNotFromDec P? [] = _ , notHere
+firstOrNotFromDec P? (x ∷ xs) with P? x
+... | yes p = true , here p xs
+... | no ¬p = _ , there ¬p (proj₂ $ firstOrNotFromDec P? xs)
+
+firstTrue : Vec Bool n → Maybe $ Fin n
+firstTrue [] = nothing
+firstTrue (true ∷ xs) = just $ Fin.zero
+firstTrue (false ∷ xs) = Maybe.map Fin.suc (firstTrue xs)

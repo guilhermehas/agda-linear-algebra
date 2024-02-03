@@ -4,7 +4,7 @@ open import Level
 open import Function
 open import Data.Empty
 open import Data.Bool
-open import Data.Maybe
+open import Data.Maybe as Maybe
 open import Data.Product
 open import Data.Nat
 open import Data.Fin
@@ -72,7 +72,6 @@ evalFromVReflect¬≡ :  ∀ (xs : Vector A n) {vBool : Vec Bool m}
 evalFromVReflect¬≡ {b = false} xs values i firstOrNot val = refl
 evalFromVReflect¬≡ {b = true} xs values i firstOrNot val = refl
 
-
 vecUpdates≡reflectBool : ∀ (xs : Vector A n) {indices : Vec (Fin n) m} (values : Vec A m) i
   {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
   (firstOrNot : FirstOrNot T vBool b)
@@ -85,3 +84,26 @@ vecUpdates≡reflectBool xs {ind ∷ indices} (val ∷ values) i (ofⁿ ¬i≡in
   vecUpdates xs indices values i                ≡⟨ vecUpdates≡reflectBool xs values i vType firstOrNot ⟩
   evalFromVReflect xs values i firstOrNot      ≡˘⟨ evalFromVReflect¬≡ xs values i firstOrNot val ⟩
   evalFromVReflect xs (val ∷ values) i (there ¬p firstOrNot) ∎
+
+vecUpdates≡reflectBool-lema₂ : ∀ (xs : Vector A n) (values : Vec A m) (vBool : Vec Bool m) →
+  firstOrNotPositionMaybe (proj₂ (firstOrNotFromDec T? vBool)) ≡ firstTrue vBool
+vecUpdates≡reflectBool-lema₂ xs [] [] = refl
+vecUpdates≡reflectBool-lema₂ xs (x ∷ values) (true ∷ vBool) = refl
+vecUpdates≡reflectBool-lema₂ xs (x ∷ values) (false ∷ vBool)
+  rewrite sym $ vecUpdates≡reflectBool-lema₂ xs values vBool
+  with firstOrNotFromDec T? vBool in eq
+... | true , _ = refl
+... | false , _ = refl
+
+vecUpdates≡reflectBool-lemma : ∀ (xs : Vector A n) (values : Vec A m) i (vBool : Vec Bool m) →
+  evalFromPosition values (xs i) (firstOrNotPositionMaybe $ proj₂ (firstOrNotFromDec T? vBool)) ≡
+  evalFromPosition values (xs i) (firstTrue vBool)
+vecUpdates≡reflectBool-lemma xs values i vBool rewrite vecUpdates≡reflectBool-lema₂ xs values vBool = refl
+
+vecUpdates≡reflectBool-theo : ∀ (xs : Vector A n) {indices : Vec (Fin n) m} (values : Vec A m) i
+  {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
+  → vecUpdates xs indices values i ≡ evalFromPosition values (xs i) (firstTrue vBool)
+vecUpdates≡reflectBool-theo xs {indices} values i {vBool} vType = begin
+  vecUpdates xs indices values i ≡⟨ vecUpdates≡reflectBool xs values i vType (proj₂ (firstOrNotFromDec T? vBool)) ⟩
+  evalFromVReflect xs values i (proj₂ (firstOrNotFromDec T? vBool)) ≡⟨ vecUpdates≡reflectBool-lemma xs values i vBool ⟩
+  evalFromPosition values (xs i) (firstTrue vBool) ∎
