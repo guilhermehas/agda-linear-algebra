@@ -28,6 +28,10 @@ firstOrNotPosition : ∀ {xs : Vec A n} → FirstOrNot P xs true → Fin n
 firstOrNotPosition (here p xs) = Fin.zero
 firstOrNotPosition (there ¬p xs) = Fin.suc (firstOrNotPosition xs)
 
+firstOrNotPositionMaybe : ∀ {xs : Vec A n} → FirstOrNot P xs b → Maybe $ Fin n
+firstOrNotPositionMaybe {b = false} fxs = nothing
+firstOrNotPositionMaybe {b = true} fxs = just $ firstOrNotPosition fxs
+
 vReflect : (P : A → Set ℓ) → ℕ → Set _
 vReflect P n = Vec (Σ[ x ∈ _ ] Σ[ b ∈ Bool ] Reflects (P x) b) n
 
