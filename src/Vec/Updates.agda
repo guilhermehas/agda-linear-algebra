@@ -129,7 +129,7 @@ eval pos (a , xs) = evalFromPosition xs a pos
 evalEq : ((left , right) : FinEq m n) (pos : MFin m) → Dec (eval pos left ≡ eval pos right)
 evalEq (left , right) pos = eval pos left Fin.≟ eval pos right
 
-theo-correct : (finEq : FinEq m n) (pos : MFin m)  → True (evalEq finEq pos) →  (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
+theo-correct : (finEq : FinEq m n) (pos : MFin m)  → True (evalEq finEq pos) → (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
 theo-correct ((a , b) , c , right) nothing eqB ρ rewrite toWitness eqB = refl
 theo-correct ((a , b) , c , right) (just i) eqB ρ rewrite Vec.lookup-map i (lookup ρ) b
   | Vec.lookup-map i (lookup ρ) right | toWitness eqB = refl
@@ -137,4 +137,4 @@ theo-correct ((a , b) , c , right) (just i) eqB ρ rewrite Vec.lookup-map i (loo
 findProof : (finEq : FinEq m n) (pos : MFin m) → Maybe $ ∀ (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
 findProof findEq pos with evalEq findEq pos in eq
 ... | no _ = nothing
-... | yes p = just (theo-correct findEq pos (fromWitness p))
+... | yes p = just $ theo-correct findEq pos $ fromWitness p
