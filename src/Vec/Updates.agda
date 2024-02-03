@@ -6,13 +6,15 @@ open import Data.Empty
 open import Data.Bool
 open import Data.Maybe as Maybe
 open import Data.Product
-open import Data.Nat
-open import Data.Fin
+open import Data.Nat hiding (less-than-or-equal)
+open import Data.Fin as Fin
 open import Data.Vec as Vec hiding (_[_]≔_)
+import Data.Vec.Properties as Vec
 open import Data.Vec.Functional using (Vector; fromVec)
-open import Data.Vec.Functional.Properties
+open import Data.Vec.Functional.Properties using (updateAt-updates; updateAt-minimal)
 open import Relation.Binary.PropositionalEquality
 open import Vec.Relation.FirstOrNot
+open import Relation.Nullary.Decidable
 open import Relation.Nullary
 
 open import Vector
@@ -107,3 +109,35 @@ vecUpdates≡reflectBool-theo xs {indices} values i {vBool} vType = begin
   vecUpdates xs indices values i ≡⟨ vecUpdates≡reflectBool xs values i vType (proj₂ (firstOrNotFromDec T? vBool)) ⟩
   evalFromVReflect xs values i (proj₂ (firstOrNotFromDec T? vBool)) ≡⟨ vecUpdates≡reflectBool-lemma xs values i vBool ⟩
   evalFromPosition values (xs i) (firstTrue vBool) ∎
+
+FinExpr FinEq  : ℕ → ℕ → Set
+FinExpr m n = Fin n × Vec (Fin n) m
+FinEq m n = FinExpr m n × FinExpr m n
+
+module _ (vBool : Vec Bool m) where
+
+  fBool = firstTrue vBool
+
+  ⟦_⟧_ : FinExpr m n → Vec A n → A
+  ⟦ a , xs ⟧ ρ = evalFromPosition (Vec.map (fromVec ρ) xs) (lookup ρ a) fBool
+
+  ⟦_⟧≡_ : FinEq m n → Vec A n → Set _
+  ⟦ left , right ⟧≡ ρ = ⟦ left ⟧ ρ ≡ ⟦ right ⟧ ρ
+
+  eval : FinExpr m n → Fin n
+  eval (a , xs) = evalFromPosition xs a fBool
+
+
+  evalEq : ((left , right) : FinEq m n) → Dec (eval left ≡ eval right)
+  evalEq (left , right) = eval left Fin.≟ eval right
+
+  theo-correct : (finEq : FinEq m n) → True (evalEq finEq) → ∀ (ρ : Vec A n) → ⟦ finEq ⟧≡ ρ
+  theo-correct ((a , b) , c , right) eqB ρ with toWitness eqB | firstTrue vBool in fbEq
+  ... | eq | nothing rewrite fbEq | eq = refl
+  ... | eq | just i rewrite fbEq | Vec.lookup-map i (lookup ρ) b
+    | Vec.lookup-map i (lookup ρ) right | eq = refl
+
+  findProof : (finEq : FinEq m n) → Maybe $ ∀ (ρ : Vec A n) → ⟦ finEq ⟧≡ ρ
+  findProof findEq with evalEq findEq in eq
+  ... | no _ = nothing
+  ... | yes p = just (theo-correct findEq (fromWitness p))
