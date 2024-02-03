@@ -114,30 +114,27 @@ FinExpr FinEq  : ℕ → ℕ → Set
 FinExpr m n = Fin n × Vec (Fin n) m
 FinEq m n = FinExpr m n × FinExpr m n
 
-module _ (vBool : Vec Bool m) where
+MFin : ℕ → Set
+MFin = Maybe ∘ Fin
 
-  fBool = firstTrue vBool
+_⟦_⟧_ : MFin m → FinExpr m n → Vec A n → A
+pos ⟦ a , xs ⟧ ρ = evalFromPosition (Vec.map (fromVec ρ) xs) (lookup ρ a) pos
 
-  ⟦_⟧_ : FinExpr m n → Vec A n → A
-  ⟦ a , xs ⟧ ρ = evalFromPosition (Vec.map (fromVec ρ) xs) (lookup ρ a) fBool
+_⟦_⟧≡_ : MFin m → FinEq m n → Vec A n → Set _
+pos ⟦ left , right ⟧≡ ρ = pos ⟦ left ⟧ ρ ≡ pos ⟦ right ⟧ ρ
 
-  ⟦_⟧≡_ : FinEq m n → Vec A n → Set _
-  ⟦ left , right ⟧≡ ρ = ⟦ left ⟧ ρ ≡ ⟦ right ⟧ ρ
+eval : MFin m → FinExpr m n → Fin n
+eval pos (a , xs) = evalFromPosition xs a pos
 
-  eval : FinExpr m n → Fin n
-  eval (a , xs) = evalFromPosition xs a fBool
+evalEq : ((left , right) : FinEq m n) (pos : MFin m) → Dec (eval pos left ≡ eval pos right)
+evalEq (left , right) pos = eval pos left Fin.≟ eval pos right
 
+theo-correct : (finEq : FinEq m n) (pos : MFin m)  → True (evalEq finEq pos) →  (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
+theo-correct ((a , b) , c , right) nothing eqB ρ rewrite toWitness eqB = refl
+theo-correct ((a , b) , c , right) (just i) eqB ρ rewrite Vec.lookup-map i (lookup ρ) b
+  | Vec.lookup-map i (lookup ρ) right | toWitness eqB = refl
 
-  evalEq : ((left , right) : FinEq m n) → Dec (eval left ≡ eval right)
-  evalEq (left , right) = eval left Fin.≟ eval right
-
-  theo-correct : (finEq : FinEq m n) → True (evalEq finEq) → ∀ (ρ : Vec A n) → ⟦ finEq ⟧≡ ρ
-  theo-correct ((a , b) , c , right) eqB ρ with toWitness eqB | firstTrue vBool in fbEq
-  ... | eq | nothing rewrite fbEq | eq = refl
-  ... | eq | just i rewrite fbEq | Vec.lookup-map i (lookup ρ) b
-    | Vec.lookup-map i (lookup ρ) right | eq = refl
-
-  findProof : (finEq : FinEq m n) → Maybe $ ∀ (ρ : Vec A n) → ⟦ finEq ⟧≡ ρ
-  findProof findEq with evalEq findEq in eq
-  ... | no _ = nothing
-  ... | yes p = just (theo-correct findEq (fromWitness p))
+findProof : (finEq : FinEq m n) (pos : MFin m) → Maybe $ ∀ (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
+findProof findEq pos with evalEq findEq pos in eq
+... | no _ = nothing
+... | yes p = just (theo-correct findEq pos (fromWitness p))
