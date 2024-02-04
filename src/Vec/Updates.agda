@@ -23,7 +23,7 @@ private variable
   ℓ : Level
   A : Set ℓ
   a : A
-  m n : ℕ
+  m n p q : ℕ
   b : Bool
   xs : Vec A n
 
@@ -110,31 +110,54 @@ vecUpdates≡reflectBool-theo xs {indices} values i {vBool} vType = begin
   evalFromVReflect xs values i (proj₂ (firstOrNotFromDec T? vBool)) ≡⟨ vecUpdates≡reflectBool-lemma xs values i vBool ⟩
   evalFromPosition values (xs i) (firstTrue vBool) ∎
 
-FinExpr FinEq  : ℕ → ℕ → Set
-FinExpr m n = Fin n × Vec (Fin n) m
-FinEq m n = FinExpr m n × FinExpr m n
-
 MFin : ℕ → Set
 MFin = Maybe ∘ Fin
 
-_⟦_⟧_ : MFin m → FinExpr m n → Vec A n → A
-pos ⟦ a , xs ⟧ ρ = evalFromPosition (Vec.map (fromVec ρ) xs) (lookup ρ a) pos
+module VecUpdate where
+  FinExpr FinEq  : ℕ → ℕ → Set
+  FinExpr m n = Fin n × Vec (Fin n) m
+  FinEq m n = FinExpr m n × FinExpr m n
 
-_⟦_⟧≡_ : MFin m → FinEq m n → Vec A n → Set _
-pos ⟦ left , right ⟧≡ ρ = pos ⟦ left ⟧ ρ ≡ pos ⟦ right ⟧ ρ
+  _⟦_⟧_ : MFin m → FinExpr m n → Vec A n → A
+  pos ⟦ a , xs ⟧ ρ = evalFromPosition (Vec.map (fromVec ρ) xs) (lookup ρ a) pos
 
-eval : MFin m → FinExpr m n → Fin n
-eval pos (a , xs) = evalFromPosition xs a pos
+  _⟦_⟧≡_ : MFin m → FinEq m n → Vec A n → Set _
+  pos ⟦ left , right ⟧≡ ρ = pos ⟦ left ⟧ ρ ≡ pos ⟦ right ⟧ ρ
 
-evalEq : ((left , right) : FinEq m n) (pos : MFin m) → Dec (eval pos left ≡ eval pos right)
-evalEq (left , right) pos = eval pos left Fin.≟ eval pos right
+  eval : MFin m → FinExpr m n → Fin n
+  eval pos (a , xs) = evalFromPosition xs a pos
 
-theo-correct : (finEq : FinEq m n) (pos : MFin m)  → True (evalEq finEq pos) → (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
-theo-correct ((a , b) , c , right) nothing eqB ρ rewrite toWitness eqB = refl
-theo-correct ((a , b) , c , right) (just i) eqB ρ rewrite Vec.lookup-map i (lookup ρ) b
-  | Vec.lookup-map i (lookup ρ) right | toWitness eqB = refl
+  evalEq : ((left , right) : FinEq m n) (pos : MFin m) → Dec (eval pos left ≡ eval pos right)
+  evalEq (left , right) pos = eval pos left Fin.≟ eval pos right
 
-findProof : (finEq : FinEq m n) (pos : MFin m) → Maybe $ ∀ (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
-findProof findEq pos with evalEq findEq pos in eq
-... | no _ = nothing
-... | yes p = just $ theo-correct findEq pos $ fromWitness p
+  theo-correct : (finEq : FinEq m n) (pos : MFin m) → True (evalEq finEq pos) → (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
+  theo-correct ((a , b) , c , right) nothing eqB ρ rewrite toWitness eqB = refl
+  theo-correct ((a , b) , c , right) (just i) eqB ρ rewrite Vec.lookup-map i (lookup ρ) b
+    | Vec.lookup-map i (lookup ρ) right | toWitness eqB = refl
+
+  findProof : (finEq : FinEq m n) (pos : MFin m) → Maybe $ ∀ (ρ : Vec A n) → pos ⟦ finEq ⟧≡ ρ
+  findProof findEq pos with evalEq findEq pos in eq
+  ... | no _ = nothing
+  ... | yes p = just $ theo-correct findEq pos $ fromWitness p
+
+
+FinExpr FinEq : (m n p : ℕ) → Set
+FinExpr m n p = Fin n × Vec (Fin n) m × Vec (Fin p) m
+FinEq m n p = FinExpr m n p × FinExpr m n p
+
+Context : Set ℓ → (n p q : ℕ) → Set ℓ
+Context A n p q = Vector A q × Vector (Fin q) n × Vector A p
+
+⟦_⟧v_ : FinExpr m n p → Context A n p q → Vector A q
+⟦ i , [] , [] ⟧v (xs , findSub , valuesSub) = xs
+⟦ i , ind ∷ indices , val ∷ values ⟧v cont@(xs , findSub , valuesSub) =
+ (⟦ i , indices , values ⟧v cont) [ findSub ind ]≔ valuesSub val
+
+⟦_⟧_ : FinExpr m n p → Context A n p q → A
+⟦ finExpr@(i , indices , values) ⟧ cont@(xs , finSub , valuesSub) = (⟦ finExpr ⟧v cont) (finSub i)
+
+evalBool : FinExpr m n p → Vector Bool n → Maybe $ Fin p
+evalBool (i , [] , []) vBool = nothing
+evalBool (i , ind ∷ indices , val ∷ values) vBool = if vBool ind
+  then just val
+  else evalBool (i , indices , values) vBool
