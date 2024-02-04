@@ -110,3 +110,27 @@ vecUpdates≡reflectBool-theo xs {indices} values i {vBool} vType = begin
   vecUpdates xs indices values i ≡⟨ vecUpdates≡reflectBool xs values i vType (proj₂ (firstOrNotFromDec T? vBool)) ⟩
   evalFromVReflect xs values i (proj₂ (firstOrNotFromDec T? vBool)) ≡⟨ vecUpdates≡reflectBool-lemma xs values i vBool ⟩
   evalFromPosition values (xs i) (firstTrue vBool) ∎
+
+vBoolFromIndices : ∀ (indices : Vec (Fin n) m) (i : Fin n) → Σ[ vBool ∈ Vec Bool m ]
+  VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool)
+vBoolFromIndices [] i = [] , []
+vBoolFromIndices (ind ∷ indices) i = _ , proof (i Fin.≟ ind) ∷ proj₂ (vBoolFromIndices indices i)
+
+vecUpdates≡reflectBool-theo2 : ∀ (xs : Vector A n) (indices : Vec (Fin n) m) (values : Vec A m) i
+  → vecUpdates xs indices values i ≡ evalFromPosition values (xs i) (firstTrue (vBoolFromIndices indices i .proj₁))
+vecUpdates≡reflectBool-theo2 xs indices values i = vecUpdates≡reflectBool-theo xs values i (proj₂ (vBoolFromIndices indices i))
+
+vecUpdates≡reflectBool-lemma3 : ∀ (indices : Vec (Fin n) m) i
+  {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
+  → vBoolFromIndices indices i .proj₁ ≡ vBool
+vecUpdates≡reflectBool-lemma3 [] i {[]} vType = refl
+vecUpdates≡reflectBool-lemma3 (ind ∷ indices) i {false ∷ vBool} (ofⁿ ¬a ∷ vType) =
+  cong₂ _∷_ (dec-false (_ Fin.≟ _) ¬a) (vecUpdates≡reflectBool-lemma3 indices _ vType)
+vecUpdates≡reflectBool-lemma3 (ind ∷ indices) _ {true ∷ vBool} (ofʸ refl ∷ vType)
+   = cong₂ _∷_ (dec-true (ind Fin.≟ ind) refl) (vecUpdates≡reflectBool-lemma3 indices _ vType)
+
+vecUpdates≡reflectBool-theo3 : ∀ (xs : Vector A n) (indices : Vec (Fin n) m) (values : Vec A m) i
+  {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
+  → evalFromPosition values (xs i) (firstTrue (vBoolFromIndices indices i .proj₁))
+  ≡ evalFromPosition values (xs i) (firstTrue vBool)
+vecUpdates≡reflectBool-theo3 xs indices values i vType rewrite vecUpdates≡reflectBool-lemma3 indices i vType = refl
