@@ -133,4 +133,5 @@ vecUpdates≡reflectBool-theo3 : ∀ (xs : Vector A n) (indices : Vec (Fin n) m)
   {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
   → evalFromPosition values (xs i) (firstTrue (vBoolFromIndices indices i .proj₁))
   ≡ evalFromPosition values (xs i) (firstTrue vBool)
-vecUpdates≡reflectBool-theo3 xs indices values i vType rewrite vecUpdates≡reflectBool-lemma3 indices i vType = refl
+vecUpdates≡reflectBool-theo3 xs indices values i vType
+  rewrite vecUpdates≡reflectBool-lemma3 indices i vType = refl
