@@ -29,6 +29,10 @@ private variable
   b : Bool
   xs : Vec A n
 
+private
+  MFin : ℕ → Set
+  MFin = Maybe ∘ Fin
+
 module VecUpdate where
   FinExpr FinEq  : ℕ → ℕ → Set
   FinExpr m n = Fin n × Vec (Fin n) m

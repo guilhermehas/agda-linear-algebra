@@ -110,6 +110,3 @@ vecUpdates≡reflectBool-theo xs {indices} values i {vBool} vType = begin
   vecUpdates xs indices values i ≡⟨ vecUpdates≡reflectBool xs values i vType (proj₂ (firstOrNotFromDec T? vBool)) ⟩
   evalFromVReflect xs values i (proj₂ (firstOrNotFromDec T? vBool)) ≡⟨ vecUpdates≡reflectBool-lemma xs values i vBool ⟩
   evalFromPosition values (xs i) (firstTrue vBool) ∎
-
-MFin : ℕ → Set
-MFin = Maybe ∘ Fin
