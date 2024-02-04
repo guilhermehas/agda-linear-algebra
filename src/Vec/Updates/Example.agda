@@ -38,5 +38,5 @@ example xs i j k = begin
   helper : ∀ vBool (vType : VecWithType (λ (ind , b) → Reflects (k ≡ ind) b) (Vec.zip indices vBool))
     → evalFromPosition values  (xs k) (firstTrue vBool) ≡ xs k
   helper (true ∷ _) (ofʸ refl ∷ _) = refl
-  helper (false ∷ true ∷ vBool) (_ ∷ ofʸ refl ∷ _) = refl
+  helper (false ∷ true ∷ _) (_ ∷ ofʸ refl ∷ _) = refl
   helper (false ∷ false ∷ []) _ = refl
