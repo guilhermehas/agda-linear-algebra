@@ -5,6 +5,7 @@ open import Function
 open import Data.Empty
 open import Data.Bool
 open import Data.Maybe as Maybe
+open import Data.Maybe.Properties
 open import Data.Product
 open import Data.Nat hiding (less-than-or-equal)
 open import Data.Fin as Fin
@@ -156,8 +157,18 @@ Context A n p q = Vector A q × Vector (Fin q) n × Vector A p
 ⟦_⟧_ : FinExpr m n p → Context A n p q → A
 ⟦ finExpr@(i , indices , values) ⟧ cont@(xs , finSub , valuesSub) = (⟦ finExpr ⟧v cont) (finSub i)
 
+⟦_⟧≡_ : FinEq m n p → Context A n p q → Set _
+⟦ left , right ⟧≡ ρ = ⟦ left ⟧ ρ ≡ ⟦ right ⟧ ρ
+
 evalBool : FinExpr m n p → Vector Bool n → Maybe $ Fin p
 evalBool (i , [] , []) vBool = nothing
 evalBool (i , ind ∷ indices , val ∷ values) vBool = if vBool ind
   then just val
   else evalBool (i , indices , values) vBool
+
+EvalEquality : (finEq : FinEq m n p) (vBool : Vector Bool n) → Set _
+EvalEquality (left , right) vBool = evalBool left vBool ≡ evalBool right vBool
+
+evalBoolEq : (finEq : FinEq m n p) (vBool : Vector Bool n)
+  → Dec $ EvalEquality finEq vBool
+evalBoolEq (left , right) vBool = ≡-dec Fin._≟_ _ _
