@@ -11,7 +11,7 @@ open import Data.Vec as Vec
 open import Relation.Nullary
 
 private variable
-  ℓ : Level
+  ℓ ℓ1 : Level
   A : Set ℓ
   a : A
   b : Bool
@@ -19,12 +19,12 @@ private variable
   P : A → Set ℓ
   xs : Vec A n
 
-data FirstOrNot (P : A → Set ℓ) : Vec A n → Bool → Set ℓ where
+data FirstOrNot {A : Set ℓ} (P : A → Set ℓ1) : Vec A n → Bool → Set (ℓ Level.⊔ ℓ1) where
   notHere : FirstOrNot P [] false
   here    : (p : P a) (xs : Vec A n) → FirstOrNot P (a ∷ xs) true
   there   : (¬p : ¬ P a) {xs : Vec A n} (firstOrNot : FirstOrNot P xs b) → FirstOrNot P (a ∷ xs) b
 
-FirstOrNotΣ : (P : A → Set ℓ) (xs : Vec A n) → Set ℓ
+FirstOrNotΣ : {A : Set ℓ} (P : A → Set ℓ1) (xs : Vec A n) → Set (ℓ Level.⊔ ℓ1)
 FirstOrNotΣ P xs = Σ Bool $ FirstOrNot P xs
 
 firstOrNotPosition : ∀ {xs : Vec A n} → FirstOrNot P xs true → Fin n

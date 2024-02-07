@@ -23,9 +23,9 @@ private variable
 open ≡-Reasoning
 
 example : (xs : Vector A n) (i j k : Fin n) →
-  (xs [ j ]≔ xs j [ i ]≔ xs i) k ≡ xs k
+  ((xs [ j ]≔ xs j) [ i ]≔ xs i) k ≡ xs k
 example xs i j k = begin
-  (xs [ j ]≔ xs j [ i ]≔ xs i) k            ≡⟨ vecUpdates≡reflectBool-theo2 xs indices values k  ⟩
+  ((xs [ j ]≔ xs j) [ i ]≔ xs i) k         ≡⟨ vecUpdates≡reflectBool-theo2 xs indices values k  ⟩
   evalFromPosition values (xs k) evaluated ≡⟨ helper _ (vBoolFromIndices indices k .proj₂) ⟩
   xs k ∎ where
 
