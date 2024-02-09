@@ -21,7 +21,7 @@ open import Relation.Nullary
 open import Vector
 
 private variable
-  ℓ : Level
+  ℓ ℓ1 : Level
   A : Set ℓ
   a : A
   m n p q : ℕ
@@ -58,7 +58,7 @@ firstOrNot→pos : (xs : Vector A n) {indices : Vec (Fin n) m} (values : Vec A m
   (firstOrNot : FirstOrNot (i ≡_) indices b) → A
 firstOrNot→pos xs values i = evalFromPosition values (xs i) ∘ firstOrNotPositionMaybe
 
-data VecWithType (P : A → Set ℓ) : Vec A n → Set ℓ where
+data VecWithType {A : Set ℓ} (P : A → Set ℓ1) : Vec A n → Set (ℓ Level.⊔ ℓ1) where
   []  : VecWithType P []
   _∷_ : P a → VecWithType P xs → VecWithType P (a ∷ xs)
 
