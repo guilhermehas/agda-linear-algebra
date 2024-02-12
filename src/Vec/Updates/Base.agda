@@ -58,6 +58,8 @@ firstOrNot→pos : (xs : Vector A n) {indices : Vec (Fin n) m} (values : Vec A m
   (firstOrNot : FirstOrNot (i ≡_) indices b) → A
 firstOrNot→pos xs values i = evalFromPosition values (xs i) ∘ firstOrNotPositionMaybe
 
+infixr 5 _∷_
+
 data VecWithType {A : Set ℓ} (P : A → Set ℓ1) : Vec A n → Set (ℓ Level.⊔ ℓ1) where
   []  : VecWithType P []
   _∷_ : P a → VecWithType P xs → VecWithType P (a ∷ xs)

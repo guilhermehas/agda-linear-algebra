@@ -10,6 +10,7 @@ module MatrixFuncNormalization.NormAfter.PropsFlip {c ℓ₁ ℓ₂}
 open import Level using (Level; Lift; lift; lower; _⊔_)
 open import Function hiding (flip)
 open import Data.Product hiding (swap)
+open import Data.Bool using (Bool; true; false)
 open import Data.Maybe
 open import Data.Nat as ℕ using (ℕ; _∸_; s<s; ≢-nonZero)
 open import Data.Nat.Properties as ℕ
@@ -27,6 +28,7 @@ open import Relation.Binary.Construct.Add.Infimum.NonStrict
 open import Relation.Nullary.Construct.Add.Infimum as ₋
 open import Relation.Nullary.Construct.Add.Supremum
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
+open import Relation.Nullary
 
 open import Algebra.Matrix
 open import Vector.Base using (swapV)
@@ -179,9 +181,8 @@ module _ (xs : Matrix F n m) where
   mOpsInv≡ (swapOp p q p≢q) zs i j = begin
     swapV fzs (opposite p) (opposite q) i j ≡⟨ cong (λ xs → xs j)
       (vecUpdates≡reflectBool-theo2 fzs indices values i) ⟩
-    evalFromPosition values (fzs i) evaluated j ≡⟨ {!!} ⟩
-    -- {!!} ≡⟨ {!!} ⟩
-    -- {!!} ≡⟨ {!!} ⟩
+    evalFromPosition values (fzs i) evaluated j
+      ≡⟨ helper _ _ (vBoolFromIndices indices i .proj₂) (vBoolFromIndices indices₂ (opposite i) .proj₂) ⟩
     evalFromPosition values₂ (zs (opposite i)) evaluated₂ (opposite j) ≡˘⟨ cong (λ xs → xs (opposite j))
       (vecUpdates≡reflectBool-theo2 zs indices₂ values₂ (opposite i)) ⟩
     swapV zs p q (opposite i) (opposite j) ∎
@@ -196,6 +197,27 @@ module _ (xs : Matrix F n m) where
     indices₂ = q Vec.∷ p Vec.∷ Vec.[]
     values₂ = zs p Vec.∷ zs q Vec.∷ Vec.[]
     evaluated₂ = firstTrue $ proj₁ $ vBoolFromIndices indices₂ (opposite i)
+
+    helper : ∀ vBool₁ vBool₂
+      → VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) $ Vec.zip indices vBool₁
+      → VecWithType (λ (ind , b) → Reflects (opposite i ≡ ind) b) $ Vec.zip indices₂ vBool₂
+      → evalFromPosition values (fzs i) (firstTrue vBool₁) j ≡
+        evalFromPosition values₂ (zs (opposite i)) (firstTrue vBool₂) (opposite j)
+    helper (true Vec.∷ vBool₁) (true Vec.∷ vBool₂) (ofʸ ≡.refl ∷ p) (ofʸ _ ∷ q) =
+      cong (λ i → zs i (opposite j)) (opposite-involutive _)
+    helper (true Vec.∷ vBool₁) (false Vec.∷ vBool₂) (ofʸ ≡.refl ∷ p) (ofⁿ ¬a ∷ q) =
+      contradiction (opposite-involutive _) ¬a
+    helper (false Vec.∷ vBool₁) (true Vec.∷ vBool₂) (ofⁿ ¬a ∷ p) (ofʸ ≡.refl ∷ q) =
+      contradiction (≡.sym (opposite-involutive _)) ¬a
+    helper (false Vec.∷ false Vec.∷ Vec.[]) (false Vec.∷ true Vec.∷ Vec.[])
+      (ofⁿ ¬a ∷ ofⁿ ¬c ∷ []) (ofⁿ ¬b ∷ ofʸ ≡.refl ∷ []) =
+      contradiction (≡.sym (opposite-involutive _)) ¬c
+    helper (false Vec.∷ true Vec.∷ Vec.[]) (false Vec.∷ false Vec.∷ Vec.[]) (ofⁿ ¬a ∷ ofʸ ≡.refl ∷ []) (ofⁿ ¬b ∷ ofⁿ ¬c ∷ []) =
+      contradiction (opposite-involutive _) ¬c
+    helper (false Vec.∷ true Vec.∷ Vec.[]) (false Vec.∷ true Vec.∷ Vec.[]) (ofⁿ ¬a ∷ ofʸ ≡.refl ∷ []) (ofⁿ ¬b ∷ ofʸ _ ∷ [])
+      = cong (λ x → zs x (opposite j)) (opposite-involutive _)
+    helper (false Vec.∷ false Vec.∷ Vec.[]) (false Vec.∷ false Vec.∷ Vec.[]) (ofⁿ ¬a ∷ ofⁿ ¬c ∷ []) (ofⁿ ¬b ∷ ofⁿ ¬a₁ ∷ []) = ≡.refl
+
 
   mOpsInv≡ (addCons p q p≢q r) zs i j = {!!}
 
