@@ -17,6 +17,7 @@ open import Data.Nat.Properties as ℕ
 open import Data.Fin.Base as F hiding (_+_; lift)
 open import Data.Fin.Properties as F hiding (_≟_)
 open import Data.Sum hiding (swap)
+open import Data.Vec as Vec using (Vec)
 open import Data.Vec.Functional as V
 open import Algebra
 import Algebra.Properties.Ring as RingProps
@@ -29,6 +30,8 @@ import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
 open import Algebra.Matrix
 open import Vector.Base using (swapV)
+open import Vec.Updates
+open import Vec.Relation.FirstOrNot
 import Algebra.HeytingField.Properties as HFProps
 import MatrixFuncNormalization.normBef as NormBef
 import MatrixFuncNormalization.NormAfter.Base as NormAfterBase
@@ -174,10 +177,26 @@ module _ (xs : Matrix F n m) where
   mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps mOps) (flip zs) i j ≈
     matOps→func mOps zs (opposite i) (opposite j)
   mOpsInv≡ (swapOp p q p≢q) zs i j = begin
-    swapV (flip zs) (opposite p) (opposite q) i j ≡⟨ {!!} ⟩
-    {!!} ≡⟨ {!!} ⟩
+    swapV fzs (opposite p) (opposite q) i j ≡⟨ cong (λ xs → xs j)
+      (vecUpdates≡reflectBool-theo2 fzs indices values i) ⟩
+    evalFromPosition values (fzs i) evaluated j ≡⟨ {!!} ⟩
     -- {!!} ≡⟨ {!!} ⟩
+    -- {!!} ≡⟨ {!!} ⟩
+    evalFromPosition values₂ (zs (opposite i)) evaluated₂ (opposite j) ≡˘⟨ cong (λ xs → xs (opposite j))
+      (vecUpdates≡reflectBool-theo2 zs indices₂ values₂ (opposite i)) ⟩
     swapV zs p q (opposite i) (opposite j) ∎
+    where
+
+    fzs = flip zs
+
+    indices = opposite q Vec.∷ opposite p Vec.∷ Vec.[]
+    values = fzs (opposite p) Vec.∷ fzs (opposite q) Vec.∷ Vec.[]
+    evaluated = firstTrue $ proj₁ $ vBoolFromIndices indices i
+
+    indices₂ = q Vec.∷ p Vec.∷ Vec.[]
+    values₂ = zs p Vec.∷ zs q Vec.∷ Vec.[]
+    evaluated₂ = firstTrue $ proj₁ $ vBoolFromIndices indices₂ (opposite i)
+
   mOpsInv≡ (addCons p q p≢q r) zs i j = {!!}
 
 
