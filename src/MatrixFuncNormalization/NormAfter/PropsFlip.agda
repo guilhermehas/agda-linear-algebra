@@ -22,7 +22,7 @@ open import Data.Vec as Vec using (Vec)
 open import Data.Vec.Functional as V
 open import Algebra
 import Algebra.Properties.Ring as RingProps
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; refl; cong; subst)
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; refl; cong; subst; module ≡-Reasoning)
 open import Relation.Binary.Construct.Add.Supremum.Strict
 open import Relation.Binary.Construct.Add.Infimum.NonStrict
 open import Relation.Nullary.Construct.Add.Infimum as ₋
@@ -174,9 +174,7 @@ module _ (xs : Matrix F n m) where
   open FlipProps ysWithPivots using (module NormedRows) renaming (ys to zs; pYs to pvZs; pivsYs to pivsZs)
   open NormedRows allRowsNormedYsPivs
 
-  open ≈-Reasoning
-
-  mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps mOps) (flip zs) i j ≈
+  mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps mOps) (flip zs) i j ≡
     matOps→func mOps zs (opposite i) (opposite j)
   mOpsInv≡ (swapOp p q p≢q) zs i j = begin
     swapV fzs (opposite p) (opposite q) i j ≡⟨ cong (λ xs → xs j)
@@ -187,6 +185,7 @@ module _ (xs : Matrix F n m) where
       (vecUpdates≡reflectBool-theo2 zs indices₂ values₂ (opposite i)) ⟩
     swapV zs p q (opposite i) (opposite j) ∎
     where
+    open ≡-Reasoning
 
     fzs = flip zs
 
@@ -219,8 +218,13 @@ module _ (xs : Matrix F n m) where
     helper (false Vec.∷ false Vec.∷ Vec.[]) (false Vec.∷ false Vec.∷ Vec.[]) (ofⁿ ¬a ∷ ofⁿ ¬c ∷ []) (ofⁿ ¬b ∷ ofⁿ ¬a₁ ∷ []) = ≡.refl
 
 
-  mOpsInv≡ (addCons p q p≢q r) zs i j = {!!}
+  mOpsInv≡ (addCons p q p≢q r) zs i j with opposite q F.≟ i | q F.≟ opposite i
+  ... | yes ≡.refl | yes _ = cong (λ x → _ + _ * zs x _) (opposite-involutive _)
+  ... | yes ≡.refl | no ¬p = contradiction (≡.sym (opposite-involutive _)) ¬p
+  ... | no ¬p | yes ≡.refl = contradiction (opposite-involutive _) ¬p
+  ... | no ¬p | no ¬q = ≡.refl
 
+  open ≈-Reasoning
 
   zs≈ⱽws⇒ys≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → ys ≈ⱽ flip ws
   zs≈ⱽws⇒ys≈ⱽws {ws} (idR zs≈ws) = idR $ λ i j → begin
@@ -229,7 +233,8 @@ module _ (xs : Matrix F n m) where
     flip ws i j ∎
   zs≈ⱽws⇒ys≈ⱽws {ws} (rec {ys = zs} mOps zs≈ⱽws mOps≈) = rec (opVecOps mOps) (zs≈ⱽws⇒ys≈ⱽws zs≈ⱽws)
     λ i j → begin
-      matOps→func (opVecOps mOps) (flip zs) i j ≈⟨ {!!} ⟩
+      matOps→func (opVecOps mOps) (flip zs) i j ≡⟨ {!!} ⟩
+      {!!} ≈⟨ {!!} ⟩
       -- {!!} ≈⟨ {!!} ⟩
       {!!} ≈⟨ {!!} ⟩
       matOps→func mOps zs (opposite i) (opposite j) ≈⟨ mOps≈ (opposite i) (opposite j) ⟩
