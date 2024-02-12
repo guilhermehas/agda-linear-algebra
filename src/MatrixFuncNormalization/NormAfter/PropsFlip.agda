@@ -217,12 +217,11 @@ module _ (xs : Matrix F n m) where
       = cong (λ x → zs x (opposite j)) (opposite-involutive _)
     helper (false Vec.∷ false Vec.∷ Vec.[]) (false Vec.∷ false Vec.∷ Vec.[]) (ofⁿ ¬a ∷ ofⁿ ¬c ∷ []) (ofⁿ ¬b ∷ ofⁿ ¬a₁ ∷ []) = ≡.refl
 
-
   mOpsInv≡ (addCons p q p≢q r) zs i j with opposite q F.≟ i | q F.≟ opposite i
   ... | yes ≡.refl | yes _ = cong (λ x → _ + _ * zs x _) (opposite-involutive _)
   ... | yes ≡.refl | no ¬p = contradiction (≡.sym (opposite-involutive _)) ¬p
   ... | no ¬p | yes ≡.refl = contradiction (opposite-involutive _) ¬p
-  ... | no ¬p | no ¬q = ≡.refl
+  ... | no _ | no _ = ≡.refl
 
   open ≈-Reasoning
 
@@ -233,13 +232,9 @@ module _ (xs : Matrix F n m) where
     flip ws i j ∎
   zs≈ⱽws⇒ys≈ⱽws {ws} (rec {ys = zs} mOps zs≈ⱽws mOps≈) = rec (opVecOps mOps) (zs≈ⱽws⇒ys≈ⱽws zs≈ⱽws)
     λ i j → begin
-      matOps→func (opVecOps mOps) (flip zs) i j ≡⟨ {!!} ⟩
-      {!!} ≈⟨ {!!} ⟩
-      -- {!!} ≈⟨ {!!} ⟩
-      {!!} ≈⟨ {!!} ⟩
+      matOps→func (opVecOps mOps) (flip zs) i j     ≡⟨ mOpsInv≡ mOps zs i j ⟩
       matOps→func mOps zs (opposite i) (opposite j) ≈⟨ mOps≈ (opposite i) (opposite j) ⟩
       flip ws i j ∎
-
 
   zs≈ⱽws⇒xs≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → xs ≈ⱽ flip ws
   zs≈ⱽws⇒xs≈ⱽws = ≈ⱽ-trans xs≈ⱽys ∘ zs≈ⱽws⇒ys≈ⱽws
