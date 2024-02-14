@@ -148,6 +148,14 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
         helper2 (inj₁ [ pj<pi ]) = [ <-opposite pj<pi ]
 
 
+
+module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivotsRight n m) where
+
+  ys : Matrix F n m
+  ys = flip xs
+
+  module NormedRowRight (allRowsNormed : AllRowsNormalizedLeft xs pXs) where
+
 module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
 
   private
@@ -243,10 +251,19 @@ module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
   wsWithProps = normMatrix _ _ proofYsPYs allRowsNormedAfter (zs , ≈ⱽ-refl , proofYsPYs)
 
   ws = wsWithProps .proj₁ .proj₁
+  wsPivs = wsWithProps .proj₁ .proj₂ .proj₁
   wsProp = wsWithProps .proj₂
+
+  wsPivots : MatrixPivots ws pvZs
+  wsPivots = wsWithProps .proj₁ .proj₂ .proj₂
+
+  wsNormedLeft : AllRowsNormalizedLeft ws pvZs
   wsNormedLeft = allNormedLeft _ _ (wsWithProps .proj₁ .proj₂ .proj₂) allRowsNormedAfter wsProp
 
   nxs = flip ws
 
   xs≈ⱽnxs : xs ≈ⱽ nxs
-  xs≈ⱽnxs = zs≈ⱽws⇒xs≈ⱽws (wsWithProps .proj₁ .proj₂ .proj₁)
+  xs≈ⱽnxs = zs≈ⱽws⇒xs≈ⱽws $ wsWithProps .proj₁ .proj₂ .proj₁
+
+  open FlipPropsRight (ws , pvZs , wsPivots)
+  open NormedRowRight wsNormedLeft
