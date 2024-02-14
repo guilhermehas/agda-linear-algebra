@@ -156,14 +156,19 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
   ys = flip xs
 
   pYs′ : Vector (VecPivotsLeftΣ m) n
-  pYs′ = {!!}
+  proj₁ (pYs′ i) = ys i
+  proj₁ (proj₂ (pYs′ i)) with pXs (opposite i)
+  ... | ⊥₋ , _ = ⊥₋
+  ... | just p , p#0 = just (opposite p)
+  proj₂ (proj₂ (pYs′ i)) with pXs (opposite i) in PXsIEq
+  ... | ⊥₋ , snd  = lift {!!}
+  ... | just x , snd = {!!}
 
   pYs : Vector (PivWithValue m) n
-  pYs = {!!}
+  pYs i = {!!}
 
   mYs : MatrixPivots ys pYs
   mYs = {!!}
-
 
   module NormedRowsLeft (allRowsNormed : AllRowsNormalizedLeft xs pXs) where
 
