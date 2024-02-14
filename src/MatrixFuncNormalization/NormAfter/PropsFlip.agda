@@ -49,6 +49,7 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; matrix→matPi
            ; Lookup≢0 to Lookup≢0Left
            ; normTwoRows to normTwoRowsLeft
            ; MatrixPivots to MatrixPivotsLeft
+           ; VecPivotsΣ to VecPivotsLeftΣ
            )
 open NormAfterBase hField _≟_
 open NormAfterProperties hField _≟_ renaming (MatrixWithPivots to MatrixWithPivotsRight)
@@ -154,7 +155,18 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
   ys : Matrix F n m
   ys = flip xs
 
-  module NormedRowRight (allRowsNormed : AllRowsNormalizedLeft xs pXs) where
+  pYs′ : Vector (VecPivotsLeftΣ m) n
+  pYs′ = {!!}
+
+  pYs : Vector (PivWithValue m) n
+  pYs = {!!}
+
+  mYs : MatrixPivots ys pYs
+  mYs = {!!}
+
+
+  module NormedRowsLeft (allRowsNormed : AllRowsNormalizedLeft xs pXs) where
+
 
 module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
 
@@ -266,4 +278,4 @@ module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
   xs≈ⱽnxs = zs≈ⱽws⇒xs≈ⱽws $ wsWithProps .proj₁ .proj₂ .proj₁
 
   open FlipPropsRight (ws , pvZs , wsPivots)
-  open NormedRowRight wsNormedLeft
+  open NormedRowsLeft wsNormedLeft

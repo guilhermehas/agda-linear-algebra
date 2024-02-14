@@ -110,6 +110,9 @@ VecPiv xs = Σ[ p ∈ _ ] Lookup≢0 xs p
 VecPivots : Vector F n → Set _
 VecPivots xs = Σ[ p ∈ _ ] VecPivotPos xs p
 
+VecPivotsΣ : ∀ n → Set _
+VecPivotsΣ n = Σ[ xs ∈ Vector F n ] Σ[ p ∈ Fin n ⁺ ] VecPivotPos xs p
+
 findNonZero : (xs : Vector F n) → VecPivots xs
 proj₁ (findNonZero {zero} xs) = ⊤⁺
 proj₂ (findNonZero {zero} xs) = lift $ λ ()
