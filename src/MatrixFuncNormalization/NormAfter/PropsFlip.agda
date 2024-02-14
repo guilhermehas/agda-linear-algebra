@@ -239,5 +239,14 @@ module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
   zs≈ⱽws⇒xs≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → xs ≈ⱽ flip ws
   zs≈ⱽws⇒xs≈ⱽws = ≈ⱽ-trans xs≈ⱽys ∘ zs≈ⱽws⇒ys≈ⱽws
 
-  wsWithProps : Σ[ ws ∈ _ ] _
+  wsWithProps : Σ[ (ws , xs≈ⱽws , _) ∈ _ ] _
   wsWithProps = normMatrix _ _ proofYsPYs allRowsNormedAfter (zs , ≈ⱽ-refl , proofYsPYs)
+
+  ws = wsWithProps .proj₁ .proj₁
+  wsProp = wsWithProps .proj₂
+  wsNormedLeft = allNormedLeft _ _ (wsWithProps .proj₁ .proj₂ .proj₂) allRowsNormedAfter wsProp
+
+  nxs = flip ws
+
+  xs≈ⱽnxs : xs ≈ⱽ nxs
+  xs≈ⱽnxs = zs≈ⱽws⇒xs≈ⱽws (wsWithProps .proj₁ .proj₂ .proj₁)
