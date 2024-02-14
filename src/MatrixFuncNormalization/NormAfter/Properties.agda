@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Algebra.Apartness
 open import Relation.Binary
 
@@ -358,7 +356,8 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
 
   P00′ : (xs : MatrixFromStart) → Pij′ F.zero F.zero ℕ.z≤n xs
   proj₁ (P00′ _) _ _ ()
-  proj₂ (P00′ _) _ _ ()
+  proj₂ (P00′ _) 0F () ℕ.z≤n
+  proj₂ (P00′ _) (Fin.suc k) _ ()
 
   Pij→Pi′ : ∀ (i : Fin (ℕ.suc n)) xs (pij : Pij′ i (fromℕ _) (≤fromℕ _) xs) → Pi′ i xs
   Pij→Pi′ i (xs , mStart≈ⱽxs , mpivsXs) (bef , after) k p k≤i k<p with k F.≟ i
