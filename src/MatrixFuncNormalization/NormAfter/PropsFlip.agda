@@ -61,7 +61,7 @@ open MRingProps ring
 private variable
   ℓ : Level
   A : Set ℓ
-  m n : ℕ
+  m n n′ : ℕ
 
 module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
 
@@ -148,7 +148,7 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
         helper2 (inj₁ [ pj<pi ]) = [ <-opposite pj<pi ]
 
 
-module _ (xs : Matrix F n m) where
+module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
 
   private
     normedWithProps = normalizeMatrix xs
@@ -171,7 +171,7 @@ module _ (xs : Matrix F n m) where
   xs≈ⱽys : xs ≈ⱽ ys
   xs≈ⱽys = normedWithProps .proj₂ .proj₂
 
-  open FlipProps ysWithPivots using (module NormedRows) renaming (ys to zs; pYs to pvZs; pivsYs to pivsZs)
+  open FlipProps ysWithPivots using (module NormedRows; proofYsPYs) renaming (ys to zs; pYs to pvZs; pivsYs to pivsZs)
   open NormedRows allRowsNormedYsPivs
 
   mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps mOps) (flip zs) i j ≡
@@ -238,3 +238,6 @@ module _ (xs : Matrix F n m) where
 
   zs≈ⱽws⇒xs≈ⱽws : ∀ {ws} → zs ≈ⱽ ws → xs ≈ⱽ flip ws
   zs≈ⱽws⇒xs≈ⱽws = ≈ⱽ-trans xs≈ⱽys ∘ zs≈ⱽws⇒ys≈ⱽws
+
+  wsWithProps : Σ[ ws ∈ _ ] _
+  wsWithProps = normMatrix _ _ proofYsPYs allRowsNormedAfter (zs , ≈ⱽ-refl , proofYsPYs)
