@@ -179,7 +179,7 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
 
       help3 : Lookup≢0 (xs (opposite i)) j c c#0 → ∀ k → k < opposite j → xs (opposite i) (opposite k) ≈ 0#
       help3 (_ , xsI≈0) k k<oj = xsI≈0 _ (begin-strict
-        toℕ j ≡˘⟨ cong toℕ (opposite-involutive j) ⟩
+        toℕ j                      ≡˘⟨ cong toℕ (opposite-involutive j) ⟩
         toℕ (opposite (opposite j)) <⟨ <-opposite k<oj ⟩
         toℕ (opposite k) ∎)
 

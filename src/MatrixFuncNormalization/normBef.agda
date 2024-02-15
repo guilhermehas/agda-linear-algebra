@@ -11,6 +11,8 @@ open import Level hiding (suc)
 open import Function
 open import Data.Empty
 open import Data.Bool using (true; false)
+open import Data.Maybe using (Maybe)
+open import Data.Maybe.Relation.Unary.Any
 open import Data.Product
 open import Data.Fin.Base as F hiding (lift; _-_; _+_)
 open import Data.Fin.Properties as F hiding (_≟_)
@@ -66,6 +68,10 @@ private variable
 private
   ≈∙-refl : Reflexive (_≈∙_ {A = ASet})
   ≈∙-refl = ≈∙-refl′ ≡.refl
+
+private
+  PivValue : F → Fin m ⁺ → Set ℓ₂
+  PivValue x = Any $ const $ x # 0#
 
 Lookup≢0 : (xs : Vector F n) (p : Fin n) → Set _
 Lookup≢0 xs p = xs p # 0# × ∀ i → i < p → xs i ≈ 0#
