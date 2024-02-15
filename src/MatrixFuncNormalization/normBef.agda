@@ -12,7 +12,7 @@ open import Function
 open import Data.Empty
 open import Data.Bool using (true; false)
 open import Data.Maybe using (Maybe)
-open import Data.Maybe.Relation.Unary.Any
+open import Data.Maybe.Relation.Unary.All
 open import Data.Product
 open import Data.Fin.Base as F hiding (lift; _-_; _+_)
 open import Data.Fin.Properties as F hiding (_≟_)
@@ -70,8 +70,8 @@ private
   ≈∙-refl = ≈∙-refl′ ≡.refl
 
 private
-  PivValue : F → Fin m ⁺ → Set ℓ₂
-  PivValue x = Any $ const $ x # 0#
+  PivValue : Vector F n → Fin n ⁺ → Set ℓ₂
+  PivValue xs = All $ λ i → xs i # 0#
 
 Lookup≢0 : (xs : Vector F n) (p : Fin n) → Set _
 Lookup≢0 xs p = xs p # 0# × ∀ i → i < p → xs i ≈ 0#
@@ -117,7 +117,7 @@ VecPivots : Vector F n → Set _
 VecPivots xs = Σ[ p ∈ _ ] VecPivotPos xs p
 
 VecPivotsΣ : ∀ n → Set _
-VecPivotsΣ n = Σ[ xs ∈ Vector F n ] Σ[ p ∈ Fin n ⁺ ] VecPivotPos xs p
+VecPivotsΣ n = Σ[ xs ∈ Vector F n ] Σ[ p ∈ Fin n ⁺ ] PivValue xs p × VecPivotPos xs p
 
 findNonZero : (xs : Vector F n) → VecPivots xs
 proj₁ (findNonZero {zero} xs) = ⊤⁺

@@ -12,6 +12,7 @@ open import Function hiding (flip)
 open import Data.Product hiding (swap)
 open import Data.Bool using (Bool; true; false)
 open import Data.Maybe
+open import Data.Maybe.Relation.Unary.All
 open import Data.Nat as ℕ using (ℕ; _∸_; s<s; ≢-nonZero)
 open import Data.Nat.Properties as ℕ
   using (≰⇒>; m>n⇒m∸n≢0; pred[m∸n]≡m∸[1+n]; m∸[m∸n]≡n; ∸-monoʳ-<; module ≤-Reasoning)
@@ -161,11 +162,11 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
   ... | ⊥₋ , _ = ⊥₋
   ... | just p , p#0 = just (opposite p)
   proj₂ (proj₂ (pYs′ i)) with pXs (opposite i) in PXsIEq
-  ... | ⊥₋ , _  = lift $ help $ proofPXs _
+  ... | ⊥₋ , _ = nothing , (lift $ help $ proofPXs _)
     where
     help : VecPivotPos (xs $ opposite i) (pXs (opposite i) .proj₁) (pXs (opposite i) .proj₂) → AllZeros (ys i)
     help rewrite PXsIEq = _∘ opposite
-  ... | just j , c , c#0 = help (proofPXs _) , help2 (proofPXs _)
+  ... | just j , c , c#0 = just (help3 (proofPXs _)) , help (proofPXs _) , help2 (proofPXs _)
     where
     help : VecPivotPos (xs $ opposite i) (pXs (opposite i) .proj₁) (pXs (opposite i) .proj₂)
       → xs (opposite i) (opposite (opposite j)) # 0#
@@ -183,6 +184,9 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
         toℕ (opposite (opposite j)) <⟨ <-opposite k<oj ⟩
         toℕ (opposite k) ∎)
 
+    help3 : VecPivotPos (xs $ opposite i) (pXs (opposite i) .proj₁) (pXs (opposite i) .proj₂)
+      → proj₁ xsWithPivs (opposite i) (opposite (opposite j)) # 0#
+    help3 rewrite PXsIEq | opposite-involutive j = λ (c≈res , _) → #-congʳ c≈res c#0
 
   pYs : Vector (PivWithValue m) n
   pYs i = {!!}
