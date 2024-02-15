@@ -188,11 +188,11 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
       → proj₁ xsWithPivs (opposite i) (opposite (opposite j)) # 0#
     help3 rewrite PXsIEq | opposite-involutive j = λ (c≈res , _) → #-congʳ c≈res c#0
 
-  pYs : Vector (PivWithValue m) n
-  pYs i = {!!}
+  pYs : Vector (Maybe $ Fin m) n
+  pYs i = let _ , piv , _ , _ = pYs′ i in piv
 
-  mYs : MatrixPivots ys pYs
-  mYs = {!!}
+  mYs : MatrixPivotsLeft ys pYs
+  mYs i = let _ , _ , _ , pivProof = pYs′ i in pivProof
 
   module NormedRowsLeft (allRowsNormed : AllRowsNormalizedLeft xs pXs) where
 
