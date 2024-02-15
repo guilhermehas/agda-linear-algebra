@@ -68,6 +68,12 @@ private variable
   m n n′ : ℕ
 
 private
+  opposite-injective : ∀ {n} {i j : Fin n} → opposite i ≡ opposite j → i ≡ j
+  opposite-injective {i = zero} {zero} p = ≡.refl
+  opposite-injective {i = zero} {suc j} p = contradiction p fromℕ≢inject₁
+  opposite-injective {i = suc i} {zero} p = contradiction (≡.sym p) fromℕ≢inject₁
+  opposite-injective {i = suc i} {suc j} p = cong suc (opposite-injective (inject₁-injective p))
+
   <-opposite : ∀ {n} {i j : Fin n} → i < j → opposite j < opposite i
   <-opposite {i = i} {j} i<j  = helper
     where
@@ -192,10 +198,22 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
   pYs i = let _ , piv , _ , _ = pYs′ i in piv
 
   mYs : MatrixPivotsLeft ys pYs
-  mYs i = let _ , _ , _ , pivProof = pYs′ i in pivProof
+  mYs i = let _ , _ , _ , d = pYs′ i in d
 
   module NormedRowsLeft (allRowsNormed : AllRowsNormalizedLeft xs pXs) where
 
+    oppositeRowsNormed : (i j : Fin n) (i≢j : i ≢ j) → Maybe≈0 (xs (opposite j)) (pXs (opposite i) .proj₁)
+    oppositeRowsNormed i j i≢j = allRowsNormed (opposite i) (opposite j) (i≢j ∘ opposite-injective)
+
+    allRowsNormedAfter : AllRowsNormalizedLeft′ ys pYs
+    allRowsNormedAfter i j i≢j = helper (oppositeRowsNormed i j i≢j)
+      where
+      helper : Maybe≈0 (xs (opposite j)) (pXs (opposite i) .proj₁) → Maybe≈0 (ys j) (pYs i)
+      helper with pXs (opposite j) | pXs (opposite i)
+      ... | ⊥₋ , _ | ⊥₋ , _ = _
+      ... | ⊥₋ , _ | just x , _ rewrite opposite-involutive x = id
+      ... | just _ , _ | just x , _ rewrite opposite-involutive x = id
+      ... | just _ , _ | ⊥₋ , _ = _
 
 module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
 
@@ -301,10 +319,8 @@ module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
   wsNormedLeft : AllRowsNormalizedLeft ws pvZs
   wsNormedLeft = allNormedLeft _ _ (wsWithProps .proj₁ .proj₂ .proj₂) allRowsNormedAfter wsProp
 
-  nxs = flip ws
+  open FlipPropsRight (ws , pvZs , wsPivots) renaming (ys to nxs)
+  open NormedRowsLeft wsNormedLeft
 
   xs≈ⱽnxs : xs ≈ⱽ nxs
   xs≈ⱽnxs = zs≈ⱽws⇒xs≈ⱽws $ wsWithProps .proj₁ .proj₂ .proj₁
-
-  open FlipPropsRight (ws , pvZs , wsPivots)
-  open NormedRowsLeft wsNormedLeft

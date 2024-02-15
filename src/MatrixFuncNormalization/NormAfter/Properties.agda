@@ -434,8 +434,12 @@ module _ (matrixStart : Matrix F (ℕ.suc n) m) (pivsStart : Vector (PivWithValu
   normMatrix : MatrixFromStart → Σ MatrixFromStart P′
   normMatrix = getProperty ind
 
+
+AllRowsNormalizedLeft′ : Matrix F (ℕ.suc n) m → Vector (Fin m ₋) (ℕ.suc n) → Set _
+AllRowsNormalizedLeft′ xs pivs = ∀ i j → i ≢ j → Maybe≈0 (xs j) $ pivs i
+
 AllRowsNormalizedLeft : Matrix F (ℕ.suc n) m → Vector (PivWithValue m) (ℕ.suc n) → Set _
-AllRowsNormalizedLeft xs pivs = ∀ i j → i ≢ j → Maybe≈0 (xs j) (pivs i .proj₁)
+AllRowsNormalizedLeft xs pivs = ∀ i j → i ≢ j → Maybe≈0 (xs j) $ pivs i .proj₁
 
 AllRowsNormalizedLeftBelow : Matrix F (ℕ.suc n) m → Vector (PivWithValue m) (ℕ.suc n) → Set _
 AllRowsNormalizedLeftBelow xs pivs = ∀ i j → i < j → Maybe≈0 (xs j) (pivs i .proj₁)
