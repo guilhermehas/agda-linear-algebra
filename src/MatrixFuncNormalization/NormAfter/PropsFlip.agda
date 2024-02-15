@@ -29,6 +29,7 @@ open import Relation.Nullary.Construct.Add.Infimum as ₋
 open import Relation.Nullary.Construct.Add.Supremum
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 open import Relation.Nullary
+import Algebra.Apartness.Properties.HeytingCommutativeRing as HCR
 
 open import Algebra.Matrix
 open import Vector.Base using (swapV)
@@ -42,6 +43,7 @@ open import MatrixFuncNormalization.FinInduction
 open import lbry
 
 open hFieldProps hField
+open HCR heytingCommutativeRing
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
 open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; matrix→matPivs; MatrixWithPivots; matrixPivs)
@@ -63,6 +65,13 @@ private variable
   ℓ : Level
   A : Set ℓ
   m n n′ : ℕ
+
+private
+  <-opposite : ∀ {n} {i j : Fin n} → i < j → opposite j < opposite i
+  <-opposite {i = i} {j} i<j  = helper
+    where
+    helper : toℕ (opposite j) ℕ.< toℕ (opposite i)
+    helper rewrite opposite-prop i | opposite-prop j = ∸-monoʳ-< (s<s i<j) (toℕ<n j)
 
 module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
 
@@ -118,15 +127,6 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
   proofYsPYs i = let _ , _ , _ , vecPivPos = pYs′ i in vecPivPos
 
   module NormedRows (allRowsNormed : AllRowsNormalized pXs) where
-
-    private
-      <-opposite : ∀ {n} {i j : Fin n} → i < j → opposite j < opposite i
-      <-opposite {i = i} {j} i<j  = helper
-        where
-        helper : toℕ (opposite j) ℕ.< toℕ (opposite i)
-        helper rewrite opposite-prop i | opposite-prop j = ∸-monoʳ-< (s<s i<j) (toℕ<n j)
-
-
     rowsNormedOpposite : (i j : Fin n) (i<j : i < j) → pXs (opposite j) <ᴮ pXs (opposite i)
     rowsNormedOpposite i j i<j = allRowsNormed (opposite j) (opposite i) (<-opposite i<j)
 
@@ -161,8 +161,28 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
   ... | ⊥₋ , _ = ⊥₋
   ... | just p , p#0 = just (opposite p)
   proj₂ (proj₂ (pYs′ i)) with pXs (opposite i) in PXsIEq
-  ... | ⊥₋ , snd  = lift {!!}
-  ... | just x , snd = {!!}
+  ... | ⊥₋ , _  = lift $ help $ proofPXs _
+    where
+    help : VecPivotPos (xs $ opposite i) (pXs (opposite i) .proj₁) (pXs (opposite i) .proj₂) → AllZeros (ys i)
+    help rewrite PXsIEq = _∘ opposite
+  ... | just j , c , c#0 = help (proofPXs _) , help2 (proofPXs _)
+    where
+    help : VecPivotPos (xs $ opposite i) (pXs (opposite i) .proj₁) (pXs (opposite i) .proj₂)
+      → xs (opposite i) (opposite (opposite j)) # 0#
+    help rewrite PXsIEq | opposite-involutive j = λ (c≈res , _) → #-congʳ c≈res c#0
+
+    help2 : VecPivotPos (xs $ opposite i) (pXs (opposite i) .proj₁) (pXs (opposite i) .proj₂)
+      → ∀ k → k < opposite j → xs (opposite i) (opposite k) ≈ 0#
+    help2 rewrite PXsIEq = help3
+      where
+      open ≤-Reasoning
+
+      help3 : Lookup≢0 (xs (opposite i)) j c c#0 → ∀ k → k < opposite j → xs (opposite i) (opposite k) ≈ 0#
+      help3 (_ , xsI≈0) k k<oj = xsI≈0 _ (begin-strict
+        toℕ j ≡˘⟨ cong toℕ (opposite-involutive j) ⟩
+        toℕ (opposite (opposite j)) <⟨ <-opposite k<oj ⟩
+        toℕ (opposite k) ∎)
+
 
   pYs : Vector (PivWithValue m) n
   pYs i = {!!}
