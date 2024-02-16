@@ -31,6 +31,7 @@ open import Relation.Nullary.Construct.Add.Supremum
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 open import Relation.Nullary
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCR
+open import Relation.Binary.Construct.Add.Point.Equality
 
 open import Algebra.Matrix
 open import Vector.Base using (swapV)
@@ -128,7 +129,7 @@ module FlipProps (xsWithPivs@(xs , pXs , proofPXs) : MatrixWithPivots n m) where
   pYs i = let _ , piv , pivValue , _ = pYs′ i in piv , pivValue
 
   pivsYs : Vector (Fin m ₋) n
-  pivsYs = V.map proj₁ pYs
+  pivsYs = pivsWV→pivs pYs
 
   proofYsPYs : MatrixPivots ys pYs
   proofYsPYs i = let _ , _ , _ , vecPivPos = pYs′ i in vecPivPos
@@ -205,8 +206,8 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
     oppositeRowsNormed : (i j : Fin n) (i≢j : i ≢ j) → Maybe≈0 (xs (opposite j)) (pXs (opposite i) .proj₁)
     oppositeRowsNormed i j i≢j = allRowsNormed (opposite i) (opposite j) (i≢j ∘ opposite-injective)
 
-    allRowsNormedAfter : AllRowsNormalizedLeft′ ys pYs
-    allRowsNormedAfter i j i≢j = helper (oppositeRowsNormed i j i≢j)
+    columsAreZeroInPivots : AllRowsNormalizedLeft′ ys pYs
+    columsAreZeroInPivots i j i≢j = helper (oppositeRowsNormed i j i≢j)
       where
       helper : Maybe≈0 (xs (opposite j)) (pXs (opposite i) .proj₁) → Maybe≈0 (ys j) (pYs i)
       helper with pXs (opposite j) | pXs (opposite i)
@@ -215,7 +216,21 @@ module FlipPropsRight (let n = ℕ.suc n′) (xsWithPivs@(xs , pXs , proofPXs) :
       ... | just _ , _ | just x , _ rewrite opposite-involutive x = id
       ... | just _ , _ | ⊥₋ , _ = _
 
-module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
+
+  pXsV = pivsWV→pivs pXs
+
+  module NormedAfter (allRowsNormed : AllRowsNormalizedRight pXsV) where
+
+    allRowsNormedAfter : AllRowsNormalized pYs
+    allRowsNormedAfter i j i<j with pXs (opposite j) in eq1 | pXs (opposite i) in eq2 | allRowsNormed (<-opposite i<j)
+    ... | just a , _ | just b , _ | [ c ] = inj₁ [ <-opposite c ]
+    ... | just a , _ | ⊥₋ , _ | ()
+    ... | ⊥₋ , _ | just b , _ | ⊥₋≤ _ = inj₁ [ _ ]<⊤⁺
+    ... | ⊥₋ , _ | ⊥₋ , _ | c  = inj₂ (∙≈∙ , ∙≈∙)
+
+
+
+module PropsMatrix (let n = ℕ.suc n′) (xs : Matrix F n m) where
 
   private
     normedWithProps = normalizeMatrix xs
@@ -319,8 +334,15 @@ module _ (let n = ℕ.suc n′) (xs : Matrix F n m) where
   wsNormedLeft : AllRowsNormalizedLeft ws pvZs
   wsNormedLeft = allNormedLeft _ _ (wsWithProps .proj₁ .proj₂ .proj₂) allRowsNormedAfter wsProp
 
-  open FlipPropsRight (ws , pvZs , wsPivots) renaming (ys to nxs)
-  open NormedRowsLeft wsNormedLeft
+  open FlipPropsRight (ws , pvZs , wsPivots) renaming (ys to nxs; pYs to pZs)
+    using (module NormedRowsLeft; module NormedAfter; mYs) public
+  open NormedRowsLeft wsNormedLeft public
+  open NormedAfter allRowsNormedAfter public
 
   xs≈ⱽnxs : xs ≈ⱽ nxs
   xs≈ⱽnxs = zs≈ⱽws⇒xs≈ⱽws $ wsWithProps .proj₁ .proj₂ .proj₁
+
+allTheoremsTogether : (let n = ℕ.suc n′) (xs : Matrix F n m) → Σ[ ys ∈ Matrix F n m ] Σ[ pivs ∈ Vector (Fin m ⁺) n ]
+  MatrixPivotsLeft ys pivs × xs ≈ⱽ ys × AllRowsNormalizedLeft′ ys pivs × AllRowsNormalized pivs
+allTheoremsTogether xs = _ , _ , mYs , xs≈ⱽnxs , columsAreZeroInPivots , allRowsNormedAfter
+  where open PropsMatrix xs
