@@ -12,3 +12,5 @@ open import Examples
 open import MatrixNormalization.normLinesFieldAfter
 
 open import MatrixFuncNormalization.normBef
+
+open import MatrixFuncNormalization.NormAfter.PropsFlip
