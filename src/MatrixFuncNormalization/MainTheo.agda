@@ -28,20 +28,20 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
 
   record MatrixNorm (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
     field
-      ys : Matrix F n m
-      pivs : Vector (Fin m ⁺) n
-      mPivots : MatrixPivots ys pivs
-      xs≈ⱽys : xs ≈ⱽ ys
+      ys           : Matrix F n m
+      pivs         : Vector (Fin m ⁺) n
+      mPivots      : MatrixPivots ys pivs
+      xs≈ⱽys       : xs ≈ⱽ ys
       pivsCrescent : AllRowsNormalized pivs
-      columnsZero : ColumnsZero ys pivs
+      columnsZero  : ColumnsZero ys pivs
 
   mainTheo : (xs : Matrix F n m) → MatrixNorm xs
   mainTheo xs = let ys , pivs , mPivs , xs≈ⱽys , colsZero , pivsCrescent = allTheoremsTogether xs in
     record
-     { ys = ys
-     ; pivs = pivs
-     ; mPivots = mPivs
-     ; xs≈ⱽys = xs≈ⱽys
+     { ys           = ys
+     ; pivs         = pivs
+     ; mPivots      = mPivs
+     ; xs≈ⱽys       = xs≈ⱽys
      ; pivsCrescent = pivsCrescent
-     ; columnsZero = colsZero
+     ; columnsZero  = colsZero
      }
