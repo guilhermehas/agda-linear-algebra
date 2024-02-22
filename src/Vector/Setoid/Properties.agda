@@ -11,7 +11,7 @@ open import Relation.Binary.PropositionalEquality as ≡ hiding (refl)
 open import Relation.Binary
 open import Relation.Nullary
 
-open import Vector.Base using (swapV)
+open import Vector.Base using (swapV; _[_]≔_)
 
 module Vector.Setoid.Properties {a ℓ} (S : Setoid a ℓ) where
 
@@ -43,3 +43,17 @@ module _ {m} {ys : Vector A m} where
   ++-congʳ : ∀ {n} (xs xs‵ : Vector A n) →
             xs ≋ xs‵ → (xs ++ ys) ≋ (xs‵ ++ ys)
   ++-congʳ {n} xs xs‵ eq = ++-cong xs xs‵ eq ≋-refl
+
+[]≔-cong : ∀ {x y} (x≈y : x ≈ y) {xs ys : Vector A n}  (xs≋ys : xs ≋ ys) i
+  → (xs [ i ]≔ x) ≋ (ys [ i ]≔ y)
+[]≔-cong {x = x} {y} x≈y {xs} {ys} xs≋ys i j with j ≟ i
+... | yes ≡.refl = begin
+  (xs [ i ]≔ x) i ≡⟨ updateAt-updates i xs ⟩
+  x               ≈⟨ x≈y ⟩
+  y              ≡˘⟨ updateAt-updates i ys ⟩
+  (ys [ i ]≔ y) i ∎
+... | no j≢i = begin
+  (xs [ i ]≔ x) j ≡⟨ updateAt-minimal j i xs j≢i ⟩
+  xs j            ≈⟨ xs≋ys _ ⟩
+  ys j           ≡˘⟨ updateAt-minimal j i ys j≢i ⟩
+  (ys [ i ]≔ y) j ∎
