@@ -1,3 +1,5 @@
 name: linear-algebra
 include: src
 depend: standard-library-2.0
+flags:
+  --safe
