@@ -9,8 +9,4 @@ open import MatrixNormalization.normLinesField
 -- Examples of normalization of a matrix of rational numbers
 open import Examples
 
-open import MatrixNormalization.normLinesFieldAfter
-
-open import MatrixFuncNormalization.normBef
-
-open import MatrixFuncNormalization.NormAfter.PropsFlip
+open import MatrixFuncNormalization.MainTheo

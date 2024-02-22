@@ -342,7 +342,7 @@ module PropsMatrix (let n = ℕ.suc n′) (xs : Matrix F n m) where
   xs≈ⱽnxs : xs ≈ⱽ nxs
   xs≈ⱽnxs = zs≈ⱽws⇒xs≈ⱽws $ wsWithProps .proj₁ .proj₂ .proj₁
 
-allTheoremsTogether : (let n = ℕ.suc n′) (xs : Matrix F n m) →
+allTheoremsTogether : (xs : Matrix F n m) →
   -- transformed matrix
   Σ[ ys ∈ Matrix F n m ]
 
@@ -359,10 +359,11 @@ allTheoremsTogether : (let n = ℕ.suc n′) (xs : Matrix F n m) →
 
   -- Everything above each pivot is zero and
   -- everything below each pivot is zero
-  × AllRowsNormalizedLeft′ ys pivs
+  × ColumnsZero ys  pivs
 
   -- The pivots are an increase list
   -- TODO: It should be earlier
   × AllRowsNormalized pivs
-allTheoremsTogether xs = _ , _ , mYs , xs≈ⱽnxs , columsAreZeroInPivots , allRowsNormedAfter
+allTheoremsTogether {ℕ.zero} xs = (λ ()) , (λ ()) , (λ ()) , idR (λ ()) , (λ ()) , λ ()
+allTheoremsTogether {ℕ.suc n} xs = _ , _ , mYs , xs≈ⱽnxs , columsAreZeroInPivots , allRowsNormedAfter
   where open PropsMatrix xs
