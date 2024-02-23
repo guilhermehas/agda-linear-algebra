@@ -11,17 +11,22 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
   open import Function
   open import Algebra
   open import Algebra.Matrix
+  open import Data.Bool.Base
   open import Data.List as L using (List)
   open import Data.Product
   open import Data.Nat.Base using (ℕ)
-  open import Data.Fin.Base
+  open import Data.Fin as F using (Fin)
   open import Data.Vec.Functional
   open import Relation.Nullary.Construct.Add.Supremum
+  open import Relation.Nullary
 
+  open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
+  open CommutativeRing commutativeRing using (rawRing; ring)
 
   open import MatrixFuncNormalization.normBef hField _≟_
   open import MatrixFuncNormalization.NormAfter.PropsFlip hField _≟_
   open import MatrixFuncNormalization.NormAfter.Properties hField _≟_ using (ColumnsZero)
+  open import Algebra.Module.Base ring
 
   open PVec
   open PNorm
@@ -41,8 +46,12 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
     listOps : List $ VecOp n
     listOps = ≈ⱽ⇒listVops xs≈ⱽys
 
-    reproduceOperations : Op₁ $ Matrix F _ _
-    reproduceOperations xs = L.foldr matOps→func xs listOps
+    reproduceOperations : ∀ {m} → Op₁ $ Matrix F n m
+    reproduceOperations {m} xs = L.foldr matOps→func xs listOps
+
+    inverseMatrix : Matrix F n n
+    inverseMatrix = reproduceOperations (λ i j → if isYes (i F.≟ j) then 1# else 0#)
+
 
 
   mainTheo : (xs : Matrix F n m) → MatrixNorm xs

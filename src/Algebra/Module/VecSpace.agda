@@ -27,6 +27,7 @@ open import Vector.Base
 import Vector.Setoid.Properties as VecProps
 open import Vector.Properties
 open import Vector.Permutation
+import Algebra.Module.Base as MBase
 
 module Algebra.Module.VecSpace {rr ℓr mr ℓm}
   {ring : Ring rr ℓr}
@@ -35,6 +36,7 @@ module Algebra.Module.VecSpace {rr ℓr mr ℓm}
 
 infixl 4 _≈ⱽ_
 
+open MBase ring
 open module R = Ring ring renaming (Carrier to R)
 open LeftModule leftModule renaming (Carrierᴹ to M)
 open ≋-props ≈ᴹ-setoid
@@ -55,10 +57,6 @@ _[_]←_*[_] : Vector M n → Fin n → R → Fin n → Vector M n
 (M [ q ]← r *[ p ]) i with does (q ≟ i)
 ... | true = M i +ᴹ r *ₗ M p
 ... | false = M i
-
-data VecOp (n : ℕ) : Set rr where
-  swapOp  : (p q : Fin n) (p≢q : p ≢ q)         → VecOp n
-  addCons : (p q : Fin n) (p≢q : p ≢ q) (r : R) → VecOp n
 
 matOps→func : VecOp n → Vector M n → Vector M n
 matOps→func (swapOp p q p≢q)    xs = swapV xs p q

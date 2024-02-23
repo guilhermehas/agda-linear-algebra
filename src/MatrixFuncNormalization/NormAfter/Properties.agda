@@ -78,6 +78,7 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; sameVecPiv; al
            ; MatrixPivots to MatrixPivotsLeft
            ; findNonZero to findNonZeroLeft
            )
+open import Algebra.Module.Base ring
 open M hiding (_+ᴹ_)
 open module PVec {n} = VecSpace (leftModule n)
 open module PNormBef {n} = MatrixPropsBefore (<-strictTotalOrder n) using (NormedTwoBeforeAfter; compare⊤⁺)

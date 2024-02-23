@@ -50,6 +50,7 @@ open MRingProps ring
 open RingProps ring
 open FuncNormAllLines
 open FuncNormAndZeros
+open import Algebra.Module.Base ring
 
 open module AddSup {n} = AddSupMod (_<_ {n})
 open module M = AMIF ring hiding (_+ᴹ_)

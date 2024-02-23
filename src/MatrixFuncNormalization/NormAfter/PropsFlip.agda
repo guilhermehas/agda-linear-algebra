@@ -61,7 +61,7 @@ open PVec
 open PNormBef renaming (_<′_ to _<ᴮ_)
 open PNormAfter
 open MRingProps ring
-
+open import Algebra.Module.Base ring
 
 private variable
   ℓ : Level
@@ -256,7 +256,7 @@ module PropsMatrix (let n = ℕ.suc n′) (xs : Matrix F n m) where
   open FlipProps ysWithPivots using (module NormedRows; proofYsPYs) renaming (ys to zs; pYs to pvZs; pivsYs to pivsZs)
   open NormedRows allRowsNormedYsPivs
 
-  mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps mOps) (flip zs) i j ≡
+  mOpsInv≡ : ∀ mOps (zs : Matrix F n m) i j → matOps→func (opVecOps {n} mOps) (flip zs) i j ≡
     matOps→func mOps zs (opposite i) (opposite j)
   mOpsInv≡ (swapOp p q p≢q) zs i j = begin
     swapV fzs (opposite p) (opposite q) i j ≡⟨ cong (λ xs → xs j)
