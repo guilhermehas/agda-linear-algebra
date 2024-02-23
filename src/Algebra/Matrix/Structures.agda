@@ -108,9 +108,7 @@ module MRing {a} {ℓ} (rawRing : RawRing a ℓ) where
       → xs ▹ ys
       → matOps→func mOps ys ≈ᴹ zs
       → xs ▹ zs
-    -- transR : xs ▹ ys → ys ▹ zs → xs ▹ zs
 
   ▹⇒listMops : {xs : Matrix A m n} → xs ▹ ys → List (MatrixOps m n)
   ▹⇒listMops (idR _) = []
   ▹⇒listMops (rec mOps xs▹ys _) = mOps ∷ ▹⇒listMops xs▹ys
-  -- ▹⇒listMops (transR xs▹ys ys▹zs) = ▹⇒listMops xs▹ys ++ ▹⇒listMops ys▹zs
