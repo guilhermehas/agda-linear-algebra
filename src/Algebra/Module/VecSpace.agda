@@ -85,17 +85,6 @@ invVecOp : Op₁ $ VecOp n
 invVecOp (swapOp p q p≢q) = swapOp q p (p≢q ∘ ≡.sym)
 invVecOp (addCons p q p≢q r) = addCons q p (p≢q ∘ ≡.sym) r
 
--- involute-inv : (xs : Vector M n) (mOps : VecOp n)
---   → matOps→func (invVecOp mOps) (matOps→func mOps xs) ≋ xs
--- involute-inv xs (swapOp p q p≢q) i = begin
---   swapV (swapV xs p q) q p i ≡⟨ swap-exchange (swapV xs p q) _ _ i ⟩
---   swapV (swapV xs p q) p q i ≡⟨ swap-involute xs _ _ _ ⟩
---   xs i ∎
---   where open ≈ᴹ-Reasoning
--- involute-inv xs (addCons p q p≢q r) i with q ≟ i
--- ... | yes refl rewrite dec-no (p ≟ q) p≢q | dec-no (p ≟ q) p≢q  | dec-yes (q ≟ q) ≡.refl .proj₂ = {!!}
--- ... | no q≢i = {!!}
-
 data _≈ⱽ_ : Rel (Vector M n) (rr ⊔ mr ⊔ ℓm) where
   idR : xs ≋ ys → xs ≈ⱽ ys
   rec : (mOps : VecOp n)
@@ -194,15 +183,6 @@ data _≈ⱽ_ : Rel (Vector M n) (rr ⊔ mr ⊔ ℓm) where
 ≈ⱽ-trans (idR xs≋ys) (idR ys≋zs) = idR (≋-trans xs≋ys ys≋zs)
 ≈ⱽ-trans (rec mOps xs≈ⱽys mOpsXs) (idR ys≋zs) = rec mOps xs≈ⱽys (≋-trans mOpsXs ys≋zs)
 ≈ⱽ-trans xs≈ⱽys (rec {ys = ws} mOpsYsZs ys≈ⱽzs mOpsYs) = rec mOpsYsZs (≈ⱽ-trans xs≈ⱽys ys≈ⱽzs) mOpsYs
-
--- ≈ⱽ-sym : Symmetric (_≈ⱽ_ {n = n})
--- ≈ⱽ-sym (idR xs≋ys) = idR (≋-sym xs≋ys)
--- ≈ⱽ-sym (rec {xs = xs} {ys} {zs} mOps xs≈ⱽys mOpsYs) = ≈ⱽ-trans (rec (invVecOp mOps) (idR ≋-refl)
---   λ i → begin
---     matOps→func (invVecOp mOps) zs i ≈⟨ matOps→func-cong zs _ (invVecOp mOps) (≋-sym mOpsYs) i ⟩
---     matOps→func (invVecOp mOps) (matOps→func mOps ys) i ≈⟨ involute-inv ys mOps i ⟩
---     ys i ∎)
---   (≈ⱽ-sym xs≈ⱽys) where open ≈ᴹ-Reasoning
 
 [_,,_] : M → M → Vector M 2
 [ x ,, y ] zero = x

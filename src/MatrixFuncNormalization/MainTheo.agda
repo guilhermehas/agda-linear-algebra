@@ -32,7 +32,7 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
   open PNorm
 
   private variable
-    m n : ℕ
+    m n p : ℕ
 
   record MatrixNorm (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
     field
@@ -46,8 +46,8 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
     listOps : List $ VecOp n
     listOps = ≈ⱽ⇒listVops xs≈ⱽys
 
-    reproduceOperations : ∀ {m} → Op₁ $ Matrix F n m
-    reproduceOperations {m} xs = L.foldr matOps→func xs listOps
+    reproduceOperations : Op₁ $ Matrix F n p
+    reproduceOperations xs = L.foldr matOps→func xs listOps
 
     inverseMatrix : Matrix F n n
     inverseMatrix = reproduceOperations (λ i j → if isYes (i F.≟ j) then 1# else 0#)
