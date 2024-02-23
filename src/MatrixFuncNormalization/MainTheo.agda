@@ -8,7 +8,10 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
   where
 
   open import Level
+  open import Function
+  open import Algebra
   open import Algebra.Matrix
+  open import Data.List as L using (List)
   open import Data.Product
   open import Data.Nat.Base using (ℕ)
   open import Data.Fin.Base
@@ -34,6 +37,13 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
       xs≈ⱽys       : xs ≈ⱽ ys
       pivsCrescent : AllRowsNormalized pivs
       columnsZero  : ColumnsZero ys pivs
+
+    listOps : List $ VecOp n
+    listOps = ≈ⱽ⇒listVops xs≈ⱽys
+
+    reproduceOperations : Op₁ $ Matrix F _ _
+    reproduceOperations xs = L.foldr matOps→func xs listOps
+
 
   mainTheo : (xs : Matrix F n m) → MatrixNorm xs
   mainTheo xs = let ys , pivs , mPivs , xs≈ⱽys , colsZero , pivsCrescent = allTheoremsTogether xs in
