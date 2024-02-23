@@ -20,24 +20,17 @@ open import Data.Fin.Properties as F hiding (_≟_)
 open import Data.Vec.Functional as V
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as EqSetoids
 open import Algebra
-import Algebra.Properties.Ring as RingProps
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
 import Algebra.Module.Instances.FunctionalVector as AMIF
-import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
-open import Relation.Binary.PropositionalEquality as ≡ hiding (setoid)
 
 open import Algebra.Matrix
 open import Algebra.MatrixData renaming (Matrix to MatrixData)
-import Algebra.HeytingField.Properties as HFProps
-import MatrixFuncNormalization.MatrixProps as MatrixPropsBefore
 import MatrixFuncNormalization.MatrixPropsAfter as MatrixPropsAfter
 import MatrixFuncNormalization.normBef as NormBef
 open import MatrixFuncNormalization.FinInduction
-import Algebra.Module.VecSpace as VecSpace
 open import Vector
-open import lbry
 
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
@@ -49,7 +42,6 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_)
 open module M = AMIF ring hiding (_+ᴹ_)
 open module PNormAfter {n} = MatrixPropsAfter (<-strictTotalOrder n) using (_<′_; AllRowsNormalizedRight; simpleFinProps)
 module ≈-Reasoning = ReasonSetoid setoid
-open module ≋‵ = EqSetoids setoid using (≋-setoid)
 open FuncNormAllLines
 open FuncNormAndZeros
 

@@ -87,7 +87,7 @@ open PNormAfter using (_<′_; AllRowsNormalizedRight; simpleFinProps)
 open HCRProps heytingCommutativeRing
 open RingProps ring
 module ≈ = Setoid setoid
-open ≋‵ using (≋-setoid)
+open module ≋‵ = EqSetoids setoid using (≋-setoid)
 open module ≋ {n} = EqSetoids (≋-setoid n)
 open FuncNormAllLines
 open FuncNormAndZeros
