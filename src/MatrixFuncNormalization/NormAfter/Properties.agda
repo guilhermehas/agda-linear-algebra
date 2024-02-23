@@ -13,56 +13,35 @@ open import Data.Bool using (Bool; false; true; T)
 open import Data.Unit.Polymorphic using (⊤)
 open import Data.Product hiding (map)
 open import Data.Maybe as Maybe using (Maybe; maybe′; just; is-just; to-witness-T)
-open import Data.Maybe.Relation.Binary.Pointwise as Maybe using ()
-open import Data.Maybe.Relation.Unary.All as Maybe using ()
 open import Data.Nat as ℕ using (ℕ; zero; suc; s<s)
 open import Data.Nat.Properties as ℕ using (≰⇒>)
-open import Data.List as L using (List; applyDownFrom)
-import Data.List.Properties as L
-open import Data.List.Relation.Unary.All as All using (All)
-open import Data.List.Relation.Unary.All.Properties as All
-open import Data.List.Relation.Unary.Linked using (Linked)
-open import Data.List.Relation.Unary.Linked.Properties
-open import Data.List.Relation.Unary.AllPairs as AP using (AllPairs)
-open import Data.List.Relation.Unary.AllPairs.Properties as AP
 open import Relation.Binary.Construct.Add.Infimum.NonStrict
 open import Data.Fin.Base as F hiding (_+_; _-_; lift; zero; suc)
 open import Data.Fin.Patterns
 open import Data.Fin.Properties as F hiding (_≟_)
 open import Data.Sum
 open import Data.Vec.Functional as V
-open import Data.Vec.Functional.Properties
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as EqSetoids
 open import Algebra
 import Algebra.Properties.Ring as RingProps
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; _≗_; refl; subst)
-open import Relation.Binary.Construct.Add.Infimum.Strict hiding (_<₋_)
 import Relation.Binary.Construct.Add.Point.Equality as Equality
-import Relation.Binary.Reasoning.Setoid as ReasonSetoid
-open import Relation.Unary as RU using (Pred)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
-open import Relation.Nullary.Construct.Add.Supremum
 import Relation.Binary.Construct.Add.Supremum.Strict as <⁺′
 import Relation.Binary.Construct.Add.Supremum.NonStrict as ≤⁺′
 import Relation.Binary.Construct.Add.Infimum.Strict as <₋′
-import Algebra.Module.Instances.FunctionalVector as AMIF
 import Algebra.Apartness.Properties.HeytingCommutativeRing as HCRProps
 
 open import Vector.Base as V
 open import Vector.SubVector
-open import AllPairs.Properties
 open import Algebra.Matrix
-open import Algebra.MatrixData renaming (Matrix to MatrixData)
 import Algebra.HeytingField.Properties as HFProps
-import MatrixFuncNormalization.MatrixProps as MatrixPropsBefore
-import MatrixFuncNormalization.MatrixPropsAfter as MatrixPropsAfter
 import MatrixFuncNormalization.normBef as NormBef
 import MatrixFuncNormalization.NormAfter.Base as NormAfterBase
 open import MatrixFuncNormalization.NormAfter.FinInduction
 open import MatrixNormalization.FinProps
-open import MatrixFuncNormalization.FinInduction
 import Algebra.Module.VecSpace as VecSpace
 open import lbry
 
@@ -81,23 +60,13 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; sameVecPiv; al
 open import Algebra.Module.Base ring
 open M hiding (_+ᴹ_)
 open module PVec {n} = VecSpace (leftModule n)
-open module PNormBef {n} = MatrixPropsBefore (<-strictTotalOrder n) using (NormedTwoBeforeAfter; compare⊤⁺)
-open PNormBef using (NormedTwoBeforeAfter; NormedTwoBeforeAfter′; compare⊤⁺; _>′_)
 open PNormAfter using (_<′_; AllRowsNormalizedRight; simpleFinProps)
-open HCRProps heytingCommutativeRing
 open RingProps ring
 module ≈ = Setoid setoid
 open module ≋‵ = EqSetoids setoid using (≋-setoid)
 open module ≋ {n} = EqSetoids (≋-setoid n)
-open FuncNormAllLines
-open FuncNormAndZeros
-open module PNorm {n} = MatrixPropsBefore (<-strictTotalOrder n)
-  using (BothRowsAreNormalize; DifferentIndicesAreEqual; NormedTwoBeforeAfter‵)
 open module ≈∙ {a} {A} = Equality {a} {A = A} _≡_ using (_≈∙_; ∙≈∙; [≈]-injective)
   renaming (≈∙-isEquivalence to ≈∙-isEquivalence′)
-open module ≤⁺ {n} = ≤⁺′ (F._≤_ {n}) using (_≤⁺_)
-open module <⁺ {n} = <⁺′ (F._<_ {n}) using (_<⁺_)
-open module <₋ {n} = <₋′ (F._<_ {n}) using (_<₋_)
 
 private variable
   ℓ ℓ′ : Level

@@ -25,7 +25,9 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
 
   open import MatrixFuncNormalization.normBef hField _≟_
   open import MatrixFuncNormalization.NormAfter.PropsFlip hField _≟_
-  open import MatrixFuncNormalization.NormAfter.Properties hField _≟_ using (ColumnsZero)
+    hiding (module PNorm)
+  open import MatrixFuncNormalization.NormAfter.Properties hField _≟_
+    using (ColumnsZero)
   open import Algebra.Module.Base ring
 
   open PVec
@@ -51,7 +53,6 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
 
     inverseMatrix : Matrix F n n
     inverseMatrix = reproduceOperations (λ i j → if isYes (i F.≟ j) then 1# else 0#)
-
 
 
   mainTheo : (xs : Matrix F n m) → MatrixNorm xs

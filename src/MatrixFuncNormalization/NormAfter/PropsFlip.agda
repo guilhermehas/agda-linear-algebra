@@ -41,6 +41,7 @@ import Algebra.HeytingField.Properties as HFProps
 import MatrixFuncNormalization.normBef as NormBef
 import MatrixFuncNormalization.NormAfter.Base as NormAfterBase
 import MatrixFuncNormalization.NormAfter.Properties as NormAfterProperties
+import MatrixFuncNormalization.MatrixProps as MatrixPropsBefore
 open import MatrixFuncNormalization.FinInduction
 open import lbry
 
@@ -58,7 +59,8 @@ open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; matrix→matPi
 open NormAfterBase hField _≟_
 open NormAfterProperties hField _≟_ renaming (MatrixWithPivots to MatrixWithPivotsRight)
 open PVec
-open PNormBef renaming (_<′_ to _<ᴮ_)
+open module PNorm {n} = MatrixPropsBefore (<-strictTotalOrder n)
+  renaming (_<′_ to _<ᴮ_)
 open PNormAfter
 open MRingProps ring
 open import Algebra.Module.Base ring
