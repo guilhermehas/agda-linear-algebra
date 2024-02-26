@@ -4,6 +4,7 @@ open import Level using (_⊔_; suc)
 open import Relation.Binary.Core using (Rel)
 open import Algebra.Core using (Op₁; Op₂)
 open import Algebra.Apartness.Structures
+open import Algebra.Apartness.Bundles
 open import Relation.Binary.Definitions using (Decidable)
 
 
@@ -40,3 +41,6 @@ record DecidableField c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) wher
     isDecidableField : IsDecidableField _≈_ _#_ _+_ _*_ -_ 0# 1#
 
   open IsDecidableField isDecidableField public
+
+  heytingField : HeytingField c ℓ₁ ℓ₂
+  heytingField = record { isHeytingField = isHeytingField }
