@@ -28,6 +28,7 @@ import Vector.Setoid.Properties as VecProps
 open import Vector.Properties
 open import Vector.Permutation
 import Algebra.Module.Base as MBase
+import Algebra.Module.Definition as MDefinitions
 
 module Algebra.Module.VecSpace {rr ℓr mr ℓm}
   {ring : Ring rr ℓr}
@@ -45,6 +46,7 @@ open VecProps ≈ᴹ-setoid
 module ≈ᴹ-Reasoning = ≈-Reasoning ≈ᴹ-setoid
 module ≈ᴹ = Setoid ≈ᴹ-setoid
 module ≋-Reasoning {n} = ≈-Reasoning (≋-setoid n)
+open MDefinitions leftModule
 
 private variable
   m n : ℕ
