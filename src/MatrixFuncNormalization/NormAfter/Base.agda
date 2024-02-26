@@ -1,11 +1,8 @@
 open import Algebra.Apartness
 open import Relation.Binary
+open import Algebra.DecidableField
 
-module MatrixFuncNormalization.NormAfter.Base {c ℓ₁ ℓ₂}
-  (hField : HeytingField c ℓ₁ ℓ₂)
-  (open HeytingField hField renaming (Carrier to F))
-  (_≟_ : Decidable _#_)
-  where
+module MatrixFuncNormalization.NormAfter.Base {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
 open import Level using (Level; Lift; lift; _⊔_)
 open import Function hiding (flip)
@@ -32,9 +29,11 @@ import MatrixFuncNormalization.normBef as NormBef
 open import MatrixFuncNormalization.FinInduction
 open import Vector
 
+open DecidableField dField renaming (Carrier to F; heytingField to hField)
+open HeytingField hField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
-open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_)
+open NormBef dField using (normalizeMatrix; AllZeros; _-v_)
   renaming ( VecPivotPos to VecPivotPosLeft
            ; Lookup≢0 to Lookup≢0Left
            ; normTwoRows to normTwoRowsLeft

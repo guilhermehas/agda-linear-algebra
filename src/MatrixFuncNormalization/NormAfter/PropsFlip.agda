@@ -1,11 +1,8 @@
 open import Algebra.Apartness
 open import Relation.Binary
+open import Algebra.DecidableField
 
-module MatrixFuncNormalization.NormAfter.PropsFlip {c ℓ₁ ℓ₂}
-  (hField : HeytingField c ℓ₁ ℓ₂)
-  (open HeytingField hField renaming (Carrier to F))
-  (_≟_ : Decidable _#_)
-  where
+module MatrixFuncNormalization.NormAfter.PropsFlip {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
 open import Level using (Level; Lift; lift; lower; _⊔_)
 open import Function hiding (flip)
@@ -45,19 +42,21 @@ import MatrixFuncNormalization.MatrixProps as MatrixPropsBefore
 open import MatrixFuncNormalization.FinInduction
 open import lbry
 
+open DecidableField dField renaming (Carrier to F; heytingField to hField)
+open HeytingField hField using (heytingCommutativeRing)
 open hFieldProps hField
 open HCR heytingCommutativeRing
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
-open NormBef hField _≟_ using (normalizeMatrix; AllZeros; _-v_; matrix→matPivs; MatrixWithPivots; matrixPivs)
+open NormBef dField using (normalizeMatrix; AllZeros; _-v_; matrix→matPivs; MatrixWithPivots; matrixPivs)
   renaming ( VecPivotPos to VecPivotPosLeft
            ; Lookup≢0 to Lookup≢0Left
            ; normTwoRows to normTwoRowsLeft
            ; MatrixPivots to MatrixPivotsLeft
            ; VecPivotsΣ to VecPivotsLeftΣ
            )
-open NormAfterBase hField _≟_
-open NormAfterProperties hField _≟_ renaming (MatrixWithPivots to MatrixWithPivotsRight)
+open NormAfterBase dField
+open NormAfterProperties dField renaming (MatrixWithPivots to MatrixWithPivotsRight)
 open PVec
 open module PNorm {n} = MatrixPropsBefore (<-strictTotalOrder n)
   renaming (_<′_ to _<ᴮ_)

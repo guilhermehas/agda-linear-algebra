@@ -1,11 +1,8 @@
 open import Algebra.Apartness
 open import Relation.Binary
+open import Algebra.DecidableField
 
-module MatrixDataNormalization.NormBef {c ℓ₁ ℓ₂}
-  (hField : HeytingField c ℓ₁ ℓ₂)
-  (open HeytingField hField renaming (Carrier to F))
-  (_≟_ : Decidable _#_)
-  where
+module MatrixDataNormalization.NormBef {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
 open import Algebra
 open import Function
@@ -20,9 +17,9 @@ open import Algebra.MatrixData
 import Algebra.Module.VecSpace as VecSpace
 open import Rational.Properties
 
-open NormField hField _≟_ hiding (getCoeff)
+open DecidableField dField renaming (Carrier to F; heytingField to hField)
+open NormField dField hiding (getCoeff)
 open PVec
-
 
 private variable
   m n : ℕ

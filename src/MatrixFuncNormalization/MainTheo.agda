@@ -1,11 +1,8 @@
 open import Algebra.Apartness
 open import Relation.Binary
+open import Algebra.DecidableField
 
-module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
-  (hField : HeytingField c ℓ₁ ℓ₂)
-  (open HeytingField hField renaming (Carrier to F))
-  (_≟_ : Decidable _#_)
-  where
+module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
   open import Level
   open import Function
@@ -20,13 +17,15 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂}
   open import Relation.Nullary.Construct.Add.Supremum
   open import Relation.Nullary
 
+  open DecidableField dField renaming (Carrier to F; heytingField to hField)
+  open HeytingField hField using (heytingCommutativeRing)
   open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
   open CommutativeRing commutativeRing using (rawRing; ring)
 
-  open import MatrixFuncNormalization.normBef hField _≟_
-  open import MatrixFuncNormalization.NormAfter.PropsFlip hField _≟_
+  open import MatrixFuncNormalization.normBef dField
+  open import MatrixFuncNormalization.NormAfter.PropsFlip dField
     hiding (module PNorm)
-  open import MatrixFuncNormalization.NormAfter.Properties hField _≟_
+  open import MatrixFuncNormalization.NormAfter.Properties dField
     using (ColumnsZero)
   open import Algebra.Module.Base ring
 

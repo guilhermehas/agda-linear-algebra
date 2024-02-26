@@ -6,17 +6,17 @@ open import Data.Vec
 open import Relation.Binary
 
 open import Algebra.Matrix.Structures
+open import Algebra.DecidableField
 import MatrixFuncNormalization.NormAfter.Base as NormAfter
 
-module MatrixFuncNormalization.NormAfter.AppendIdentity {c} {ℓ₁} {ℓ₂}
-  (hField : HeytingField c ℓ₁ ℓ₂)
-  (open HeytingField hField renaming (Carrier to F))
-  (_≟_ : Decidable _#_) where
+module MatrixFuncNormalization.NormAfter.AppendIdentity {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
+  open DecidableField dField renaming (Carrier to F; heytingField to hField)
+  open HeytingField hField using (heytingCommutativeRing)
   open HeytingCommutativeRing heytingCommutativeRing
   open CommutativeRing commutativeRing
   open MRing rawRing
-  open NormAfter hField _≟_
+  open NormAfter dField
 
   private variable
     m n p : ℕ

@@ -17,6 +17,7 @@ import MatrixDataNormalization.NormBef as NormField
 import MatrixDataNormalization.Base as NormAll
 
 import Algebra.MatrixData.Relation.Setoid as MSetoid
+open import Algebra.DecidableField
 open import Rational.Properties
 open import Rational.Unnormalized.Literals
 
@@ -27,8 +28,11 @@ open MSetoid setoid
 private variable
   m n p : ℕ
 
-open NormField +-*-heytingField _≠?_
-open NormAll +-*-heytingField _≠?_
++-*-decidableField : DecidableField _ _ _
++-*-decidableField = record { isDecidableField = record { isHeytingField = isHeytingField ; decidableInequality = _≠?_ }}
+
+open NormField +-*-decidableField
+open NormAll +-*-decidableField
 
 _≟_ : Decidable (_≋_ {m} {n})
 _≟_ = decidable _≃?_

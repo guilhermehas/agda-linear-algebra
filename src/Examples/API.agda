@@ -5,6 +5,7 @@ open import Algebra.Apartness
 open import Data.Nat
 open import Data.Vec
 open import Relation.Binary
+open import Algebra.DecidableField
 
 open import Algebra.MatrixData
 import MatrixDataNormalization.Base as Normed
@@ -21,13 +22,13 @@ module Examples (x y : A) where
   matrix : Matrix A 2 3
   matrix = (x ∷ y ∷ x ∷ []) ∷ vec ∷ []
 
-module _ (hField : HeytingField c ℓ₁ ℓ₂)
-  (open HeytingField hField)
-  (_≟_ : Decidable _#_) (x y : Carrier) where
+module _ (dField : DecidableField c ℓ₁ ℓ₂)
+  (open DecidableField dField)
+  (x y : Carrier) where
 
-  open HeytingField hField renaming (Carrier to F)
+  open DecidableField dField renaming (Carrier to F)
   open Examples x y
-  open Normed hField _≟_
+  open Normed dField
 
   normedMatrix : Matrix F 2 3
   normedMatrix = normalize matrix
