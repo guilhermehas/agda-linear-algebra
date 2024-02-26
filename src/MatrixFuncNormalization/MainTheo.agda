@@ -7,7 +7,6 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableFie
   open import Level
   open import Function
   open import Algebra
-  open import Algebra.Matrix
   open import Data.Bool.Base
   open import Data.List as L using (List)
   open import Data.Product
@@ -16,6 +15,8 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableFie
   open import Data.Vec.Functional
   open import Relation.Nullary.Construct.Add.Supremum
   open import Relation.Nullary
+
+  open import Algebra.Matrix.Structures
 
   open DecidableField dField renaming (Carrier to F; heytingField to hField)
   open HeytingField hField using (heytingCommutativeRing)
@@ -28,6 +29,7 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableFie
   open import MatrixFuncNormalization.NormAfter.Properties dField
     using (ColumnsZero)
   open import Algebra.Module.Base ring
+  open MRing rawRing hiding (matOps→func)
 
   open PVec
   open PNorm
@@ -51,7 +53,7 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableFie
     reproduceOperations xs = L.foldr matOps→func xs listOps
 
     inverseMatrix : Matrix F n n
-    inverseMatrix = reproduceOperations (λ i j → if isYes (i F.≟ j) then 1# else 0#)
+    inverseMatrix = reproduceOperations 1ᴹ
 
 
   mainTheo : (xs : Matrix F n m) → MatrixNorm xs
