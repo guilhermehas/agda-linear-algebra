@@ -30,7 +30,7 @@ module MMonoid (rawMonoid : RawMonoid a ℓ) where
 
   open RawMonoid rawMonoid renaming (Carrier to A)
   open MAddition _∙_ public
-  open SumMonoid rawMonoid
+  open SumRawMonoid rawMonoid
 
   0ᴹ : Matrix A m n
   0ᴹ _ _ = ε

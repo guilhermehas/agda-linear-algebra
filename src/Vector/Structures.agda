@@ -27,4 +27,4 @@ module VRing (rawRing : RawRing a ℓ) where
 
   open RawRing rawRing
   open VMonoid *-rawMonoid public
-  open SumMonoid +-rawMonoid public
+  open SumRawMonoid +-rawMonoid public

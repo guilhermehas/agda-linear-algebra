@@ -17,7 +17,7 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
 
   open Ring ring renaming (Carrier to A)
   open LeftModule leftModule renaming (Carrierᴹ to M)
-  open SumMonoid +ᴹ-rawMonoid
+  open SumMonoid +ᴹ-monoid
 
   private variable
     n : ℕ

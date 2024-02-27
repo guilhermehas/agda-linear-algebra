@@ -18,7 +18,7 @@ private variable
   a ℓ : Level
   m n : ℕ
 
-module SumMonoid (rawMonoid : RawMonoid a ℓ) where
+module SumRawMonoid (rawMonoid : RawMonoid a ℓ) where
 
   open RawMonoid rawMonoid renaming (Carrier to A)
 
@@ -31,12 +31,34 @@ module SumMonoid (rawMonoid : RawMonoid a ℓ) where
 module SumRawRing (rawRing : RawRing a ℓ) where
 
   open RawRing rawRing renaming (Carrier to A)
-  open SumMonoid +-rawMonoid public
+  open SumRawMonoid +-rawMonoid public
 
   δ : (i j : Fin n) → A
   δ i j with i ≟ j
   ... | true  because _ = 1#
   ... | false because _ = 0#
+
+module SumMonoid (monoid : Monoid a ℓ) where
+
+  open Monoid monoid renaming (Carrier to A)
+  open import Relation.Binary.Reasoning.Setoid setoid
+  open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
+  open import Vector.Properties
+  open import Vector.Setoid.Properties setoid hiding (++-cong)
+  open SumRawMonoid rawMonoid public
+
+  ∑0r : ∀ n → ∑ {n} (const ε) ≈ ε
+  ∑0r zero = refl
+  ∑0r (suc n) = begin
+    ∑ {suc n} (const ε) ≈⟨ ∙-congˡ (∑0r n) ⟩
+    ε ∙ ε               ≈⟨ identityˡ ε ⟩
+    ε ∎
+
+  ∑Ext : {U V : Vector A n} → U ≋ V → ∑ U ≈ ∑ V
+  ∑Ext {zero} U≈V = refl
+  ∑Ext {suc n} {U} {V} U≈V = begin
+    head U ∙ ∑ (tail U) ≈⟨ ∙-cong (U≈V F.zero) (∑Ext (U≈V ∘ suc)) ⟩
+    head V ∙ ∑ (tail V) ∎
 
 module SumRing (ring : Ring a ℓ) where
 
@@ -48,21 +70,7 @@ module SumRing (ring : Ring a ℓ) where
   open import Vector.Setoid.Properties setoid hiding (++-cong)
   open Units ring
   open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid using (solve; _⊜_; _⊕_)
-
-
-
-  ∑0r : ∀ n → ∑ {n} (const 0#) ≈ 0#
-  ∑0r zero = refl
-  ∑0r (suc n) = begin
-    ∑ {suc n} (const 0#) ≈⟨ +-congˡ (∑0r n) ⟩
-    0# + 0#              ≈⟨ +-identityˡ 0# ⟩
-    0# ∎
-
-  ∑Ext : {U V : Vector A n} → U ≋ V → ∑ U ≈ ∑ V
-  ∑Ext {zero} U≈V = refl
-  ∑Ext {suc n} {U} {V} U≈V = begin
-    head U + ∑ (tail U) ≈⟨ +-cong (U≈V F.zero) (∑Ext (U≈V ∘ suc)) ⟩
-    head V + ∑ (tail V) ∎
+  open SumMonoid +-monoid using (∑0r; ∑Ext) public
 
   ∑Split : (V W : Vector A n) → ∑ (λ i → V i + W i) ≈ ∑ V + ∑ W
   ∑Split {zero} V W = sym (+-identityʳ _)
