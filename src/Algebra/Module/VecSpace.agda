@@ -369,12 +369,17 @@ xs*ws≈x (bwd (≈ⱽ⇒≋ⱽ (idR {xs = xs} {zs} xs≈zs)) {x} record { ys = 
   ∑ (ys *ᵣ xs) ≈⟨ ∑Ext (*ₗ-congˡ ∘ xs≈zs) ⟩
   ∑ (ys *ᵣ zs) ≈⟨ xs*zs≈x ⟩
   x ∎ where open ≈ᴹ-Reasoning
-ws (fwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} record { ys = ys ; xs*ys≈x = xs*ys≈x }) = {!!}
-xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (MBase.swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
-  ∑ ({!!} *ᵣ yss) ≈⟨ {!!} ⟩
-  -- {!!} ≈⟨ {!!} ⟩
-  ∑ (ys *ᵣ {!!}) ≈⟨ ∑Ext {!*ₗ-congˡ ∘ ?!} ⟩
-  ∑ (ys *ᵣ xs) ≈⟨ xs*ys≈x ⟩
-  x ∎ where open ≈ᴹ-Reasoning
+ws (fwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = swapV (≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd reach .ws) p q
+xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
+  ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ swap≈ys) ⟩
+  ∑ (sws *ᵣ swapV zs p q) ≈⟨ {!!} ⟩
+  ∑ (wss *ᵣ zs) ≈⟨ help .xs*ws≈x ⟩
+  x ∎ where
+  open ≈ᴹ-Reasoning
+
+  eqn = ≈ⱽ⇒≋ⱽ xs≈ⱽys
+  help = eqn .fwd reach
+  wss = ws help
+  sws = swapV wss p q
 bwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) = {!!}
 ≈ⱽ⇒≋ⱽ (rec (addCons p q p≢q r) xs≈ⱽys x) = {!!}
