@@ -29,6 +29,7 @@ open import Vector.Properties
 open import Vector.Permutation
 import Algebra.Module.Base as MBase
 import Algebra.Module.Definition as MDefinitions
+open import Algebra.BigOps
 
 module Algebra.Module.VecSpace {rr ℓr mr ℓm}
   {ring : Ring rr ℓr}
@@ -47,6 +48,7 @@ module ≈ᴹ-Reasoning = ≈-Reasoning ≈ᴹ-setoid
 module ≈ᴹ = Setoid ≈ᴹ-setoid
 module ≋-Reasoning {n} = ≈-Reasoning (≋-setoid n)
 open MDefinitions leftModule
+open SumMonoid +ᴹ-monoid
 
 private variable
   m n : ℕ
@@ -351,3 +353,28 @@ stepVecSpace {n} xs ys i j i≢j (rec {ys = zs} (addCons p q p≢q r) xy≈ⱽys
     xs k                            ≡˘⟨ updateAt-minimal _ i _ (i≢k ∘ ≡.sym) ⟩
     (xs [ i ]≔ ys 0F) k             ≡˘⟨ updateAt-minimal _ j _ k≢j ⟩
     (xs [ i ]≔ ys 0F [ j ]≔ ys 1F) k ∎
+
+open _reaches_ renaming (ys to ws; xs*ys≈x to xs*ws≈x)
+open _≋ⱽ_
+
+≈ⱽ⇒≋ⱽ : xs ≈ⱽ ys → xs ≋ⱽ ys
+ws (fwd (≈ⱽ⇒≋ⱽ (idR {ys = zs} xs≈ys))
+  record { ys = ys ; xs*ys≈x = xs*ys≈x }) = ys
+xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ (idR {xs = xs} {ys = zs} xs≈zs)) {x} record { ys = ys ; xs*ys≈x = xs*zs≈x }) = begin
+  ∑ (ys *ᵣ zs) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ xs≈zs) ⟩
+  ∑ (ys *ᵣ xs) ≈⟨ xs*zs≈x ⟩
+  x ∎ where open ≈ᴹ-Reasoning
+ws (bwd (≈ⱽ⇒≋ⱽ (idR {ys = zs} xs≈zs)) {x} record { ys = ys ; xs*ys≈x = xs*ys≈x }) = ys
+xs*ws≈x (bwd (≈ⱽ⇒≋ⱽ (idR {xs = xs} {zs} xs≈zs)) {x} record { ys = ys ; xs*ys≈x = xs*zs≈x }) = begin
+  ∑ (ys *ᵣ xs) ≈⟨ ∑Ext (*ₗ-congˡ ∘ xs≈zs) ⟩
+  ∑ (ys *ᵣ zs) ≈⟨ xs*zs≈x ⟩
+  x ∎ where open ≈ᴹ-Reasoning
+ws (fwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} record { ys = ys ; xs*ys≈x = xs*ys≈x }) = {!!}
+xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (MBase.swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
+  ∑ ({!!} *ᵣ yss) ≈⟨ {!!} ⟩
+  -- {!!} ≈⟨ {!!} ⟩
+  ∑ (ys *ᵣ {!!}) ≈⟨ ∑Ext {!*ₗ-congˡ ∘ ?!} ⟩
+  ∑ (ys *ᵣ xs) ≈⟨ xs*ys≈x ⟩
+  x ∎ where open ≈ᴹ-Reasoning
+bwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) = {!!}
+≈ⱽ⇒≋ⱽ (rec (addCons p q p≢q r) xs≈ⱽys x) = {!!}
