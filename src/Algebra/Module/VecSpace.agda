@@ -382,4 +382,16 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q
   wss = ws help
   sws = swapV wss p q
 bwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) = {!!}
-≈ⱽ⇒≋ⱽ (rec (addCons p q p≢q r) xs≈ⱽys x) = {!!}
+ws (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) x∈xs) = {!!}
+xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) {x} x∈xs) = begin
+  ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ zs≋ys) ⟩
+  ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≡⟨ {!!} ⟩
+  -- {!!} ≡⟨ {!!} ⟩
+  ∑ (wss *ᵣ zs) ≈⟨ help .xs*ws≈x ⟩
+  x ∎
+  where
+  open ≈ᴹ-Reasoning
+  help = ≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd x∈xs
+  wss = ws help
+  sws = {!!}
+bwd (≈ⱽ⇒≋ⱽ (rec (addCons p q p≢q r) xs≈ⱽys x)) = {!!}
