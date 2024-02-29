@@ -91,6 +91,18 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     (V F.zero ∙ (∑ (tail V) ∙ ∑ W)) ≈˘⟨ assoc _ _ _ ⟩
     (∑ V ∙ ∑ W) ∎
 
+  ∑Remove : ∀ (V : Vector A $ suc n) i → ∑ V ≈ V i ∙ ∑ (removeAt V i)
+  ∑Remove V zero = refl
+  ∑Remove {ℕ.suc _} V (suc i) = begin
+    (V zero ∙ ∑ tV)                       ≈⟨ ∙-congˡ $ ∑Remove tV i ⟩
+    (V zero ∙ (tV i ∙ ∑ (removeAt tV i))) ≈⟨ helper _ _ _ ⟩
+    (tV i ∙ (V zero ∙ ∑ (removeAt tV i))) ∎
+    where
+    tV = tail V
+    helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
+    helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
+
+
 module SumRing (ring : Ring a ℓ) where
 
   open Ring ring renaming (Carrier to A)
