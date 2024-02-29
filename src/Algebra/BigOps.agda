@@ -7,13 +7,15 @@ import Data.Sum as Sum
 open import Data.Bool using (true; false)
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Fin as F using (Fin; _≟_; zero; suc)
+open import Data.Fin.Properties
 open import Data.Vec.Functional
 open import Data.Vec.Functional.Properties
-import Relation.Binary.PropositionalEquality as ≡
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; cong)
 open import Relation.Nullary.Decidable
 open import Vector.Properties
 
 open import Algebra.Ring.Properties
+open import Vector
 
 private variable
   a ℓ : Level
@@ -99,6 +101,39 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     (tV i ∙ (V zero ∙ ∑ (removeAt tV i))) ∎
     where
     tV = tail V
+    helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
+    helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
+
+  ∑Swap : ∀ (V : Vector A n) i j (i<j : i F.< j) → ∑ (swapV V i j) ≈ ∑ V
+  ∑Swap {suc zero} V zero zero ()
+  ∑Swap {suc (suc n)} V i (suc j) i<j = begin
+    ∑ sv ≈⟨ ∑Remove sv i ⟩
+    (sv i ∙ ∑ svr) ≈⟨ ∙-congˡ (∑Remove svr j) ⟩
+    (sv i ∙ (svr j ∙ ∑ svrr)) ≈⟨ helper (sv i) (svr j) _ ⟩
+    (svr j ∙ (sv i ∙ ∑ svrr)) ≈⟨ ∙-cong
+      (begin
+        svr j ≡⟨ {!!} ⟩
+        {!!} ≈⟨ {!!} ⟩
+        V i ∎)
+      (∙-cong (begin
+                 sv i ≡⟨ updateAt-minimal i (suc j) _ {!!} ⟩
+                 {!!} ≡⟨ updateAt-updates i {!!} ⟩
+                 V (suc j) ≈⟨ {!!} ⟩
+                 -- {!!} ≈⟨ {!!} ⟩
+                 {!!} ≡˘⟨ cong V {!!} ⟩
+                 vr j ∎)
+              {!!}) ⟩
+    (V i ∙ (vr j ∙ ∑ vrr)) ≈˘⟨ ∙-congˡ (∑Remove vr j) ⟩
+    (V i ∙ ∑ vr) ≈˘⟨ ∑Remove V i ⟩
+    ∑ V ∎
+    where
+    sv = swapV V i (suc j)
+    svr = removeAt sv i
+    svrr = removeAt svr j
+
+    vr = removeAt V i
+    vrr = removeAt vr j
+
     helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
     helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
 
