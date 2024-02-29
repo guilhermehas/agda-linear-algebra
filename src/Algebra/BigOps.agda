@@ -11,6 +11,7 @@ open import Data.Vec.Functional
 open import Data.Vec.Functional.Properties
 import Relation.Binary.PropositionalEquality as ≡
 open import Relation.Nullary.Decidable
+open import Vector.Properties
 
 open import Algebra.Ring.Properties
 
@@ -43,7 +44,6 @@ module SumMonoid (monoid : Monoid a ℓ) where
   open Monoid monoid renaming (Carrier to A)
   open import Relation.Binary.Reasoning.Setoid setoid
   open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
-  open import Vector.Properties
   open import Vector.Setoid.Properties setoid hiding (++-cong)
   open SumRawMonoid rawMonoid public
 
@@ -60,38 +60,48 @@ module SumMonoid (monoid : Monoid a ℓ) where
     head U ∙ ∑ (tail U) ≈⟨ ∙-cong (U≈V F.zero) (∑Ext (U≈V ∘ suc)) ⟩
     head V ∙ ∑ (tail V) ∎
 
+module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
+
+  open CommutativeMonoid cMonoid renaming (Carrier to A)
+  open import Relation.Binary.Reasoning.Setoid setoid
+  open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
+  open import Vector.Setoid.Properties setoid hiding (++-cong)
+  open SumMonoid monoid public
+  open import Algebra.Solver.CommutativeMonoid cMonoid using (solve; _⊜_; _⊕_)
+
+
+  ∑Split : (V W : Vector A n) → ∑ (λ i → V i ∙ W i) ≈ ∑ V ∙ ∑ W
+  ∑Split {zero} V W = sym (identityʳ _)
+  ∑Split {suc n} V W = begin
+    head V ∙ head W ∙ ∑ (λ i → tail V i ∙ tail W i) ≈⟨ ∙-congˡ (∑Split (tail V) (tail W)) ⟩
+    head V ∙ head W ∙ (∑ (tail V) ∙ ∑ (tail W)) ≈⟨ helper (head V) (head W) (∑ (tail V)) (∑ (tail W)) ⟩
+    ∑ V ∙ ∑ W ∎ where
+
+    helper : ∀ a b c d → a ∙ b ∙ (c ∙ d) ≈ ((a ∙ c) ∙ (b ∙ d))
+    helper = solve 4 (λ a b c d → ((a ⊕ b) ⊕ (c ⊕ d)) ⊜ ((a ⊕ c) ⊕ (b ⊕ d))) refl
+
+  ∑Split++ : (V : Vector A m) (W : Vector A n) → ∑ (V ++ W) ≈ ∑ V ∙ ∑ W
+  ∑Split++ {zero} V W = sym (identityˡ _)
+  ∑Split++ {suc m} V W = begin
+    ∑ (V ++ W) ≈⟨ ∑Ext {U = V ++ W} {V = (V F.zero ∷ tail V) ++ W}
+      (λ i → reflexive (++-cong V (head V ∷ tail V)
+      (λ i → ≡.sym (head++tail≡id V i) ) (λ _ → ≡.refl) i)) ⟩
+    ∑ ((V F.zero ∷ tail V) ++ W) ≈⟨ ∑Ext (reflexive ∘ ++-split (V F.zero) (tail V) W) ⟩
+    V F.zero ∙ ∑ (tail V ++ W) ≈⟨ ∙-congˡ (∑Split++ (tail V) W) ⟩
+    (V F.zero ∙ (∑ (tail V) ∙ ∑ W)) ≈˘⟨ assoc _ _ _ ⟩
+    (∑ V ∙ ∑ W) ∎
+
 module SumRing (ring : Ring a ℓ) where
 
   open Ring ring renaming (Carrier to A)
   open SumRawRing rawRing
   open import Relation.Binary.Reasoning.Setoid setoid
   open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
-  open import Vector.Properties
   open import Vector.Setoid.Properties setoid hiding (++-cong)
   open Units ring
   open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid using (solve; _⊜_; _⊕_)
-  open SumMonoid +-monoid using (∑0r; ∑Ext) public
-
-  ∑Split : (V W : Vector A n) → ∑ (λ i → V i + W i) ≈ ∑ V + ∑ W
-  ∑Split {zero} V W = sym (+-identityʳ _)
-  ∑Split {suc n} V W = begin
-    head V + head W + ∑ (λ i → tail V i + tail W i) ≈⟨ +-congˡ (∑Split (tail V) (tail W)) ⟩
-    head V + head W + (∑ (tail V) + ∑ (tail W)) ≈⟨ helper (head V) (head W) (∑ (tail V)) (∑ (tail W)) ⟩
-    ∑ V + ∑ W ∎ where
-
-    helper : ∀ a b c d → a + b + (c + d) ≈ ((a + c) + (b + d))
-    helper = solve 4 (λ a b c d → ((a ⊕ b) ⊕ (c ⊕ d)) ⊜ ((a ⊕ c) ⊕ (b ⊕ d))) refl
-
-  ∑Split++ : (V : Vector A m) (W : Vector A n) → ∑ (V ++ W) ≈ ∑ V + ∑ W
-  ∑Split++ {zero} V W = sym (+-identityˡ _)
-  ∑Split++ {suc m} V W = begin
-    ∑ (V ++ W) ≈⟨ ∑Ext {U = V ++ W} {V = (V F.zero ∷ tail V) ++ W}
-      (λ i → reflexive (++-cong V (head V ∷ tail V)
-      (λ i → ≡.sym (head++tail≡id V i) ) (λ _ → ≡.refl) i)) ⟩
-    ∑ ((V F.zero ∷ tail V) ++ W) ≈⟨ ∑Ext (reflexive ∘ ++-split (V F.zero) (tail V) W) ⟩
-    V F.zero + ∑ (tail V ++ W) ≈⟨ +-congˡ (∑Split++ (tail V) W) ⟩
-    (V F.zero + (∑ (tail V) + ∑ W)) ≈˘⟨ +-assoc _ _ _ ⟩
-    (∑ V + ∑ W) ∎
+  open SumCommMonoid +-commutativeMonoid public
+    using (∑0r; ∑Ext; ∑Split; ∑Split++)
 
   ∑Mulrdist : (x : A) (V : Vector A n)
              → x * ∑ V ≈ ∑ λ i → x * V i
