@@ -5,8 +5,9 @@ open import Function
 open import Algebra
 import Data.Sum as Sum
 open import Data.Bool using (true; false)
-open import Data.Nat using (ℕ; zero; suc)
-open import Data.Fin as F using (Fin; _≟_; zero; suc)
+open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s)
+import Data.Nat.Properties as ℕ
+open import Data.Fin as F using (Fin; _≟_; zero; suc; punchIn)
 open import Data.Fin.Properties
 open import Data.Vec.Functional
 open import Data.Vec.Functional.Properties
@@ -104,6 +105,22 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
     helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
 
+  private
+    helperF : ∀ (i : Fin $ ℕ.suc n) j → i F.≤ j → punchIn i j ≡ suc j
+    helperF zero j i<j = ≡.refl
+    helperF (suc i) (suc j) i≤j = cong suc (helperF _ j (ℕ.≤-pred i≤j))
+
+    pred : Fin (suc (suc n)) → Fin (suc n)
+    pred zero = zero
+    pred (suc x) = x
+
+    pij≢sj : ∀ i j (i≤j : i F.≤ j) (k : Fin n) → punchIn i (punchIn j k) ≢ suc j
+    pij≢sj zero zero z≤n _ ()
+    pij≢sj zero (suc zero) z≤n zero ()
+    pij≢sj zero (suc zero) z≤n (suc k) ()
+    pij≢sj zero j@(suc (suc _)) z≤n k eq = punchInᵢ≢i j _ (cong pred eq)
+    pij≢sj (suc i) (suc j) (s≤s i≤j) (suc k) eq = pij≢sj _ _ i≤j _ (cong pred eq)
+
   ∑Swap : ∀ (V : Vector A n) i j (i<j : i F.< j) → ∑ (swapV V i j) ≈ ∑ V
   ∑Swap {suc zero} V zero zero ()
   ∑Swap {suc (suc n)} V i (suc j) i<j = begin
@@ -112,17 +129,19 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     (sv i ∙ (svr j ∙ ∑ svrr)) ≈⟨ helper (sv i) (svr j) _ ⟩
     (svr j ∙ (sv i ∙ ∑ svrr)) ≈⟨ ∙-cong
       (begin
-        svr j ≡⟨ {!!} ⟩
-        {!!} ≈⟨ {!!} ⟩
+        svr j ≡⟨ cong ((V [ i ]≔ V (suc j)) [ suc j ]≔ V i)
+          (helperF _ j (ℕ.≤-pred i<j))  ⟩
+        ((V [ i ]≔ V (suc j)) [ suc j ]≔ V i) (suc j) ≡⟨ updateAt-updates (suc j) (V [ i ]≔ V (suc j)) ⟩
         V i ∎)
       (∙-cong (begin
-                 sv i ≡⟨ updateAt-minimal i (suc j) _ {!!} ⟩
-                 {!!} ≡⟨ updateAt-updates i {!!} ⟩
-                 V (suc j) ≈⟨ {!!} ⟩
-                 -- {!!} ≈⟨ {!!} ⟩
-                 {!!} ≡˘⟨ cong V {!!} ⟩
+                 sv i ≡⟨ updateAt-minimal i (suc j) _ (<⇒≢ i<j) ⟩
+                 (V [ i ]≔ V (suc j)) i ≡⟨ updateAt-updates i V ⟩
+                 V (suc j) ≡˘⟨ cong V (helperF i j (ℕ.≤-pred i<j)) ⟩
                  vr j ∎)
-              {!!}) ⟩
+              (∑Ext (λ k → let pij = punchIn i (punchIn j k) in begin
+                svrr k ≡⟨ updateAt-minimal pij (suc j) _ (pij≢sj i j (ℕ.≤-pred i<j) k) ⟩
+                (V [ i ]≔ V (suc j)) pij ≡⟨ updateAt-minimal pij i _ (punchInᵢ≢i _ _) ⟩
+                vrr k ∎))) ⟩
     (V i ∙ (vr j ∙ ∑ vrr)) ≈˘⟨ ∙-congˡ (∑Remove vr j) ⟩
     (V i ∙ ∑ vr) ≈˘⟨ ∑Remove V i ⟩
     ∑ V ∎
@@ -136,6 +155,7 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
 
     helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
     helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
+
 
 
 module SumRing (ring : Ring a ℓ) where
