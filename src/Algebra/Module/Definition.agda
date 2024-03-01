@@ -20,7 +20,7 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
   open SumMonoid +ᴹ-monoid
 
   private variable
-    n : ℕ
+    m n : ℕ
 
   _*ᵣ_ : Vector A n → Op₁ $ Vector M n
   (u *ᵣ v) i = u i *ₗ v i
@@ -30,10 +30,10 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
       ys      : Vector A n
       xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x
 
-  _⊆ⱽ_ : (xs ys : Vector M n) → Set _
+  _⊆ⱽ_ : (xs : Vector M m) (ys : Vector M n) → Set _
   xs ⊆ⱽ ys = (xs reaches_) ⊆ (ys reaches_)
 
-  record _≋ⱽ_ (xs ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) where
+  record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) where
     field
       fwd : xs ⊆ⱽ ys
       bwd : ys ⊆ⱽ xs
