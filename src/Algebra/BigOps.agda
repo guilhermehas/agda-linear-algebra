@@ -14,6 +14,8 @@ open import Data.Vec.Functional.Properties
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; cong)
 open import Relation.Nullary.Decidable
 open import Vector.Properties
+open import Relation.Binary
+open import Relation.Nullary
 
 open import Algebra.Ring.Properties
 open import Vector
@@ -121,9 +123,9 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     pij≢sj zero j@(suc (suc _)) z≤n k eq = punchInᵢ≢i j _ (cong pred eq)
     pij≢sj (suc i) (suc j) (s≤s i≤j) (suc k) eq = pij≢sj _ _ i≤j _ (cong pred eq)
 
-  ∑Swap : ∀ (V : Vector A n) i j (i<j : i F.< j) → ∑ (swapV V i j) ≈ ∑ V
-  ∑Swap {suc zero} V zero zero ()
-  ∑Swap {suc (suc n)} V i (suc j) i<j = begin
+  ∑Swap< : ∀ (V : Vector A n) i j (i<j : i F.< j) → ∑ (swapV V i j) ≈ ∑ V
+  ∑Swap< {suc zero} V zero zero ()
+  ∑Swap< {suc (suc n)} V i (suc j) i<j = begin
     ∑ sv ≈⟨ ∑Remove sv i ⟩
     (sv i ∙ ∑ svr) ≈⟨ ∙-congˡ (∑Remove svr j) ⟩
     (sv i ∙ (svr j ∙ ∑ svrr)) ≈⟨ helper (sv i) (svr j) _ ⟩
@@ -156,6 +158,16 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
     helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
 
+  ∑Swap : ∀ (V : Vector A n) i j → ∑ (swapV V i j) ≈ ∑ V
+  ∑Swap {n = n} V i j with <-cmp i j
+  ... | tri< i<j _ _ = ∑Swap< V i j i<j
+  ... | tri> _ _ i>j = trans (∑Ext λ k → reflexive (swap-exchange V i j k)) (∑Swap< V j i i>j)
+  ... | tri≈ _ ≡.refl _ = ∑Ext {n} $ reflexive ∘ helper
+    where
+    helper : ∀ k → (V [ i ]≔ V i [ i ]≔ V i) k ≡ V k
+    helper k with k F.≟ i
+    ... | yes ≡.refl = updateAt-updates i _
+    ... | no k≢i = ≡.trans (updateAt-minimal k _ _ k≢i) (updateAt-minimal k _ _ k≢i)
 
 
 module SumRing (ring : Ring a ℓ) where
@@ -168,7 +180,7 @@ module SumRing (ring : Ring a ℓ) where
   open Units ring
   open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid using (solve; _⊜_; _⊕_)
   open SumCommMonoid +-commutativeMonoid public
-    using (∑0r; ∑Ext; ∑Split; ∑Split++)
+    using (∑0r; ∑Ext; ∑Split; ∑Split++; ∑Swap<; ∑Swap)
 
   ∑Mulrdist : (x : A) (V : Vector A n)
              → x * ∑ V ≈ ∑ λ i → x * V i
