@@ -372,7 +372,7 @@ xs*ws≈x (bwd (≈ⱽ⇒≋ⱽ (idR {xs = xs} {zs} xs≈zs)) {x} record { ys = 
 ws (fwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = swapV (≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd reach .ws) p q
 xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ swap≈ys) ⟩
-  ∑ (sws *ᵣ swapV zs p q) ≈⟨ ∑Ext {n} (λ k → ≈ᴹ-reflexive {!≡.refl!}) ⟩
+  ∑ (sws *ᵣ swapV zs p q) ≈⟨ ∑Ext {n} (λ k → ≈ᴹ-reflexive {!!}) ⟩
   -- ? ≡⟨ ? ⟩
 
   ∑ (swapV (wss *ᵣ zs) p q) ≈⟨ ∑Swap (wss *ᵣ zs) p q ⟩

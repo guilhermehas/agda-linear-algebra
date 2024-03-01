@@ -37,3 +37,6 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
     field
       fwd : xs ⊆ⱽ ys
       bwd : ys ⊆ⱽ xs
+
+  _isSolutionOf_ : A → Vector M n → Set _
+  α isSolutionOf v = ∀ k → α *ₗ v k ≈ᴹ 0ᴹ
