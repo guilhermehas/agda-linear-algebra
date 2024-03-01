@@ -48,7 +48,7 @@ module ≈ᴹ-Reasoning = ≈-Reasoning ≈ᴹ-setoid
 module ≈ᴹ = Setoid ≈ᴹ-setoid
 module ≋-Reasoning {n} = ≈-Reasoning (≋-setoid n)
 open MDefinitions leftModule
-open SumMonoid +ᴹ-monoid
+open SumCommMonoid +ᴹ-commutativeMonoid
 
 private variable
   m n : ℕ
@@ -370,9 +370,12 @@ xs*ws≈x (bwd (≈ⱽ⇒≋ⱽ (idR {xs = xs} {zs} xs≈zs)) {x} record { ys = 
   ∑ (ys *ᵣ zs) ≈⟨ xs*zs≈x ⟩
   x ∎ where open ≈ᴹ-Reasoning
 ws (fwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = swapV (≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd reach .ws) p q
-xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
+xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ swap≈ys) ⟩
-  ∑ (sws *ᵣ swapV zs p q) ≈⟨ {!!} ⟩
+  ∑ (sws *ᵣ swapV zs p q) ≈⟨ ∑Ext {n} (λ k → ≈ᴹ-reflexive {!≡.refl!}) ⟩
+  -- ? ≡⟨ ? ⟩
+
+  ∑ (swapV (wss *ᵣ zs) p q) ≈⟨ ∑Swap (wss *ᵣ zs) p q ⟩
   ∑ (wss *ᵣ zs) ≈⟨ help .xs*ws≈x ⟩
   x ∎ where
   open ≈ᴹ-Reasoning
@@ -383,7 +386,7 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q
   sws = swapV wss p q
 bwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) = {!!}
 ws (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) x∈xs) = {!!}
-xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) {x} x∈xs) = begin
+xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) {x} x∈xs) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ zs≋ys) ⟩
   ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≡⟨ {!!} ⟩
   -- {!!} ≡⟨ {!!} ⟩
