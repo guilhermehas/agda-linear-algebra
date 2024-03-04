@@ -44,6 +44,11 @@ module SumRawRing (rawRing : RawRing a ℓ) where
   ... | true  because _ = 1#
   ... | false because _ = 0#
 
+  δss≡δ : (i j : Fin n) → δ (suc i) (suc j) ≡ δ i j
+  δss≡δ i j with i ≟ j
+  ... | true  because _ = ≡.refl
+  ... | false because _ = ≡.refl
+
 module SumMonoid (monoid : Monoid a ℓ) where
 
   open Monoid monoid renaming (Carrier to A)
@@ -204,10 +209,10 @@ module SumRing (ring : Ring a ℓ) where
     0# * ∑ V            ≈⟨ 0LeftAnnihilates _ ⟩
     0# ∎
 
-  δss≡δ : (i j : Fin n) → δ (suc i) (suc j) ≈ δ i j
-  δss≡δ i j with i ≟ j
-  ... | true  because _ = refl
-  ... | false because _ = refl
+  -- δss≡δ : (i j : Fin n) → δ (suc i) (suc j) ≈ δ i j
+  -- δss≡δ i j with i ≟ j
+  -- ... | true  because _ = refl
+  -- ... | false because _ = refl
 
   ∑Mul1r : (V : Vector A n) (j : Fin n) → ∑ (λ i → δ j i * V i) ≈ V j
   ∑Mul1r {suc n} V zero = begin
@@ -218,7 +223,7 @@ module SumRing (ring : Ring a ℓ) where
   ∑Mul1r {suc n} V (suc j) = begin
     0# * _ + _                             ≈⟨ +-congʳ (0LeftAnnihilates _) ⟩
     0# + _                                 ≈⟨ +-identityˡ _ ⟩
-    ∑ (λ i → δ (suc j) (suc i) * tail V i) ≈⟨ ∑Ext (λ i → *-congʳ (δss≡δ j i)) ⟩
+    ∑ (λ i → δ (suc j) (suc i) * tail V i) ≈⟨ ∑Ext (λ i → *-congʳ (reflexive $ δss≡δ j i)) ⟩
     ∑ (λ i → δ j i * tail V i)             ≈⟨ ∑Mul1r (tail V) j ⟩
     tail V j ∎
 
