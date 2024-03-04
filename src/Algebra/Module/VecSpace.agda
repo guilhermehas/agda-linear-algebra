@@ -436,7 +436,20 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
   theo₁ = {!!}
 
   theo₂ : sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ ≋ wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ
-  theo₂ k = {!!}
+  theo₂ k = helper _ $ vBoolFromIndices indices k .proj₂
+    where
+    indices = q :: p :: V.[]
+    v0 = 0ᴹ :: 0ᴹ :: V.[]
+
+    helper : ∀ vBool (vType : VecWithType (λ (ind , b) → Reflects (k ≡ ind) b) $ V.zip indices vBool)
+      → (sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) k ≈ᴹ (wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) k
+    helper (true :: vBool) vt@(ofʸ ≡.refl :: vType) = begin
+      _   ≡⟨ vecUpdates≡reflectBool-theo sws*zs v0 k vt ⟩
+      0ᴹ ≡˘⟨ vecUpdates≡reflectBool-theo wss*zs v0 k vt ⟩
+      _ ∎
+    helper (false :: true :: vBool) vt@(_ :: ofʸ ≡.refl :: vType) = ≈ᴹ-reflexive (≡.trans
+      (vecUpdates≡reflectBool-theo sws*zs v0 k vt) (≡.sym $ vecUpdates≡reflectBool-theo wss*zs v0 k vt))
+    helper (false :: false :: V.[]) (ofⁿ ¬a :: ofⁿ ¬b :: []) = {!!}
 
   sameness : ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈ᴹ ∑ (wss *ᵣ zs)
   sameness = begin
