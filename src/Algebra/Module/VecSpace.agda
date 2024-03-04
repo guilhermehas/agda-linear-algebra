@@ -420,8 +420,6 @@ ws (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs
 xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) {x} x∈xs) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ zs≋ys) ⟩
   ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈⟨ sameness ⟩
-  -- {!!} ≡⟨ {!!} ⟩
-  -- {!!} ≡⟨ {!!} ⟩
   ∑ (wss *ᵣ zs) ≈⟨ help .xs*ws≈x ⟩
   x ∎
   where
@@ -434,23 +432,20 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
   wss*zs = wss *ᵣ zs
   sws*zs = sws *ᵣ (zs [ q ]← r *[ p ])
 
-  theo₁ : sws*zs p ≈ᴹ wss*zs p
+  theo₁ : sws*zs p +ᴹ (sws*zs [ p ]≔ 0ᴹ) q ≈ᴹ wss*zs p +ᴹ (wss*zs [ p ]≔ 0ᴹ) q
   theo₁ = {!!}
 
-  theo₂ : (sws*zs [ p ]≔ 0ᴹ) q ≈ᴹ (wss*zs [ p ]≔ 0ᴹ) q
-  theo₂ = {!!}
-
-  theo₃ : sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ ≋ wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ
-  theo₃ k = {!!}
+  theo₂ : sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ ≋ wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ
+  theo₂ k = {!!}
 
   sameness : ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈ᴹ ∑ (wss *ᵣ zs)
   sameness = begin
     ∑ sws*zs ≈⟨ ∑Remove₂ sws*zs p ⟩
-    sws*zs p +ᴹ _ ≈⟨ +ᴹ-cong theo₁ (begin
-      _ ≈⟨ ∑Remove₂ {n = n} _ q ⟩
-      _ +ᴹ _ ≈⟨ +ᴹ-cong theo₂ (∑Ext {n} theo₃) ⟩
-      _ +ᴹ _ ≈˘⟨ ∑Remove₂ {n = n} _ q ⟩
-      _ ∎) ⟩
+    sws*zs p +ᴹ _ ≈⟨ +ᴹ-congˡ (∑Remove₂ {n} _ q) ⟩
+    sws*zs p +ᴹ (_ +ᴹ _) ≈˘⟨ +ᴹ-assoc (sws*zs p) _ _ ⟩
+    sws*zs p +ᴹ (sws*zs [ p ]≔ 0ᴹ) q +ᴹ _ ≈⟨ +ᴹ-cong theo₁ (∑Ext theo₂) ⟩
+    wss*zs p +ᴹ (wss*zs [ p ]≔ 0ᴹ) q  +ᴹ _ ≈⟨ +ᴹ-assoc _ _ _ ⟩
+    wss*zs p +ᴹ (_ +ᴹ _) ≈˘⟨ +ᴹ-congˡ (∑Remove₂ {n} _ q) ⟩
     wss*zs p +ᴹ _ ≈˘⟨ ∑Remove₂ wss*zs p ⟩
     ∑ wss*zs ∎
 
