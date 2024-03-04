@@ -378,8 +378,6 @@ ws (fwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reac
 xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ swap≈ys) ⟩
   ∑ (sws *ᵣ swapV zs p q) ≈⟨ ∑Ext {n} sameness ⟩
-  -- ? ≡⟨ ? ⟩
-
   ∑ (swapV (wss *ᵣ zs) p q) ≈⟨ ∑Swap (wss *ᵣ zs) p q ⟩
   ∑ (wss *ᵣ zs) ≈⟨ help .xs*ws≈x ⟩
   x ∎ where
@@ -421,7 +419,8 @@ bwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) = {!!}
 ws (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) x∈xs) = {!!}
 xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) {x} x∈xs) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ zs≋ys) ⟩
-  ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈⟨ ∑Ext {n} sameness ⟩
+  ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈⟨ sameness ⟩
+  -- {!!} ≡⟨ {!!} ⟩
   -- {!!} ≡⟨ {!!} ⟩
   ∑ (wss *ᵣ zs) ≈⟨ help .xs*ws≈x ⟩
   x ∎
@@ -432,15 +431,28 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
   sws : Vector R n
   sws k = {!!}
 
-  sameness : ∀ k → (sws *ᵣ (zs [ q ]← r *[ p ])) k ≈ᴹ (wss *ᵣ zs) k
-  sameness k = {!!}
-  --   with q ≟ k
-  -- ... | yes ≡.refl = begin
-  --   {!!} *ₗ (zs k +ᴹ r *ₗ zs p) ≈⟨ {!!} ⟩
-  --   -- {!!} *ₗ {! !} ≈⟨ {!sws!} ⟩
-  --   -- {!!} ≈⟨ {!!} ⟩
-  --   -- {!!} ≈⟨ {!!} ⟩
-  --   wss k *ₗ zs k ∎
-  -- ... | no q≢k = ≈ᴹ-refl
+  wss*zs = wss *ᵣ zs
+  sws*zs = sws *ᵣ (zs [ q ]← r *[ p ])
+
+  theo₁ : sws*zs p ≈ᴹ wss*zs p
+  theo₁ = {!!}
+
+  theo₂ : (sws*zs [ p ]≔ 0ᴹ) q ≈ᴹ (wss*zs [ p ]≔ 0ᴹ) q
+  theo₂ = {!!}
+
+  theo₃ : sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ ≋ wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ
+  theo₃ k = {!!}
+
+  sameness : ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈ᴹ ∑ (wss *ᵣ zs)
+  sameness = begin
+    ∑ sws*zs ≈⟨ ∑Remove₂ sws*zs p ⟩
+    sws*zs p +ᴹ _ ≈⟨ +ᴹ-cong theo₁ (begin
+      _ ≈⟨ ∑Remove₂ {n = n} _ q ⟩
+      _ +ᴹ _ ≈⟨ +ᴹ-cong theo₂ (∑Ext {n} theo₃) ⟩
+      _ +ᴹ _ ≈˘⟨ ∑Remove₂ {n = n} _ q ⟩
+      _ ∎) ⟩
+    wss*zs p +ᴹ _ ≈˘⟨ ∑Remove₂ wss*zs p ⟩
+    ∑ wss*zs ∎
+
 
 bwd (≈ⱽ⇒≋ⱽ (rec (addCons p q p≢q r) xs≈ⱽys x)) = {!!}

@@ -112,6 +112,17 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
     helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
 
+  ∑Remove₂ : ∀ (V : Vector A n) i → ∑ V ≈ V i ∙ ∑ (V [ i ]≔ ε)
+  ∑Remove₂ V zero = ∙-congˡ (sym (identityˡ _))
+  ∑Remove₂ {ℕ.suc _} V (suc i) = begin
+    (V zero ∙ ∑ tV )                    ≈⟨ (∙-congˡ $ ∑Remove₂ tV i) ⟩
+    (V zero ∙ (tV i ∙ ∑ (tV [ i ]≔ ε))) ≈⟨ helper _ _ _ ⟩
+    (tV i ∙ (V zero ∙ ∑ (tV [ i ]≔ ε))) ∎
+    where
+    tV = tail V
+    helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
+    helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
+
   private
     helperF : ∀ (i : Fin $ ℕ.suc n) j → i F.≤ j → punchIn i j ≡ suc j
     helperF zero j i<j = ≡.refl
@@ -208,11 +219,6 @@ module SumRing (ring : Ring a ℓ) where
     ∑ (λ i → 0# * V i) ≈˘⟨ ∑Mulrdist 0# V ⟩
     0# * ∑ V            ≈⟨ 0LeftAnnihilates _ ⟩
     0# ∎
-
-  -- δss≡δ : (i j : Fin n) → δ (suc i) (suc j) ≈ δ i j
-  -- δss≡δ i j with i ≟ j
-  -- ... | true  because _ = refl
-  -- ... | false because _ = refl
 
   ∑Mul1r : (V : Vector A n) (j : Fin n) → ∑ (λ i → δ j i * V i) ≈ V j
   ∑Mul1r {suc n} V zero = begin
