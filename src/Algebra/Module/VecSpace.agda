@@ -4,10 +4,12 @@ open import Algebra
 open import Algebra.Module
 open import Data.Empty
 open import Data.Bool hiding (_≟_)
+open import Data.Maybe using (Maybe; map)
 open import Data.Product
 open import Data.Sum renaming ([_,_] to [_⊕_])
 open import Data.Nat as ℕ using (ℕ; _∸_)
 open import Data.Nat.Properties as ℕ hiding (_≟_)
+open import Data.Vec as V renaming (_∷_ to _::_) using (Vec; [])
 open import Data.Fin
 open import Data.Fin.Properties
 open import Data.Fin.Patterns
@@ -30,6 +32,9 @@ open import Vector.Permutation
 import Algebra.Module.Base as MBase
 import Algebra.Module.Definition as MDefinitions
 open import Algebra.BigOps
+
+open import Vec.Updates.Base renaming (_∷_ to _::_)
+open import Vec.Relation.FirstOrNot
 
 module Algebra.Module.VecSpace {rr ℓr mr ℓm}
   {ring : Ring rr ℓr}
@@ -372,7 +377,7 @@ xs*ws≈x (bwd (≈ⱽ⇒≋ⱽ (idR {xs = xs} {zs} xs≈zs)) {x} record { ys = 
 ws (fwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = swapV (≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd reach .ws) p q
 xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (swapOp p q p≢q) xs≈ⱽys swap≈ys)) {x} reach@record { ys = ys ; xs*ys≈x = xs*ys≈x }) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ swap≈ys) ⟩
-  ∑ (sws *ᵣ swapV zs p q) ≈⟨ ∑Ext {n} (λ k → ≈ᴹ-reflexive {!!}) ⟩
+  ∑ (sws *ᵣ swapV zs p q) ≈⟨ ∑Ext {n} sameness ⟩
   -- ? ≡⟨ ? ⟩
 
   ∑ (swapV (wss *ᵣ zs) p q) ≈⟨ ∑Swap (wss *ᵣ zs) p q ⟩
@@ -384,11 +389,39 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (swapOp p q p
   help = eqn .fwd reach
   wss = ws help
   sws = swapV wss p q
+  wssZs = wss *ᵣ zs
+
+
+  sameness : sws *ᵣ swapV zs p q ≋ swapV (wss *ᵣ zs) p q
+  sameness k = begin
+    swapV wss p q k *ₗ swapV zs p q k ≈⟨ *ₗ-congʳ (reflexive
+      (vecUpdates≡reflectBool-theo2 wss indices valuesWss k)) ⟩
+    evalFromPosition valuesWss (wss k) evaluatedWss *ₗ swapV zs p q k ≈⟨ *ₗ-congˡ
+      (≈ᴹ-reflexive (vecUpdates≡reflectBool-theo2 zs indices val2 k)) ⟩
+    _ *ₗ _ ≈⟨ helper _ (vBoolFromIndices indices k .proj₂) ⟩
+    _ ≈˘⟨ ≈ᴹ-reflexive (vecUpdates≡reflectBool-theo2 wssZs indices val3 k) ⟩
+    swapV wssZs p q k ∎
+    where
+
+    indices = q :: p :: V.[]
+    valuesWss = wss p :: wss q :: V.[]
+    evaluatedWss = firstTrue $ proj₁ $ vBoolFromIndices indices k
+
+    val2 = zs p :: zs q :: V.[]
+    val3 = wssZs p :: wssZs q :: V.[]
+
+    helper : ∀ vBool (vType : VecWithType (λ (ind , b) → Reflects (k ≡ ind) b) $ V.zip indices vBool) →
+      evalFromPosition valuesWss (wss k) (firstTrue vBool) *ₗ evalFromPosition val2 (zs k) (firstTrue vBool) ≈ᴹ
+      evalFromPosition val3 (wssZs k) (firstTrue vBool)
+    helper (true :: _) (ofʸ ≡.refl :: _) = ≈ᴹ-refl
+    helper (false :: true :: V.[]) (ofⁿ _ :: ofʸ ≡.refl :: []) = ≈ᴹ-refl
+    helper (false :: false :: V.[]) (ofⁿ _ :: ofⁿ _ :: []) = ≈ᴹ-refl
+
 bwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) = {!!}
 ws (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) x∈xs) = {!!}
 xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) {x} x∈xs) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ zs≋ys) ⟩
-  ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≡⟨ {!!} ⟩
+  ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈⟨ ∑Ext {n} sameness ⟩
   -- {!!} ≡⟨ {!!} ⟩
   ∑ (wss *ᵣ zs) ≈⟨ help .xs*ws≈x ⟩
   x ∎
@@ -396,5 +429,18 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
   open ≈ᴹ-Reasoning
   help = ≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd x∈xs
   wss = ws help
-  sws = {!!}
+  sws : Vector R n
+  sws k = {!!}
+
+  sameness : ∀ k → (sws *ᵣ (zs [ q ]← r *[ p ])) k ≈ᴹ (wss *ᵣ zs) k
+  sameness k = {!!}
+  --   with q ≟ k
+  -- ... | yes ≡.refl = begin
+  --   {!!} *ₗ (zs k +ᴹ r *ₗ zs p) ≈⟨ {!!} ⟩
+  --   -- {!!} *ₗ {! !} ≈⟨ {!sws!} ⟩
+  --   -- {!!} ≈⟨ {!!} ⟩
+  --   -- {!!} ≈⟨ {!!} ⟩
+  --   wss k *ₗ zs k ∎
+  -- ... | no q≢k = ≈ᴹ-refl
+
 bwd (≈ⱽ⇒≋ⱽ (rec (addCons p q p≢q r) xs≈ⱽys x)) = {!!}
