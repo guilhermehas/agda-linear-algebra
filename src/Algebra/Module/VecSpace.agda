@@ -418,7 +418,8 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (swapOp p q p
     helper (false :: false :: V.[]) (ofⁿ _ :: ofⁿ _ :: []) = ≈ᴹ-refl
 
 bwd (≈ⱽ⇒≋ⱽ (rec (swapOp p q p≢q) xs≈ⱽys swap≈ys)) = {!!}
-ws (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) x∈xs) = {!!}
+ws (fwd (≈ⱽ⇒≋ⱽ {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) x∈xs) = 
+  let wss = ws (≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd x∈xs) in wss [ p ]≔ (wss p - wss q * r)
 xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q r) xs≈ⱽys zs≋ys)) {x} x∈xs) = begin
   ∑ (sws *ᵣ yss) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ zs≋ys) ⟩
   ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈⟨ sameness ⟩
@@ -444,6 +445,9 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
   sws*zsP≡ : sws*zs p ≡ sws p *ₗ zs p
   sws*zsP≡ rewrite dec-no (q ≟ p) (p≢q ∘ ≡.sym) = ≡.refl
 
+  sws*zsK≡ : ∀ {k} → k ≢ q → sws*zs k ≡ sws k *ₗ zs k
+  sws*zsK≡ {k} k≢q rewrite dec-no (q ≟ k) (k≢q ∘ ≡.sym) = ≡.refl
+
   sws*zsQ : sws*zs q ≈ᴹ sws q *ₗ zs q +ᴹ (sws q * r) *ₗ zs p
   sws*zsQ = begin
     _ ≈⟨ *ₗ-congˡ (≈ᴹ-reflexive zsPq≡) ⟩
@@ -453,8 +457,11 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
 
   swsP : sws p + sws q * r ≈ wss p
   swsP = ∼.begin
-    sws p + sws q * r ∼.≈⟨ {!!} ⟩
-    -- {!!} ∼.≈⟨ {!!} ⟩
+    sws p + sws q * r ∼.≈⟨ +-cong (reflexive (updateAt-updates p wss))
+      (*-congʳ (reflexive (updateAt-minimal q p _ q≢p))) ⟩
+    wss p - wss q * r + wss q * r ∼.≈⟨ R.+-assoc (wss p) _ _ ⟩
+    wss p + (- (wss q * r) + wss q * r) ∼.≈⟨ +-congˡ (-‿inverseˡ _) ⟩
+    wss p + 0# ∼.≈⟨ R.+-identityʳ _ ⟩
     wss p ∼.∎
 
   swsQ : sws q ≈ wss q
@@ -485,6 +492,7 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
     indices = q :: p :: V.[]
     v0 = 0ᴹ :: 0ᴹ :: V.[]
 
+
     helper : ∀ vBool (vType : VecIndBool indices vBool k)
       → (sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) k ≈ᴹ (wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) k
     helper (true :: _) vt@(ofʸ ≡.refl :: _) = begin
@@ -493,12 +501,13 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
       _ ∎
     helper (false :: true :: _) vt@(_ :: _ :: _) = ≈ᴹ-reflexive (≡.trans
       (vecUpdates≡reflectBool-theo sws*zs v0 k vt) (≡.sym $ vecUpdates≡reflectBool-theo wss*zs v0 k vt))
-    helper (false :: false :: V.[]) vt@(ofⁿ ¬a :: ofⁿ ¬b :: []) = begin
-      _   ≡⟨ vecUpdates≡reflectBool-theo sws*zs v0 k vt ⟩
-      sws*zs k ≈⟨ {!!} ⟩
-      -- {!!} ≈⟨ {!!} ⟩
-      wss*zs k ≡˘⟨ vecUpdates≡reflectBool-theo wss*zs v0 k vt ⟩
+    helper (false :: false :: V.[]) vt@(ofⁿ k≢q :: ofⁿ k≢p :: []) = begin
+      _              ≡⟨ vecUpdates≡reflectBool-theo sws*zs v0 k vt ⟩
+      sws*zs k       ≡⟨ sws*zsK≡ k≢q ⟩
+      _ *ₗ zs k      ≈⟨ *ₗ-congʳ (reflexive (updateAt-minimal k p _ k≢p)) ⟩
+      wss k *ₗ zs k ≡˘⟨ vecUpdates≡reflectBool-theo wss*zs v0 k vt ⟩
       _ ∎
+
 
   sameness : ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈ᴹ ∑ (wss *ᵣ zs)
   sameness = begin
