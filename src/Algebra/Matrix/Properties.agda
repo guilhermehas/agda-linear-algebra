@@ -91,7 +91,7 @@ module MRingProps (ring : Ring a ℓ) where
   *ᴹ-identityˡ {ℕ.suc n} M (suc i) k = begin
     (0# * M zero k + _) ≈⟨ +-congʳ (zeroˡ _) ⟩
     (0# + _) ≈⟨ +-identityˡ _ ⟩
-    (∑ λ j → δ (suc i) (suc j) * M (suc j) k) ≈⟨ ∑Ext (λ j → *-congʳ (δss≡δ i j))  ⟩
+    (∑ λ j → δ (suc i) (suc j) * M (suc j) k) ≈⟨ ∑Ext (λ j → *-congʳ (reflexive (δss≡δ i j)))  ⟩
     (∑ λ j → δ i j * M (suc j) k) ≈⟨ *ᴹ-identityˡ (tail M) i k ⟩
     M (suc i) k ∎ where open ≈-Reasoning setoid
 
