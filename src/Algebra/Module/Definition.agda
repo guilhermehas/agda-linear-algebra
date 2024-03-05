@@ -30,8 +30,9 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
       ys      : Vector A n
       xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x
 
-  _⊆ⱽ_ : (xs : Vector M m) (ys : Vector M n) → Set _
+  _⊆ⱽ_ _⊇ⱽ_ : (xs : Vector M m) (ys : Vector M n) → Set _
   xs ⊆ⱽ ys = (xs reaches_) ⊆ (ys reaches_)
+  xs ⊇ⱽ ys = ys ⊆ⱽ xs
 
   record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) where
     field

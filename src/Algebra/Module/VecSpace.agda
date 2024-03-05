@@ -513,5 +513,34 @@ xs*ws≈x (≈ⱽ⇒⊆ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q p≢q
     wss*zs p +ᴹ _ ≈˘⟨ ∑Remove₂ wss*zs p ⟩
     ∑ wss*zs ∎
 
+≈ⱽ-sym : Symmetric (_≈ⱽ_ {n = n})
+≈ⱽ-sym (idR xs≈ys) = idR (≋-sym xs≈ys)
+≈ⱽ-sym {x = xs} {zs} (rec {ys = ys} (MBase.swapOp p q p≢q) xs≈ⱽys fMops) =
+  ≈ⱽ-trans (rec (swapOp p q p≢q) (idR (≋-sym fMops)) λ i → ≈ᴹ-reflexive (swap-involute ys p q i)) ys≈ⱽxs
+  where
+  ys≈ⱽxs = ≈ⱽ-sym xs≈ⱽys
+≈ⱽ-sym {x = xs} {zs} (rec {ys = ys} (MBase.addCons p q p≢q r) xs≈ⱽys fMops) =
+  ≈ⱽ-trans (rec (addCons p q p≢q (- r)) (idR (≋-sym fMops)) sameVec) ys≈ⱽxs
+  where
+  ys≈ⱽxs = ≈ⱽ-sym xs≈ⱽys
+
+  sameVec : ((ys [ q ]← r *[ p ]) [ q ]← - r *[ p ]) ≋ ys
+  sameVec i with q ≟ i
+  ... | no q≢i rewrite dec-no (q ≟ i) q≢i | dec-no (q ≟ i) q≢i = ≈ᴹ-refl
+  ... | yes ≡.refl rewrite dec-yes (i ≟ i) ≡.refl .proj₂ | dec-no (i ≟ p) (p≢q ∘ ≡.sym) = begin
+    ys i +ᴹ r *ₗ ys p +ᴹ - r *ₗ ys p ≈⟨ +ᴹ-assoc _ _ _ ⟩
+    ys i +ᴹ (r *ₗ ys p +ᴹ - r *ₗ ys p) ≈⟨ +ᴹ-congˡ (begin
+       _ ≈˘⟨ *ₗ-distribʳ (ys p) r (- r) ⟩
+       (r - r) *ₗ ys p ≈⟨ *ₗ-congʳ (-‿inverseʳ _) ⟩
+       0# *ₗ ys p ≈⟨ *ₗ-zeroˡ _ ⟩
+       _ ∎
+       ) ⟩
+    ys i +ᴹ 0ᴹ ≈⟨ +ᴹ-identityʳ _ ⟩
+    ys i ∎
+    where open ≈ᴹ-Reasoning
+
+≈ⱽ⇒⊇ⱽ : xs ≈ⱽ ys → xs ⊇ⱽ ys
+≈ⱽ⇒⊇ⱽ = ≈ⱽ⇒⊆ⱽ ∘ ≈ⱽ-sym
+
 ≈ⱽ⇒≋ⱽ : xs ≈ⱽ ys → xs ≋ⱽ ys
-≈ⱽ⇒≋ⱽ xs≈ⱽys = record { fwd = ≈ⱽ⇒⊆ⱽ xs≈ⱽys ; bwd = {!!} }
+≈ⱽ⇒≋ⱽ xs≈ⱽys = record { fwd = ≈ⱽ⇒⊆ⱽ xs≈ⱽys ; bwd = ≈ⱽ⇒⊇ⱽ xs≈ⱽys }
