@@ -2,7 +2,7 @@ open import Algebra
 open import Algebra.Module
 
 module Algebra.Module.Props {rr ℓr mr ℓm}
-  {cRing : CommutativeRing rr ℓr}
+  (cRing : CommutativeRing rr ℓr)
   (open CommutativeRing cRing using (ring))
   (leftModule : LeftModule ring mr ℓm)
   where
