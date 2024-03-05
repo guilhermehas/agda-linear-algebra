@@ -432,6 +432,30 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
   wss*zs = wss *ᵣ zs
   sws*zs = sws *ᵣ (zs [ q ]← r *[ p ])
 
+  zsPq≡ : (zs [ q ]← r *[ p ]) q ≡ zs q +ᴹ r *ₗ zs p
+  zsPq≡ rewrite dec-yes (q ≟ q) ≡.refl .proj₂ = ≡.refl
+
+  sws*zsP≡ : sws*zs p ≡ sws p *ₗ zs p
+  sws*zsP≡ rewrite dec-no (q ≟ p) (p≢q ∘ ≡.sym) = ≡.refl
+
+  sws*zsQ : sws*zs q ≈ᴹ sws q *ₗ zs q +ᴹ (sws q * r) *ₗ zs p
+  sws*zsQ = begin
+    _ ≈⟨ *ₗ-congˡ (≈ᴹ-reflexive zsPq≡) ⟩
+    sws q *ₗ (zs q +ᴹ r *ₗ zs p) ≈⟨ *ₗ-distribˡ _ _ _ ⟩
+    sws q *ₗ zs q +ᴹ sws q *ₗ r *ₗ zs p ≈˘⟨ +ᴹ-congˡ (*ₗ-assoc _ _ _) ⟩
+    _ ∎
+
+
+  theo₀ : sws*zs p +ᴹ sws*zs q ≈ᴹ wss*zs p +ᴹ wss*zs q
+  theo₀ = begin
+    _ ≈⟨ +ᴹ-cong (≈ᴹ-reflexive sws*zsP≡) sws*zsQ ⟩
+    sws p *ₗ zs p +ᴹ (sws q *ₗ zs q +ᴹ (sws q * r) *ₗ zs p) ≈⟨ {!!} ⟩
+    sws p *ₗ zs p +ᴹ (sws q * r) *ₗ zs p +ᴹ sws q *ₗ zs q ≈⟨ {!!} ⟩
+    (sws p * (sws q * r)) *ₗ zs p +ᴹ sws q *ₗ zs q ≈⟨ {!!} ⟩
+    -- {!!} ≈⟨ {!!} ⟩
+    _ ∎
+
+
   theo₁ : sws*zs p +ᴹ (sws*zs [ p ]≔ 0ᴹ) q ≈ᴹ wss*zs p +ᴹ (wss*zs [ p ]≔ 0ᴹ) q
   theo₁ = {!!}
 
@@ -441,15 +465,20 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
     indices = q :: p :: V.[]
     v0 = 0ᴹ :: 0ᴹ :: V.[]
 
-    helper : ∀ vBool (vType : VecWithType (λ (ind , b) → Reflects (k ≡ ind) b) $ V.zip indices vBool)
+    helper : ∀ vBool (vType : VecIndBool indices vBool k)
       → (sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) k ≈ᴹ (wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) k
-    helper (true :: vBool) vt@(ofʸ ≡.refl :: vType) = begin
+    helper (true :: _) vt@(ofʸ ≡.refl :: _) = begin
       _   ≡⟨ vecUpdates≡reflectBool-theo sws*zs v0 k vt ⟩
       0ᴹ ≡˘⟨ vecUpdates≡reflectBool-theo wss*zs v0 k vt ⟩
       _ ∎
-    helper (false :: true :: vBool) vt@(_ :: ofʸ ≡.refl :: vType) = ≈ᴹ-reflexive (≡.trans
+    helper (false :: true :: _) vt@(_ :: _ :: _) = ≈ᴹ-reflexive (≡.trans
       (vecUpdates≡reflectBool-theo sws*zs v0 k vt) (≡.sym $ vecUpdates≡reflectBool-theo wss*zs v0 k vt))
-    helper (false :: false :: V.[]) (ofⁿ ¬a :: ofⁿ ¬b :: []) = {!!}
+    helper (false :: false :: V.[]) vt@(ofⁿ ¬a :: ofⁿ ¬b :: []) = begin
+      _   ≡⟨ vecUpdates≡reflectBool-theo sws*zs v0 k vt ⟩
+      sws*zs k ≈⟨ {!!} ⟩
+      -- {!!} ≈⟨ {!!} ⟩
+      wss*zs k ≡˘⟨ vecUpdates≡reflectBool-theo wss*zs v0 k vt ⟩
+      _ ∎
 
   sameness : ∑ (sws *ᵣ (zs [ q ]← r *[ p ])) ≈ᴹ ∑ (wss *ᵣ zs)
   sameness = begin

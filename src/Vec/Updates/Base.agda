@@ -17,6 +17,7 @@ open import Relation.Binary.PropositionalEquality
 open import Vec.Relation.FirstOrNot
 open import Relation.Nullary.Decidable
 open import Relation.Nullary
+open import Relation.Binary
 
 open import Vector
 
@@ -64,6 +65,8 @@ data VecWithType {A : Set ℓ} (P : A → Set ℓ1) : Vec A n → Set (ℓ Level
   []  : VecWithType P []
   _∷_ : P a → VecWithType P xs → VecWithType P (a ∷ xs)
 
+VecIndBool : ∀ (indices : Vec A n) vBool k → Set _
+VecIndBool indices vBool k = VecWithType (λ (ind , b) → Reflects (k ≡ ind) b) $ Vec.zip indices vBool
 
 evalFromVReflect : (xs : Vector A n) {vBool : Vec Bool m}
   (values : Vec A m) (i : Fin n) (firstOrNot : FirstOrNot T vBool b) → A
@@ -106,7 +109,7 @@ vecUpdates≡reflectBool-lemma : ∀ (xs : Vector A n) (values : Vec A m) i (vBo
 vecUpdates≡reflectBool-lemma xs values i vBool rewrite vecUpdates≡reflectBool-lema₂ xs values vBool = refl
 
 vecUpdates≡reflectBool-theo : ∀ (xs : Vector A n) {indices : Vec (Fin n) m} (values : Vec A m) i
-  {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
+  {vBool : Vec Bool m} (vType : VecIndBool indices vBool i)
   → vecUpdates xs indices values i ≡ evalFromPosition values (xs i) (firstTrue vBool)
 vecUpdates≡reflectBool-theo xs {indices} values i {vBool} vType = begin
   vecUpdates xs indices values i ≡⟨ vecUpdates≡reflectBool xs values i vType (proj₂ (firstOrNotFromDec T? vBool)) ⟩
@@ -123,7 +126,7 @@ vecUpdates≡reflectBool-theo2 : ∀ (xs : Vector A n) (indices : Vec (Fin n) m)
 vecUpdates≡reflectBool-theo2 xs indices values i = vecUpdates≡reflectBool-theo xs values i (proj₂ (vBoolFromIndices indices i))
 
 vecUpdates≡reflectBool-lemma3 : ∀ (indices : Vec (Fin n) m) i
-  {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
+  {vBool : Vec Bool m} (vType : VecIndBool indices vBool i)
   → vBoolFromIndices indices i .proj₁ ≡ vBool
 vecUpdates≡reflectBool-lemma3 [] i {[]} vType = refl
 vecUpdates≡reflectBool-lemma3 (ind ∷ indices) i {false ∷ vBool} (ofⁿ ¬a ∷ vType) =
@@ -132,7 +135,7 @@ vecUpdates≡reflectBool-lemma3 (ind ∷ indices) _ {true ∷ vBool} (ofʸ refl 
    = cong₂ _∷_ (dec-true (ind Fin.≟ ind) refl) (vecUpdates≡reflectBool-lemma3 indices _ vType)
 
 vecUpdates≡reflectBool-theo3 : ∀ (xs : Vector A n) (indices : Vec (Fin n) m) (values : Vec A m) i
-  {vBool : Vec Bool m} (vType : VecWithType (λ (ind , b) → Reflects (i ≡ ind) b) (Vec.zip indices vBool))
+  {vBool : Vec Bool m} (vType : VecIndBool indices vBool i)
   → evalFromPosition values (xs i) (firstTrue (vBoolFromIndices indices i .proj₁))
   ≡ evalFromPosition values (xs i) (firstTrue vBool)
 vecUpdates≡reflectBool-theo3 xs indices values i vType
