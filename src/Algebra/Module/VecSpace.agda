@@ -10,10 +10,10 @@ open import Data.Sum renaming ([_,_] to [_⊕_])
 open import Data.Nat as ℕ using (ℕ; _∸_)
 open import Data.Nat.Properties as ℕ hiding (_≟_)
 open import Data.Vec as V renaming (_∷_ to _::_) using (Vec; [])
-open import Data.Fin
+open import Data.Fin hiding (_+_; _-_)
 open import Data.Fin.Properties
 open import Data.Fin.Patterns
-open import Data.Fin.Permutation as ↭ hiding (remove)
+open import Data.Fin.Permutation as ↭ hiding (remove; _≈_)
 open import Data.Fin.Permutation.Components renaming (transpose to transposeC)
 open import Data.List as L using (List)
 open import Data.Vec.Functional hiding (transpose)
@@ -24,6 +24,7 @@ import Relation.Binary.Reasoning.Setoid as ≈-Reasoning
 open import Relation.Binary.PropositionalEquality as ≡ hiding (sym)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
+import Algebra.Solver.CommutativeMonoid as CMonoidSolver
 
 open import Vector.Base
 import Vector.Setoid.Properties as VecProps
@@ -361,6 +362,7 @@ stepVecSpace {n} xs ys i j i≢j (rec {ys = zs} (addCons p q p≢q r) xy≈ⱽys
 
 open _reaches_ renaming (ys to ws; xs*ys≈x to xs*ws≈x)
 open _≋ⱽ_
+open CMonoidSolver +ᴹ-commutativeMonoid hiding (_≟_)
 
 ≈ⱽ⇒≋ⱽ : xs ≈ⱽ ys → xs ≋ⱽ ys
 ws (fwd (≈ⱽ⇒≋ⱽ (idR {ys = zs} xs≈ys))
@@ -424,10 +426,14 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
   x ∎
   where
   open ≈ᴹ-Reasoning
+  module ∼ = ≈-Reasoning R.setoid
+
   help = ≈ⱽ⇒≋ⱽ xs≈ⱽys .fwd x∈xs
   wss = ws help
   sws : Vector R n
-  sws k = {!!}
+  sws = wss [ p ]≔ (wss p - wss q * r)
+
+  q≢p = p≢q ∘ ≡.sym
 
   wss*zs = wss *ᵣ zs
   sws*zs = sws *ᵣ (zs [ q ]← r *[ p ])
@@ -445,19 +451,33 @@ xs*ws≈x (fwd (≈ⱽ⇒≋ⱽ {n} {ys = yss} (rec {xs = xs} {zs} (addCons p q 
     sws q *ₗ zs q +ᴹ sws q *ₗ r *ₗ zs p ≈˘⟨ +ᴹ-congˡ (*ₗ-assoc _ _ _) ⟩
     _ ∎
 
+  swsP : sws p + sws q * r ≈ wss p
+  swsP = ∼.begin
+    sws p + sws q * r ∼.≈⟨ {!!} ⟩
+    -- {!!} ∼.≈⟨ {!!} ⟩
+    wss p ∼.∎
+
+  swsQ : sws q ≈ wss q
+  swsQ = reflexive (updateAt-minimal q p wss q≢p)
+
+  lemma₁ : (sws p + sws q * r) *ₗ zs p +ᴹ sws q *ₗ zs q ≈ᴹ wss p *ₗ zs p +ᴹ wss q *ₗ zs q
+  lemma₁ = +ᴹ-cong (*ₗ-congʳ swsP) (*ₗ-congʳ swsQ)
 
   theo₀ : sws*zs p +ᴹ sws*zs q ≈ᴹ wss*zs p +ᴹ wss*zs q
   theo₀ = begin
     _ ≈⟨ +ᴹ-cong (≈ᴹ-reflexive sws*zsP≡) sws*zsQ ⟩
-    sws p *ₗ zs p +ᴹ (sws q *ₗ zs q +ᴹ (sws q * r) *ₗ zs p) ≈⟨ {!!} ⟩
-    sws p *ₗ zs p +ᴹ (sws q * r) *ₗ zs p +ᴹ sws q *ₗ zs q ≈⟨ {!!} ⟩
-    (sws p * (sws q * r)) *ₗ zs p +ᴹ sws q *ₗ zs q ≈⟨ {!!} ⟩
-    -- {!!} ≈⟨ {!!} ⟩
+    sws p *ₗ zs p +ᴹ (sws q *ₗ zs q +ᴹ (sws q * r) *ₗ zs p) ≈⟨
+      solve 3 (λ a b c → a ⊕ b ⊕ c ⊜ (a ⊕ c) ⊕ b) ≈ᴹ-refl (sws p *ₗ zs p) (sws q *ₗ zs q) ((sws q * r) *ₗ zs p) ⟩
+    sws p *ₗ zs p +ᴹ (sws q * r) *ₗ zs p +ᴹ sws q *ₗ zs q ≈˘⟨ +ᴹ-congʳ (*ₗ-distribʳ (zs p) _ _) ⟩
+    (sws p + sws q * r) *ₗ zs p +ᴹ sws q *ₗ zs q ≈⟨ lemma₁ ⟩
     _ ∎
 
-
   theo₁ : sws*zs p +ᴹ (sws*zs [ p ]≔ 0ᴹ) q ≈ᴹ wss*zs p +ᴹ (wss*zs [ p ]≔ 0ᴹ) q
-  theo₁ = {!!}
+  theo₁ = begin
+    _ +ᴹ _ ≈⟨ +ᴹ-congˡ (≈ᴹ-reflexive (updateAt-minimal q p sws*zs q≢p)) ⟩
+    _ +ᴹ sws*zs q ≈⟨ theo₀ ⟩
+    _ +ᴹ wss*zs q ≈˘⟨ +ᴹ-congˡ (≈ᴹ-reflexive (updateAt-minimal q p wss*zs q≢p)) ⟩
+    _ +ᴹ _ ∎
 
   theo₂ : sws*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ ≋ wss*zs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ
   theo₂ k = helper _ $ vBoolFromIndices indices k .proj₂
