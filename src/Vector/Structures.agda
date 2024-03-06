@@ -12,6 +12,7 @@ private variable
   n : ℕ
 
 module VMonoid (rawMonoid : RawMonoid a ℓ) where
+  infixl 7 _*ⱽ_
 
   open import Vector.Base public
 
@@ -24,7 +25,11 @@ module VMonoid (rawMonoid : RawMonoid a ℓ) where
   (u *ⱽ v) i = u i ∙ v i
 
 module VRing (rawRing : RawRing a ℓ) where
+  infixl 7 _∙ⱽ_
 
-  open RawRing rawRing
+  open RawRing rawRing renaming (Carrier to A)
   open VMonoid *-rawMonoid public
   open SumRawMonoid +-rawMonoid public
+
+  _∙ⱽ_ : (u v : Vector A n) → A
+  u ∙ⱽ v = ∑ (u *ⱽ v )

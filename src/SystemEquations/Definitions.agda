@@ -12,12 +12,7 @@ module SystemEquations.Definitions {c ℓ₁ ℓ₂} (dField : DecidableField c 
   open import Relation.Nullary.Construct.Add.Supremum
 
   open import Algebra.Matrix.Structures
-
-  open DecidableField dField renaming (Carrier to F; heytingField to hField)
-  open HeytingField hField using (heytingCommutativeRing)
-  open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
-  open CommutativeRing commutativeRing using (rawRing; ring)
-  open MRing rawRing hiding (matOps→func)
+  open import Vector.Structures
 
   open import MatrixFuncNormalization.normBef dField
   open import MatrixFuncNormalization.NormAfter.PropsFlip dField
@@ -25,6 +20,12 @@ module SystemEquations.Definitions {c ℓ₁ ℓ₂} (dField : DecidableField c 
   open import MatrixFuncNormalization.NormAfter.Properties dField
     using (ColumnsZero)
 
+  open DecidableField dField renaming (Carrier to F; heytingField to hField)
+  open HeytingField hField using (heytingCommutativeRing)
+  open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
+  open CommutativeRing commutativeRing using (rawRing; ring)
+  open MRing rawRing hiding (matOps→func)
+  open VRing rawRing using (_∙ⱽ_)
   open PNorm
 
   private variable
@@ -39,7 +40,7 @@ module SystemEquations.Definitions {c ℓ₁ ℓ₂} (dField : DecidableField c 
 
   record Polynomial (p : ℕ) : Set c where
     field
-      poly : Vector F p
+      poly     : Vector F p
       constant : F
 
   VecPolynomial : (n p : ℕ) → Set c
@@ -51,7 +52,7 @@ module SystemEquations.Definitions {c ℓ₁ ℓ₂} (dField : DecidableField c 
       b : Vector F n
 
     IsSolution : Vector F m → Set ℓ₁
-    IsSolution x = ∀ row → (∑ (λ i → A row i * x i) ≈ b row)
+    IsSolution x = ∀ i → A i ∙ⱽ x ≈ b i
 
     A++b : Matrix F n (m ℕ.+ 1)
     A++b = A ++ⱽ const ∘ b
@@ -60,5 +61,5 @@ module SystemEquations.Definitions {c ℓ₁ ℓ₂} (dField : DecidableField c 
     IsFamilySolution vPoly = ∀ vecs → IsSolution (vSol vecs)
       where
       vSol : (vecs : Vector F _) → Vector F m
-      vSol vecs i = ∑ (λ j → vecs j * poly j) + constant
+      vSol vecs i = vecs ∙ⱽ poly + constant
         where open Polynomial (vPoly i)
