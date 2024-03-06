@@ -1,5 +1,3 @@
-open import Algebra.Apartness
-open import Relation.Binary
 open import Algebra.DecidableField
 
 module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
@@ -7,6 +5,7 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableFie
   open import Level
   open import Function
   open import Algebra
+  open import Algebra.Apartness
   open import Data.Bool.Base
   open import Data.List as L using (List)
   open import Data.Product
@@ -25,6 +24,7 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableFie
   open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
   open CommutativeRing commutativeRing using (rawRing; ring)
 
+  open import SystemEquations.Definitions dField
   open import MatrixFuncNormalization.normBef dField
   open import MatrixFuncNormalization.NormAfter.PropsFlip dField
     hiding (module PNorm)
@@ -65,6 +65,15 @@ module MatrixFuncNormalization.MainTheo {c ℓ₁ ℓ₂} (dField : DecidableFie
 
     αys⇒αxs : α isSolutionOf ys → α isSolutionOf xs
     αys⇒αxs = sameSolutions (_≋ⱽ_.fwd xs≋ⱽys)
+
+    ysNormed : MatrixNormed ys
+    ysNormed = record
+      { pivs         = pivs
+      ; mPivots      = mPivots
+      ; pivsCrescent = pivsCrescent
+      ; columnsZero  = columnsZero
+      }
+
 
   mainTheo : (xs : Matrix F n m) → MatrixNorm xs
   mainTheo xs = let ys , pivs , mPivs , xs≈ⱽys , colsZero , pivsCrescent = allTheoremsTogether xs in
