@@ -38,13 +38,18 @@ module SystemEquations.Definitions {c ℓ₁ ℓ₂} (dField : DecidableField c 
       pivsCrescent : AllRowsNormalized pivs
       columnsZero  : ColumnsZero xs pivs
 
-  record Polynomial (p : ℕ) : Set c where
+  record Affine (p : ℕ) : Set c where
     field
-      poly     : Vector F p
+      coeff    : Vector F p
       constant : F
 
-  VecPolynomial : (n p : ℕ) → Set c
-  VecPolynomial n p = Vector (Polynomial p) n
+    eval : Vector F p → F
+    eval vecs = vecs ∙ⱽ coeff + constant
+
+  VecAffine : (n p : ℕ) → Set c
+  VecAffine n p = Vector (Affine p) n
+
+  open Affine
 
   record SystemEquations (m n : ℕ) : Set c where
     field
@@ -57,9 +62,29 @@ module SystemEquations.Definitions {c ℓ₁ ℓ₂} (dField : DecidableField c 
     A++b : Matrix F n (m ℕ.+ 1)
     A++b = A ++ⱽ const ∘ b
 
-    IsFamilySolution : VecPolynomial m p → Set (c ⊔ ℓ₁)
-    IsFamilySolution vPoly = ∀ vecs → IsSolution (vSol vecs)
-      where
-      vSol : (vecs : Vector F _) → Vector F m
-      vSol vecs i = vecs ∙ⱽ poly + constant
-        where open Polynomial (vPoly i)
+    IsFamilySolution : VecAffine m p → Set (c ⊔ ℓ₁)
+    IsFamilySolution affine = ∀ vecs → IsSolution (λ i → eval (affine i) vecs)
+
+  -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
+  -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)
+
+  vSol : VecAffine 2 1
+  vSol F.zero = record { coeff = (λ where F.zero → 1# + 1#) ; constant = 0# }
+  vSol (F.suc F.zero) = record { coeff = (λ where F.zero → 1#) ; constant = 0# }
+
+  A` : Matrix F 1 2
+  A` F.zero F.zero = 1#
+  A` F.zero (F.suc F.zero) = - (1# + 1#)
+
+  systemEquation : SystemEquations 2 1
+  systemEquation = record { A = A` ; b = λ _ → 0# }
+
+  open SystemEquations systemEquation
+
+  -- isSol : IsFamilySolution vSol
+  -- isSol vecs F.zero = {!!}
+
+  -- x - 2*y = 0
+
+  -- x = 2w -> Affine coeff [2] constant 0
+  -- y = w  -> Affine coeff [1] constant 0
