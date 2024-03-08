@@ -1,5 +1,3 @@
-open import Algebra.Apartness
-open import Relation.Binary
 open import Algebra.DecidableField
 
 module MatrixFuncNormalization.NormAfter.Base {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
@@ -17,6 +15,7 @@ open import Data.Fin.Properties as F hiding (_≟_)
 open import Data.Vec.Functional as V
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as EqSetoids
 open import Algebra
+open import Algebra.Apartness
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
 open import Relation.Nullary.Decidable
 open import Relation.Nullary.Construct.Add.Infimum as ₋
