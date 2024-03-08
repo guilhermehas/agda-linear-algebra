@@ -14,6 +14,7 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
   open import Data.Vec.Functional
   open import Vector.Structures
   open import Algebra.BigOps
+  open import Relation.Unary.PredicateTransformer hiding (_⊔_)
 
   open Ring ring renaming (Carrier to A)
   open LeftModule leftModule renaming (Carrierᴹ to M)
@@ -26,6 +27,7 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
   (u *ᵣ v) i = u i *ₗ v i
 
   record _reaches_ (xs : Vector M n) (x : M) : Set (ℓm ⊔ rr) where
+    constructor _by_
     field
       ys      : Vector A n
       xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x

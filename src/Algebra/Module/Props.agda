@@ -35,23 +35,23 @@ module Algebra.Module.Props {rr ℓr mr ℓm}
       x *ₗ V F.zero +ᴹ x *ₗ ∑ (tail V) ≈⟨ +ᴹ-congˡ (∑Mulrdist‵ x (tail V)) ⟩
       x *ₗ V F.zero +ᴹ ∑ (λ i → x *ₗ V (F.suc i)) ∎
 
-  δ*ᵣ-refl : ∀ V (i : Fin n) → ∑ (δ i *ᵣ V) ≈ᴹ V i
-  δ*ᵣ-refl {suc n} V F.zero = begin
-    1# *ₗ V F.zero +ᴹ ∑ (λ i → δ F.zero (F.suc i) *ₗ tail V i) ≈⟨ +ᴹ-cong (*ₗ-identityˡ _) (begin
-      _ ≈⟨ ∑Ext {n} (λ _ → *ₗ-zeroˡ _) ⟩
-      ∑ {n} (const 0ᴹ) ≈⟨ ∑0r n ⟩
-      0ᴹ ∎
-      ) ⟩
-    V F.zero +ᴹ 0ᴹ ≈⟨ +ᴹ-identityʳ _ ⟩
-    V F.zero ∎
-  δ*ᵣ-refl {suc n} V i@(F.suc i′) = begin
-    0# *ₗ _ +ᴹ ∑ {n} (λ j → δ i (F.suc j) *ₗ tail V j) ≈⟨ +ᴹ-cong (*ₗ-zeroˡ _) (begin
-      _                                ≈⟨ ∑Ext (λ j → *ₗ-congʳ (reflexive (δss≡δ i′ j))) ⟩
-      ∑ {n} (λ j → δ i′ j *ₗ tail V j) ≈⟨ δ*ᵣ-refl (tail V) i′ ⟩
-      _ ∎
-      ) ⟩
-    0ᴹ +ᴹ V i  ≈⟨ +ᴹ-identityˡ _ ⟩
-    V i ∎
+    δ*ᵣ-refl : ∀ V (i : Fin n) → ∑ (δ i *ᵣ V) ≈ᴹ V i
+    δ*ᵣ-refl {suc n} V F.zero = begin
+      1# *ₗ V F.zero +ᴹ ∑ (λ i → δ F.zero (F.suc i) *ₗ tail V i) ≈⟨ +ᴹ-cong (*ₗ-identityˡ _) (begin
+        _ ≈⟨ ∑Ext {n} (λ _ → *ₗ-zeroˡ _) ⟩
+        ∑ {n} (const 0ᴹ) ≈⟨ ∑0r n ⟩
+        0ᴹ ∎
+        ) ⟩
+      V F.zero +ᴹ 0ᴹ ≈⟨ +ᴹ-identityʳ _ ⟩
+      V F.zero ∎
+    δ*ᵣ-refl {suc n} V i@(F.suc i′) = begin
+      0# *ₗ _ +ᴹ ∑ {n} (λ j → δ i (F.suc j) *ₗ tail V j) ≈⟨ +ᴹ-cong (*ₗ-zeroˡ _) (begin
+        _                                ≈⟨ ∑Ext (λ j → *ₗ-congʳ (reflexive (δss≡δ i′ j))) ⟩
+        ∑ {n} (λ j → δ i′ j *ₗ tail V j) ≈⟨ δ*ᵣ-refl (tail V) i′ ⟩
+        _ ∎
+        ) ⟩
+      0ᴹ +ᴹ V i  ≈⟨ +ᴹ-identityˡ _ ⟩
+      V i ∎
 
 
   xsReachesItself : ∀ xs (i : Fin n) → xs reaches xs i
@@ -71,3 +71,19 @@ module Algebra.Module.Props {rr ℓr mr ℓm}
       0ᴹ ∎) ⟩
     ∑ {n} (const 0ᴹ) ≈⟨ ∑0r n ⟩
     0ᴹ ∎
+
+  open _reaches_ renaming (ys to wws; xs*ys≈x to xs*wws≈x)
+
+  0∷⊆ⱽ : xs ⊆ⱽ ys → (0ᴹ ∷ xs) ⊆ⱽ ys
+  0∷⊆ⱽ {n} {xs} {zs} {as} xs⊆ⱽys {x} (ys by xs*ys≈x) = _ by xs*ws≈x where
+
+    ∑tys≈0+∑t = begin
+      ∑ (tail ys *ᵣ xs)       ≈˘⟨ +ᴹ-identityˡ _ ⟩
+      0ᴹ +ᴹ ∑ (tail ys *ᵣ xs) ≈˘⟨ +ᴹ-congʳ (*ₗ-zeroʳ _) ⟩
+      _ *ₗ 0ᴹ +ᴹ ∑ (tail ys *ᵣ xs) ∎
+
+    ∑ws≈∑ys = xs⊆ⱽys (tail ys by ∑tys≈0+∑t)
+    xs*ws≈x = begin
+      ∑ (_ *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x  ⟩
+      _ *ₗ 0ᴹ +ᴹ ∑ (tail (ys *ᵣ (0ᴹ ∷ xs))) ≈⟨ xs*ys≈x ⟩
+      x ∎
