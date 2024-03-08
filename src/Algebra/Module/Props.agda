@@ -101,3 +101,14 @@ module Algebra.Module.Props {rr ℓr mr ℓm}
       ∑ (∑ws≈∑ys .wws *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x ⟩
       ∑ (ys *ᵣ xs)           ≈⟨ xs*ys≈x ⟩
       x ∎
+
+  0∷⊆ⱽₗ : (0ᴹ ∷ xs) ⊆ⱽ ys → xs ⊆ⱽ ys
+  0∷⊆ⱽₗ {n} {xs} {zs} {as} xs⊆ⱽys {x} (ys by xs*ys≈x) = _ by ∑ws≈x
+    where
+    ∑0ys≈0xs = +ᴹ-cong (*ₗ-zeroˡ _) xs*ys≈x
+    ∑ws≈∑ys = xs⊆ⱽys $ (0# ∷ ys) by ∑0ys≈0xs
+
+    ∑ws≈x = begin
+      ∑ (_ *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x ⟩
+      0ᴹ +ᴹ x     ≈⟨ +ᴹ-identityˡ _ ⟩
+      x ∎
