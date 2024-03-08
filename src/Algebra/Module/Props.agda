@@ -87,3 +87,17 @@ module Algebra.Module.Props {rr ℓr mr ℓm}
       ∑ (_ *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x  ⟩
       _ *ₗ 0ᴹ +ᴹ ∑ (tail (ys *ᵣ (0ᴹ ∷ xs))) ≈⟨ xs*ys≈x ⟩
       x ∎
+
+  ⊆ⱽ0∷ : xs ⊆ⱽ ys → xs ⊆ⱽ (0ᴹ ∷ ys)
+  ⊆ⱽ0∷ {n} {xs} {zs} {as} xs⊆ⱽys {x} (ys by xs*ys≈x) = ws by ∑ws≈x
+    where
+    0∷as = 0ᴹ ∷ as
+    ws = 0# ∷ _
+
+    ∑ws≈∑ys = xs⊆ⱽys (ys by ≈ᴹ-refl)
+    ∑ws≈x = begin
+      _ *ₗ 0ᴹ +ᴹ _           ≈⟨ +ᴹ-congʳ (*ₗ-zeroʳ _) ⟩
+      0ᴹ +ᴹ _                ≈⟨ +ᴹ-identityˡ _ ⟩
+      ∑ (∑ws≈∑ys .wws *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x ⟩
+      ∑ (ys *ᵣ xs)           ≈⟨ xs*ys≈x ⟩
+      x ∎
