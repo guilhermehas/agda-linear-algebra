@@ -24,5 +24,5 @@ open module LM {n} = LeftModule (leftModule n)
 private variable
   m n : ℕ
 
-_isSolutionOf_ : (xs : Vector F m) (ys : Matrix F n m) → Set _
-xs isSolutionOf ys = ∀ i → xs ∙ⱽ ys i ≈ 0#
+_isSolutionOf_ : (x : Vector F m) (xs : Matrix F n m) → Set _
+x isSolutionOf xs = ∀ i → x ∙ⱽ xs i ≈ 0#
