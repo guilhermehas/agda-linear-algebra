@@ -8,6 +8,7 @@ open import Relation.Binary
 open import Algebra.Matrix.Structures
 open import Algebra.DecidableField
 import MatrixFuncNormalization.NormAfter.Base as NormAfter
+import MatrixFuncNormalization.ElimZeros.Base as EZeros
 
 module MatrixFuncNormalization.NormAfter.AppendIdentity {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
@@ -17,6 +18,7 @@ module MatrixFuncNormalization.NormAfter.AppendIdentity {c ℓ₁ ℓ₂} (dFiel
   open CommutativeRing commutativeRing
   open MRing rawRing
   open NormAfter dField
+  open EZeros dField
 
   private variable
     m n p : ℕ

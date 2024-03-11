@@ -9,11 +9,11 @@ open import Function
 open import Data.Nat using (ℕ)
 
 open import Algebra.MatrixData
-import MatrixFuncNormalization.NormAfter.Base as NormAfter
+import MatrixFuncNormalization.ElimZeros.Base as ElimZeros
 import MatrixFuncNormalization.NormAfter.AppendIdentity as AppendIdentity
 
 open DecidableField dField renaming (Carrier to F)
-open module F = NormAfter dField using ()
+open module F = ElimZeros dField using ()
   renaming (normalizeData to normalize;
             normalizeAndDivideData to normalizeAndDivide) public
 module AI = AppendIdentity dField
