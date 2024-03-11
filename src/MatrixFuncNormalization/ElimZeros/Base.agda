@@ -5,15 +5,18 @@ module MatrixFuncNormalization.ElimZeros.Base {c ℓ₁ ℓ₂} (dField : Decida
 open import Algebra
 open import Function
 open import Data.Product
+open import Data.Fin as F using (Fin; zero; suc; toℕ)
 open import Data.Maybe as Maybe
 open import Data.Bool using (Bool; false; true; T)
 open import Data.Nat using (ℕ)
 open import Data.Vec.Functional as V
 open import Relation.Nullary
+open import Relation.Nullary.Construct.Add.Supremum
 
 open import Vector
 open import Algebra.Matrix
 open import Algebra.MatrixData renaming (Matrix to MatrixData)
+open import MatrixFuncNormalization.normBef dField using (findNonZeroPos)
 open import MatrixFuncNormalization.NormAfter.Base dField
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
@@ -44,3 +47,15 @@ normalizeData = func⇒op₁⇒data normalize
 
 normalizeAndDivideData : Op₁ $ MatrixData F n m
 normalizeAndDivideData = func⇒op₁⇒data normalizeAndDivide
+
+findZeroEnd : ∀ (pivs : Vector (Fin m ⁺) n) → Fin $ ℕ.suc n
+findZeroEnd {n = ℕ.zero} pivs = F.zero
+findZeroEnd {n = ℕ.suc n} pivs with pivs F.zero
+... | just _  = F.zero
+... | ⊥₋  = F.suc $ findZeroEnd (tail pivs)
+
+eliminateZerosEnd : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m ⁺) n) → Matrix F (toℕ (findZeroEnd pivs)) m
+eliminateZerosEnd xs _ = xs ∘ F.inject!
+
+normalizeAndEliminateZeros : (xs : Matrix F n m) → Σ[ n ∈ ℕ ] (Matrix F n m)
+normalizeAndEliminateZeros xs = _ , eliminateZerosEnd (normalizeAndDivide xs) (V.map findNonZeroPos xs)
