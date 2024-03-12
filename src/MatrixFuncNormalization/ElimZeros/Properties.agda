@@ -25,6 +25,7 @@ open import MatrixFuncNormalization.NormAfter.PropsFlip dField
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)
+open import Algebra.HeytingField.Properties hField
 
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
@@ -39,7 +40,7 @@ divideVec xs [ p ] (xp#0 , _) i = #⇒invertible xp#0 .proj₁ * xs i
 
 divideVecPreservesPos : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → VecPivotPos (divideVec xs p vPos) p
 divideVecPreservesPos xs ⊤⁺ vPos = vPos
-proj₁ (divideVecPreservesPos xs [ p ] vPos@(xp#0 , xi≈0)) = x#0y#0→xy#0 {!!} xp#0
+proj₁ (divideVecPreservesPos xs [ p ] vPos@(xp#0 , xi≈0)) = x#0y#0→xy#0 (x⁻¹#0 _ _) xp#0
 proj₂ (divideVecPreservesPos xs [ p ] vPos@(xp#0 , xi≈0)) i i<p = begin
   _ * xs i ≈⟨ *-congˡ (xi≈0 i i<p) ⟩
   _ * 0#   ≈⟨ zeroʳ _ ⟩

@@ -36,3 +36,11 @@ cong-# {x} {y} {z} x≈y x#z = invertible⇒# (x-z⁻¹ , theo , theo2) where
 
   theo2 : (y - z) * x-z⁻¹ ≈ 1#
   theo2 = trans (*-comm _ _) theo
+
+x⁻¹#0 : (x : Carrier) (x#0 : x # 0#) (let x⁻¹ = #⇒invertible x#0 .proj₁) → x⁻¹ # 0#
+x⁻¹#0 x x#0 = invertibleˡ⇒# (x , (begin
+  x * (x⁻¹ - 0#) ≈⟨ *-congˡ (x-0≈x _) ⟩
+  x * x⁻¹       ≈˘⟨ *-congʳ (x-0≈x _) ⟩
+  (x - 0#) * x⁻¹ ≈⟨ #⇒invertible x#0 .proj₂ .proj₂ ⟩
+  1# ∎)) where
+  x⁻¹ = #⇒invertible x#0 .proj₁
