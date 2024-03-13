@@ -1,11 +1,6 @@
-open import Algebra.Apartness
-open import Relation.Binary
+open import Algebra.DecidableField
 
-module MatrixFuncNormalization.LinearIndependence {c ℓ₁ ℓ₂}
-  (hField : HeytingField c ℓ₁ ℓ₂)
-  (open HeytingField hField renaming (Carrier to F))
-  (_≟_ : Decidable _#_)
-  where
+module MatrixFuncNormalization.LinearIndependence {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
 open import Algebra.Matrix
 open import Function using (_$_; _∘_)
@@ -17,7 +12,8 @@ open import Data.Fin as F using (Fin; fromℕ)
 
 import MatrixFuncNormalization.NormAfter as NormAfter
 
-open NormAfter hField _≟_
+open DecidableField dField renaming (Carrier to F)
+open NormAfter dField
 
 private variable
   m n : ℕ
