@@ -41,6 +41,7 @@ import MatrixFuncNormalization.NormAfter.Properties as NormAfterProperties
 import MatrixFuncNormalization.MatrixProps as MatrixPropsBefore
 open import MatrixFuncNormalization.FinInduction
 open import lbry
+open import SystemEquations.Definitions dField
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)

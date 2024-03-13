@@ -15,8 +15,6 @@ open import Algebra.Matrix.Structures
 open import Vector.Structures
 
 open import MatrixFuncNormalization.normBef dField
-open import MatrixFuncNormalization.NormAfter.PropsFlip dField
-  hiding (module PNorm)
 open import MatrixFuncNormalization.NormAfter.Properties dField
   using (ColumnsZero)
 
@@ -27,16 +25,10 @@ open CommutativeRing commutativeRing using (rawRing; ring)
 open MRing rawRing hiding (matOps→func)
 open VRing rawRing using (_∙ⱽ_)
 open PNorm
+open PVec
 
 private variable
   m n p : ℕ
-
-record MatrixNormed (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
-  field
-    pivs         : Vector (Fin m ⁺) n
-    mPivots      : MatrixPivots xs pivs
-    pivsCrescent : AllRowsNormalized pivs
-    columnsZero  : ColumnsZero xs pivs
 
 record Affine (p : ℕ) : Set c where
   field
