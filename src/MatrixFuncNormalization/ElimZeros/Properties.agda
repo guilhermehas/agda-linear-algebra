@@ -18,11 +18,11 @@ open import Relation.Nullary.Construct.Add.Supremum
 open import Algebra.Matrix
 -- open import Algebra.MatrixData renaming (Matrix to MatrixData)
 -- open import MatrixFuncNormalization.normBef dField using (findNonZeroPos)
--- open import MatrixFuncNormalization.NormAfter.Base dField
 open import MatrixFuncNormalization.normBef dField using (VecPivotPos; MatrixPivots)
 open import MatrixFuncNormalization.ElimZeros.Base dField hiding (divideVec)
 open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZero; Maybe≈0)
 open import MatrixFuncNormalization.NormAfter.PropsFlip dField
+open import MatrixFuncNormalization.Definitions dField
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)
@@ -56,25 +56,20 @@ divideVec≈0 {q = [ q ]} vPos p xsP≈0 = trans (*-congˡ xsP≈0) (0RightAnnih
 divideVec≈0 {q = ⊤⁺} vPos p = id
 
 
-module _ (xs : Matrix F n m) where
+module _ (xs : Matrix F n m) (xsNormed : FromNormalization xs) where
 
-  matAfterNorm = allTheoremsTogether xs
-  ys = matAfterNorm .proj₁
-  pivs = matAfterNorm .proj₂ .proj₁
-  mPivs = matAfterNorm .proj₂ .proj₂ .proj₁
-  cZeros = matAfterNorm .proj₂ .proj₂ .proj₂ .proj₂ .proj₁
+  open FromNormalization xsNormed
 
   matDivided : Matrix F n m
-  matDivided i = divideVec (ys i) (pivs i) (mPivs i)
+  matDivided i = divideVec (ys i) (pivs i) (mPivots i)
 
   mPivAfter : MatrixPivots matDivided pivs
   mPivAfter _ = divideVecPreservesPos _ _ _
 
   columnsZeros : ColumnsZero matDivided pivs
-  columnsZeros i j i≢j with matAfterNorm
-  ... | ys , pivs , mPivs , _ , cPivs , _ = helper (cPivs i j i≢j)
+  columnsZeros i j i≢j = helper (columnsZero i j i≢j)
     where
-    helper : Maybe≈0 (ys j) (pivs i) → Maybe≈0 (divideVec (ys j) (pivs j) (mPivs j)) (pivs i)
+    helper : Maybe≈0 (ys j) (pivs i) → Maybe≈0 (divideVec (ys j) (pivs j) (mPivots j)) (pivs i)
     helper with pivs i
     ... | ⊤⁺  = λ _ → _
-    ... | [ p ]  = divideVec≈0 (mPivs j) p
+    ... | [ p ]  = divideVec≈0 (mPivots j) p
