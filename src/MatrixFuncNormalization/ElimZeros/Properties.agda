@@ -11,6 +11,7 @@ open import Data.Fin as F using (Fin; zero; suc)
 -- open import Data.Bool using (Bool; false; true; T)
 open import Data.Nat using (ℕ)
 open import Data.Vec.Functional as V
+open import Data.Maybe.Relation.Unary.All
 -- open import Relation.Nullary
 open import Relation.Nullary.Construct.Add.Supremum
 
@@ -55,6 +56,12 @@ divideVec≈0 : ∀ {xs : Vector F n} {q} (vPos : VecPivotPos xs q) p → xs p �
 divideVec≈0 {q = [ q ]} vPos p xsP≈0 = trans (*-congˡ xsP≈0) (0RightAnnihilates _)
 divideVec≈0 {q = ⊤⁺} vPos p = id
 
+divideVecP≈1 : ∀ {xs : Vector F n} {p} (vPos : VecPivotPos xs p) → All (λ i → divideVec xs p vPos i ≈ 1#) p
+divideVecP≈1 {xs = xs} {[ i ]} (xsI#0 , _) = let x⁻¹ = #⇒invertible xsI#0 .proj₁ in just (begin
+  x⁻¹ * xs i       ≈˘⟨ *-congˡ (trans (+-congˡ -0#≈0#) (+-identityʳ _)) ⟩
+  x⁻¹ * (xs i - 0#) ≈⟨ #⇒invertible xsI#0 .proj₂ .proj₁ ⟩
+  1# ∎)
+divideVecP≈1 {p = ⊤⁺} vPos = nothing
 
 module _ (xs : Matrix F n m) (xsNormed : FromNormalization xs) where
 
@@ -73,3 +80,6 @@ module _ (xs : Matrix F n m) (xsNormed : FromNormalization xs) where
     helper with pivs i
     ... | ⊤⁺  = λ _ → _
     ... | [ p ]  = divideVec≈0 (mPivots j) p
+
+  pivsOne : PivsOne matDivided pivs
+  pivsOne _ = divideVecP≈1 _

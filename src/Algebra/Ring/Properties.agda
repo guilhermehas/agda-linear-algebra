@@ -10,7 +10,7 @@ module Units {ℓ ℓ'} (ring : Ring ℓ ℓ') where
 
   open Ring ring renaming (Carrier to R)
   open import Relation.Binary.Reasoning.Setoid setoid
-  open import Algebra.Properties.Ring ring
+  open import Algebra.Properties.Ring ring public
 
   0Idempotent : 0# + 0# ≈ 0#
   0Idempotent = +-identityˡ _

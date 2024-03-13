@@ -8,6 +8,7 @@ open import Algebra
 open import Algebra.Apartness
 open import Data.Bool.Base
 open import Data.List as L using (List)
+open import Data.Maybe.Relation.Unary.All
 open import Data.Product
 open import Data.Nat.Base using (ℕ)
 open import Data.Fin as F using (Fin)
@@ -77,3 +78,7 @@ record FromNormalization (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) whe
 
   αys⇒αxs : α isSolutionOf ys → α isSolutionOf xs
   αys⇒αxs = sameSolutions (_≋ⱽ_.fwd xs≋ⱽys)
+
+
+PivsOne : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m ⁺) n) → Set _
+PivsOne xs pivs = ∀ i → All (λ j → xs i j ≈ 1#) (pivs i)
