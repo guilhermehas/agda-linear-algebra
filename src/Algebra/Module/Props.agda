@@ -72,36 +72,6 @@ sameSolutions {m} {xs} {n} {ys} {α} xs⊆ys αXs k with xs⊆ys (xsReachesItsel
   ∑ {n} (const 0ᴹ) ≈⟨ ∑0r n ⟩
   0ᴹ ∎
 
-open _reaches_ renaming (ys to wws; xs*ys≈x to xs*wws≈x)
-
-0∷⊆ⱽ : xs ⊆ⱽ ys → (0ᴹ ∷ xs) ⊆ⱽ ys
-0∷⊆ⱽ {n} {xs} {zs} {as} xs⊆ⱽys {x} (ys by xs*ys≈x) = _ by xs*ws≈x where
-
-  ∑tys≈0+∑t = begin
-    ∑ (tail ys *ᵣ xs)       ≈˘⟨ +ᴹ-identityˡ _ ⟩
-    0ᴹ +ᴹ ∑ (tail ys *ᵣ xs) ≈˘⟨ +ᴹ-congʳ (*ₗ-zeroʳ _) ⟩
-    _ *ₗ 0ᴹ +ᴹ ∑ (tail ys *ᵣ xs) ∎
-
-  ∑ws≈∑ys = xs⊆ⱽys (tail ys by ∑tys≈0+∑t)
-  xs*ws≈x = begin
-    ∑ (_ *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x  ⟩
-    _ *ₗ 0ᴹ +ᴹ ∑ (tail (ys *ᵣ (0ᴹ ∷ xs))) ≈⟨ xs*ys≈x ⟩
-    x ∎
-
-⊆ⱽ0∷ : xs ⊆ⱽ ys → xs ⊆ⱽ (0ᴹ ∷ ys)
-⊆ⱽ0∷ {n} {xs} {zs} {as} xs⊆ⱽys {x} (ys by xs*ys≈x) = ws by ∑ws≈x
-  where
-  0∷as = 0ᴹ ∷ as
-  ws = 0# ∷ _
-
-  ∑ws≈∑ys = xs⊆ⱽys (ys by ≈ᴹ-refl)
-  ∑ws≈x = begin
-    _ *ₗ 0ᴹ +ᴹ _           ≈⟨ +ᴹ-congʳ (*ₗ-zeroʳ _) ⟩
-    0ᴹ +ᴹ _                ≈⟨ +ᴹ-identityˡ _ ⟩
-    ∑ (∑ws≈∑ys .wws *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x ⟩
-    ∑ (ys *ᵣ xs)           ≈⟨ xs*ys≈x ⟩
-    x ∎
-
 0∷⊆ⱽₗ : (xs : Vector M n) → (0ᴹ ∷ xs) ⊆ⱽ xs
 0∷⊆ⱽₗ xs {x} (ys by xs*ys≈x) = as by ∑as*xs≈x
   where
