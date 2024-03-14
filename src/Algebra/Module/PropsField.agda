@@ -27,6 +27,7 @@ open SumCommMonoid +ᴹ-commutativeMonoid
 open VRing rawRing using (_*ⱽ_)
 open import Algebra.Solver.CommutativeMonoid *-commutativeMonoid
 open import Algebra.HeytingCommutativeRing.Properties hField
+open import Algebra.Module.Props commutativeRing leftModule public
 
 import Relation.Binary.Reasoning.Setoid as RSetoid
 module ≈ᴹ-Reasoning = RSetoid ≈ᴹ-setoid
