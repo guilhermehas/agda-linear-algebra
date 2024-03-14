@@ -37,8 +37,8 @@ private variable
   xs ys : Vector M n
 
 
-*#0⊆ⱽ : ∀ {xs : Vector M n} {ys : Vector A n} (ys#0 : ∀ i → ys i # 0#) → xs ⊆ⱽ (ys *ᵣ xs)
-*#0⊆ⱽ {n} {xs} {ys} ys#0 {x} (zs by xs*zs≈x) = as by ∑as*zs≈x
+*#0⊆ⱽ : ∀ (xs : Vector M n) {ys : Vector A n} (ys#0 : ∀ i → ys i # 0#) → xs ⊆ⱽ ys *ᵣ xs
+*#0⊆ⱽ {n} xs {ys} ys#0 {x} (zs by xs*zs≈x) = as by ∑as*zs≈x
   where
   ass : _ → _
   ass i = #0⇒invertible (ys#0 i) .proj₁
@@ -56,7 +56,6 @@ private variable
       zs i ∎
       where open ≈-Reasoning
 
-
     as≈xs : as i *ₗ (ys i *ₗ xs i) ≈ᴹ zs i *ₗ xs i
     as≈xs = begin
         as i *ₗ ys i *ₗ xs i ≈˘⟨ *ₗ-assoc _ _ _ ⟩
@@ -67,3 +66,16 @@ private variable
     ∑ (as *ᵣ (ys *ᵣ xs)) ≈⟨ ∑Ext {n} as≈xs ⟩
     ∑ (zs *ᵣ xs)         ≈⟨ xs*zs≈x ⟩
     x ∎ where open ≈ᴹ-Reasoning
+
+*ₗ#0⊆ⱽ : (xs : Vector M n) (ys : Vector A n) → ys *ᵣ xs ⊆ⱽ xs
+*ₗ#0⊆ⱽ {n} xs ys {x} (ws by xs*ws≈x) = as by as*xs≈x
+  where
+  open ≈ᴹ-Reasoning
+  as = ws *ⱽ ys
+  as*xs≈x = begin
+    ∑ ((ws *ⱽ ys) *ᵣ xs) ≈⟨ ∑Ext {n} (λ _ → *ₗ-assoc _ _ _) ⟩
+    ∑ (ws *ᵣ (ys *ᵣ xs)) ≈⟨ xs*ws≈x ⟩
+    x ∎
+
+*#0≈ⱽ : ∀ (xs : Vector M n) {ys : Vector A n} (ys#0 : ∀ i → ys i # 0#) → xs ≋ⱽ (ys *ᵣ xs)
+*#0≈ⱽ xs ys#0 = record { fwd = *#0⊆ⱽ xs ys#0 ; bwd = *ₗ#0⊆ⱽ xs _ }
