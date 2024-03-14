@@ -102,23 +102,22 @@ open _reaches_ renaming (ys to wws; xs*ys≈x to xs*wws≈x)
     ∑ (ys *ᵣ xs)           ≈⟨ xs*ys≈x ⟩
     x ∎
 
-0∷⊆ⱽₗ : (0ᴹ ∷ xs) ⊆ⱽ ys → xs ⊆ⱽ ys
-0∷⊆ⱽₗ {n} {xs} {zs} {as} xs⊆ⱽys {x} (ys by xs*ys≈x) = _ by ∑ws≈x
+0∷⊆ⱽₗ : (xs : Vector M n) → (0ᴹ ∷ xs) ⊆ⱽ xs
+0∷⊆ⱽₗ xs {x} (ys by xs*ys≈x) = as by ∑as*xs≈x
   where
-  ∑0ys≈0xs = +ᴹ-cong (*ₗ-zeroˡ _) xs*ys≈x
-  ∑ws≈∑ys = xs⊆ⱽys $ (0# ∷ ys) by ∑0ys≈0xs
-
-  ∑ws≈x = begin
-    ∑ (_ *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x ⟩
-    0ᴹ +ᴹ x     ≈⟨ +ᴹ-identityˡ _ ⟩
+  as = tail ys
+  ∑as*xs≈x = begin
+    ∑ (tail ys *ᵣ xs)           ≈˘⟨ +ᴹ-identityˡ _ ⟩
+    0ᴹ +ᴹ _                     ≈˘⟨ +ᴹ-congʳ (*ₗ-zeroʳ _) ⟩
+    _ *ₗ 0ᴹ +ᴹ ∑ (tail ys *ᵣ xs) ≈⟨ xs*ys≈x ⟩
     x ∎
 
-⊆ⱽ0∷ᵣ : xs ⊆ⱽ (0ᴹ ∷ ys) → xs ⊆ⱽ ys
-⊆ⱽ0∷ᵣ {n} {xs} {zs} {as} xs⊆ⱽys {x} (ys by xs*ys≈x) = _ by ∑ws≈x
+⊆ⱽ0∷ᵣ : ∀ (xs : Vector M n) → xs ⊆ⱽ (0ᴹ ∷ xs)
+⊆ⱽ0∷ᵣ xs {x} (ys by xs*ys≈x) = as by ∑ws≈x
   where
-  ∑ws≈∑ys = xs⊆ⱽys $ (ys by xs*ys≈x)
+  as = 0# ∷ ys
   ∑ws≈x = begin
-    ∑ (_ *ᵣ as)           ≈˘⟨ +ᴹ-identityˡ _ ⟩
-    0ᴹ +ᴹ _               ≈˘⟨ +ᴹ-congʳ (*ₗ-zeroʳ _) ⟩
-    _ *ₗ 0ᴹ +ᴹ ∑ (_ *ᵣ as) ≈⟨ ∑ws≈∑ys .xs*wws≈x ⟩
+    0# *ₗ 0ᴹ +ᴹ ∑ (ys *ᵣ xs) ≈⟨ +ᴹ-congʳ (*ₗ-zeroˡ _) ⟩
+    0ᴹ +ᴹ ∑ (ys *ᵣ xs) ≈⟨ +ᴹ-identityˡ _ ⟩
+    ∑ (ys *ᵣ xs) ≈⟨ xs*ys≈x ⟩
     x ∎
