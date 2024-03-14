@@ -11,6 +11,7 @@ open import Function
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Fin as F using (Fin)
 open import Data.Vec.Functional
+open import Relation.Binary.Definitions
 
 open import Algebra.Module.Definition leftModule
 open import Algebra.BigOps
@@ -21,9 +22,12 @@ open SumCommMonoid +ᴹ-commutativeMonoid
 open import Relation.Binary.Reasoning.Setoid ≈ᴹ-setoid
 open SumRawRing rawRing using (δ; δss≡δ)
 
+open import Algebra.Definitions _≈_
+open import Data.Vec.Functional.Relation.Binary.Equality.Setoid ≈ᴹ-setoid
+
 private variable
   m n : ℕ
-  xs ys : Vector M n
+  xs ys zs : Vector M n
   α : A
 
 private
@@ -72,8 +76,8 @@ sameSolutions {m} {xs} {n} {ys} {α} xs⊆ys αXs k with xs⊆ys (xsReachesItsel
   ∑ {n} (const 0ᴹ) ≈⟨ ∑0r n ⟩
   0ᴹ ∎
 
-0∷⊆ⱽₗ : (xs : Vector M n) → (0ᴹ ∷ xs) ⊆ⱽ xs
-0∷⊆ⱽₗ xs {x} (ys by xs*ys≈x) = as by ∑as*xs≈x
+0∷⊆ⱽ : (xs : Vector M n) → (0ᴹ ∷ xs) ⊆ⱽ xs
+0∷⊆ⱽ xs {x} (ys by xs*ys≈x) = as by ∑as*xs≈x
   where
   as = tail ys
   ∑as*xs≈x = begin
@@ -82,12 +86,31 @@ sameSolutions {m} {xs} {n} {ys} {α} xs⊆ys αXs k with xs⊆ys (xsReachesItsel
     _ *ₗ 0ᴹ +ᴹ ∑ (tail ys *ᵣ xs) ≈⟨ xs*ys≈x ⟩
     x ∎
 
-⊆ⱽ0∷ᵣ : ∀ (xs : Vector M n) → xs ⊆ⱽ (0ᴹ ∷ xs)
-⊆ⱽ0∷ᵣ xs {x} (ys by xs*ys≈x) = as by ∑ws≈x
+⊆ⱽ0∷ : (xs : Vector M n) → xs ⊆ⱽ (0ᴹ ∷ xs)
+⊆ⱽ0∷ xs {x} (ys by xs*ys≈x) = as by ∑ws≈x
   where
   as = 0# ∷ ys
   ∑ws≈x = begin
     0# *ₗ 0ᴹ +ᴹ ∑ (ys *ᵣ xs) ≈⟨ +ᴹ-congʳ (*ₗ-zeroˡ _) ⟩
-    0ᴹ +ᴹ ∑ (ys *ᵣ xs) ≈⟨ +ᴹ-identityˡ _ ⟩
-    ∑ (ys *ᵣ xs) ≈⟨ xs*ys≈x ⟩
+    0ᴹ +ᴹ ∑ (ys *ᵣ xs)       ≈⟨ +ᴹ-identityˡ _ ⟩
+    ∑ (ys *ᵣ xs)             ≈⟨ xs*ys≈x ⟩
     x ∎
+
+0∷≈ⱽ : (xs : Vector M n) → (0ᴹ ∷ xs) ≋ⱽ xs
+0∷≈ⱽ xs = record { fwd = 0∷⊆ⱽ xs ; bwd = ⊆ⱽ0∷ xs }
+
+≋ⱽ-refl : Reflexive (_≋ⱽ_ {n})
+≋ⱽ-refl = record { fwd = id ; bwd = id }
+
+≋ⱽ-sym : Symmetric (_≋ⱽ_ {n})
+≋ⱽ-sym record { fwd = fwd ; bwd = bwd } = record { fwd = bwd ; bwd = fwd }
+
+≋ⱽ-trans : Transitive (_≋ⱽ_ {n})
+≋ⱽ-trans record { fwd = fwdA ; bwd = bwdA } record { fwd = fwdB ; bwd = bwdB } =
+  record { fwd = fwdB ∘ fwdA ; bwd = bwdA ∘ bwdB }
+
+≋⇒⊆ⱽ : xs ≋ ys → xs ⊆ⱽ ys
+≋⇒⊆ⱽ {n} {xs} {ys} xs≋ys (zs by xs*zs≈x) = zs by ≈ᴹ-trans (∑Ext (*ₗ-congˡ ∘ ≋-sym xs≋ys)) xs*zs≈x
+
+≋⇒≋ⱽ : xs ≋ ys → xs ≋ⱽ ys
+≋⇒≋ⱽ xs≋ys = record { fwd = ≋⇒⊆ⱽ xs≋ys ; bwd = ≋⇒⊆ⱽ (≋-sym xs≋ys) }
