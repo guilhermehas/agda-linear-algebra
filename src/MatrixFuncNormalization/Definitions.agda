@@ -56,6 +56,26 @@ record MatrixNormed (m n : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
 
   open MatrixIsNormed isNormed public
 
+PivsOne : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m ⁺) n) → Set _
+PivsOne xs pivs = ∀ i → All (λ j → xs i j ≈ 1#) (pivs i)
+
+record MatrixIsNormed≈1 (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
+  field
+    isNormed : MatrixIsNormed xs
+
+  open MatrixIsNormed isNormed public
+
+  field
+    pivsOne  : PivsOne xs pivs
+
+
+record MatrixNormed≈1 (m n : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    xs         : Matrix F n m
+    isNormed≈1 : MatrixIsNormed≈1 xs
+
+  open MatrixIsNormed≈1 isNormed≈1 public
+
 record FromNormalization (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
   field
     ys       : Matrix F n m
@@ -79,6 +99,8 @@ record FromNormalization (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) whe
   αys⇒αxs : α isSolutionOf ys → α isSolutionOf xs
   αys⇒αxs = sameSolutions (_≋ⱽ_.fwd xs≋ⱽys)
 
-
-PivsOne : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m ⁺) n) → Set _
-PivsOne xs pivs = ∀ i → All (λ j → xs i j ≈ 1#) (pivs i)
+record FromNormalization≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    ys       : Matrix F n m
+    ysNormed : MatrixIsNormed≈1 ys
+    xs≋ⱽys   : xs ≋ⱽ ys

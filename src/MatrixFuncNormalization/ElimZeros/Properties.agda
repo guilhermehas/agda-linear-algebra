@@ -31,18 +31,35 @@ open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (ring)
 open import Algebra.HeytingField.Properties hField
 open import Algebra.Ring.Properties
+import Algebra.Module.Definition as MDefinition
+import Algebra.Module.PropsField as PField
+open import Algebra.Module.Instances.FunctionalVector ring
 
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.Reasoning.Setoid setoid
 open Units ring
+open module PFieldN {n} = PField heytingCommutativeRing (leftModule n)
+open module MDefN {n} = MDefinition (leftModule n)
+
 
 private variable
   m n : ℕ
 
+invVecValue : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → F
+invVecValue xs ⊤⁺ vPos = 1#
+invVecValue xs [ p ] (xp#0 , _) = proj₁ (#0⇒invertible xp#0)
+
 divideVec : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → Vector F n
 divideVec xs ⊤⁺ vPos i = xs i
 divideVec xs [ p ] (xp#0 , _) i = #⇒invertible xp#0 .proj₁ * xs i
+
+divideVec₂ : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → Vector F n
+divideVec₂ xs p vPos i = invVecValue xs p vPos * xs i
+
+dV₂≈dV : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → divideVec₂ xs p vPos ≋ divideVec xs p vPos
+dV₂≈dV xs ⊤⁺ vPos _ = *-identityˡ _
+dV₂≈dV xs [ p ] vPos i = refl
 
 divideVecPreservesPos : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → VecPivotPos (divideVec xs p vPos) p
 divideVecPreservesPos xs ⊤⁺ vPos = vPos
@@ -63,7 +80,11 @@ divideVecP≈1 {xs = xs} {[ i ]} (xsI#0 , _) = let x⁻¹ = #⇒invertible xsI#0
   1# ∎)
 divideVecP≈1 {p = ⊤⁺} vPos = nothing
 
-module _ (xs : Matrix F n m) (xsNormed : FromNormalization xs) where
+invVecValue#0 : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → invVecValue xs p vPos # 0#
+invVecValue#0 xs ⊤⁺ vPos = 1#0
+invVecValue#0 xs [ p ] vPos = x⁻¹#0 _ _
+
+module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   open FromNormalization xsNormed
 
@@ -83,3 +104,23 @@ module _ (xs : Matrix F n m) (xsNormed : FromNormalization xs) where
 
   pivsOne : PivsOne matDivided pivs
   pivsOne _ = divideVecP≈1 _
+
+  ys≋ⱽmNormed : ys ≋ⱽ matDivided
+  ys≋ⱽmNormed = ≋ⱽ-trans (*#0≈ⱽ ys λ i → invVecValue#0 (ys i) (pivs i) (mPivots i))
+    (≋⇒≋ⱽ λ i → dV₂≈dV (ys i) (pivs i) (mPivots i))
+
+  xs≋ⱽmNormed : xs ≋ⱽ matDivided
+  xs≋ⱽmNormed = ≋ⱽ-trans xs≋ⱽys ys≋ⱽmNormed
+
+  normalizeOne : FromNormalization≈1 xs
+  normalizeOne = record
+    { ysNormed = record
+      { isNormed = record
+        { mPivots      = mPivAfter
+        ; pivsCrescent = pivsCrescent
+        ; columnsZero  = columnsZeros
+        }
+      ; pivsOne  = pivsOne
+      }
+    ; xs≋ⱽys   = xs≋ⱽmNormed
+    }
