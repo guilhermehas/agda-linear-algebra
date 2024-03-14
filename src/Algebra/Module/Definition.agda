@@ -23,6 +23,9 @@ open SumMonoid +ᴹ-monoid
 private variable
   m n : ℕ
 
+infix 4 _⊆ⱽ_ _⊇ⱽ_ _≋ⱽ_
+infixr 7 _*ᵣ_
+
 _*ᵣ_ : Vector A n → Op₁ $ Vector M n
 (u *ᵣ v) i = u i *ₗ v i
 
