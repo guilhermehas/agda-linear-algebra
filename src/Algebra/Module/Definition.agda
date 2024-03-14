@@ -6,40 +6,40 @@ module Algebra.Module.Definition {rr ℓr mr ℓm}
   (leftModule : LeftModule ring mr ℓm)
   where
 
-  open import Level using (Level; _⊔_)
-  open import Function
-  open import Relation.Binary
-  open import Relation.Unary
-  open import Data.Nat using (ℕ)
-  open import Data.Vec.Functional
-  open import Vector.Structures
-  open import Algebra.BigOps
-  open import Relation.Unary.PredicateTransformer hiding (_⊔_)
+open import Level using (Level; _⊔_)
+open import Function
+open import Relation.Binary
+open import Relation.Unary
+open import Data.Nat using (ℕ)
+open import Data.Vec.Functional
+open import Vector.Structures
+open import Algebra.BigOps
+open import Relation.Unary.PredicateTransformer hiding (_⊔_)
 
-  open Ring ring renaming (Carrier to A)
-  open LeftModule leftModule renaming (Carrierᴹ to M)
-  open SumMonoid +ᴹ-monoid
+open Ring ring renaming (Carrier to A)
+open LeftModule leftModule renaming (Carrierᴹ to M)
+open SumMonoid +ᴹ-monoid
 
-  private variable
-    m n : ℕ
+private variable
+  m n : ℕ
 
-  _*ᵣ_ : Vector A n → Op₁ $ Vector M n
-  (u *ᵣ v) i = u i *ₗ v i
+_*ᵣ_ : Vector A n → Op₁ $ Vector M n
+(u *ᵣ v) i = u i *ₗ v i
 
-  record _reaches_ (xs : Vector M n) (x : M) : Set (ℓm ⊔ rr) where
-    constructor _by_
-    field
-      ys      : Vector A n
-      xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x
+record _reaches_ (xs : Vector M n) (x : M) : Set (ℓm ⊔ rr) where
+  constructor _by_
+  field
+    ys      : Vector A n
+    xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x
 
-  _⊆ⱽ_ _⊇ⱽ_ : (xs : Vector M m) (ys : Vector M n) → Set _
-  xs ⊆ⱽ ys = (xs reaches_) ⊆ (ys reaches_)
-  xs ⊇ⱽ ys = ys ⊆ⱽ xs
+_⊆ⱽ_ _⊇ⱽ_ : (xs : Vector M m) (ys : Vector M n) → Set _
+xs ⊆ⱽ ys = (xs reaches_) ⊆ (ys reaches_)
+xs ⊇ⱽ ys = ys ⊆ⱽ xs
 
-  record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) where
-    field
-      fwd : xs ⊆ⱽ ys
-      bwd : ys ⊆ⱽ xs
+record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) where
+  field
+    fwd : xs ⊆ⱽ ys
+    bwd : ys ⊆ⱽ xs
 
-  _isSolutionOf_ : A → Vector M n → Set _
-  α isSolutionOf v = ∀ k → α *ₗ v k ≈ᴹ 0ᴹ
+_isSolutionOf_ : A → Vector M n → Set _
+α isSolutionOf v = ∀ k → α *ₗ v k ≈ᴹ 0ᴹ
