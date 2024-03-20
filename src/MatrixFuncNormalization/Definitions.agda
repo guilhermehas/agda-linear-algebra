@@ -113,7 +113,7 @@ MatrixPivots≁0 : Matrix F n m → Vector (Fin m) n → Set _
 MatrixPivots≁0 xs v = ∀ i → Lookup≢0 (xs i) (v i)
 
 AllRowsNormalized≁0 : Vector (Fin m) n → Set _
-AllRowsNormalized≁0 xs = Monotonic₁ _<_ _<_ xs
+AllRowsNormalized≁0 = Monotonic₁ _<_ _<_
 
 ColumnsZero≁0 : Matrix F n m → Vector (Fin m) n → Set _
 ColumnsZero≁0 xs pivs = ∀ i j → i ≢ j → xs j (pivs i) ≈ 0#
@@ -124,3 +124,47 @@ record MatrixIsNormed≁0 (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
     mPivots      : MatrixPivots≁0 xs pivs
     pivsCrescent : AllRowsNormalized≁0 pivs
     columnsZero  : ColumnsZero≁0 xs pivs
+
+record MatrixNormed≁0 (m n : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    xs       : Matrix F n m
+    isNormed : MatrixIsNormed≁0 xs
+
+  open MatrixIsNormed≁0 isNormed public
+
+PivsOne≁0 : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m) n) → Set _
+PivsOne≁0 xs pivs = ∀ i → xs i (pivs i) ≈ 1#
+
+record MatrixIsNormed≁0≈1 (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
+  field
+    isNormed : MatrixIsNormed≁0 xs
+
+  open MatrixIsNormed≁0 isNormed public
+
+  field
+    pivsOne  : PivsOne≁0 xs pivs
+
+
+record MatrixNormed≁0≈1 (m n : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    xs         : Matrix F n m
+    isNormed≈1 : MatrixIsNormed≁0≈1 xs
+
+  open MatrixIsNormed≁0≈1 isNormed≈1 public
+
+record FromNormalization≁0 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    ys       : Matrix F n m
+    ysNormed : MatrixIsNormed≁0 ys
+    xs≋ⱽys   : xs ≋ⱽ ys
+
+  open MatrixIsNormed≁0 ysNormed public
+
+  αys⇒αxs : α isSolutionOf ys → α isSolutionOf xs
+  αys⇒αxs = sameSolutions (_≋ⱽ_.fwd xs≋ⱽys)
+
+record FromNormalization≁0≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    ys       : Matrix F n m
+    ysNormed : MatrixIsNormed≁0≈1 ys
+    xs≋ⱽys   : xs ≋ⱽ ys
