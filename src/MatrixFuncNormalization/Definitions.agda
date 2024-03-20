@@ -107,6 +107,8 @@ record FromNormalization≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂)
     ysNormed : MatrixIsNormed≈1 ys
     xs≋ⱽys   : xs ≋ⱽ ys
 
+  open MatrixIsNormed≈1 ysNormed public
+
 -- Normalization without zeros
 
 MatrixPivots≁0 : Matrix F n m → Vector (Fin m) n → Set _
@@ -168,3 +170,5 @@ record FromNormalization≁0≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ
     ys       : Matrix F n m
     ysNormed : MatrixIsNormed≁0≈1 ys
     xs≋ⱽys   : xs ≋ⱽ ys
+
+  open MatrixIsNormed≁0≈1 ysNormed public
