@@ -90,15 +90,10 @@ firstZero : Vector (Fin m ⁺) n → Fin (ℕ.suc n)
 firstZero {n = ℕ.zero} xs = 0F
 firstZero {n = ℕ.suc n} xs = maybe′ (const (suc (firstZero (tail xs)))) 0F (xs 0F)
 
-firstZeroIsJust : ∀ (pivs : Vector (Fin m ⁺) n) i → Is-just (pivs (inject! {i = firstZero pivs} i))
-firstZeroIsJust {n = ℕ.suc n} pivs i with pivs 0F in eq
-firstZeroIsJust {n = ℕ.suc n} pivs 0F | just _ rewrite eq = just _
-firstZeroIsJust {n = ℕ.suc n} pivs (suc i) | just _ = firstZeroIsJust {n = n} (tail pivs) i
-
 normPivs : ∀ (pivs : Vector (Fin m ⁺) n) → Vector (Fin m) (toℕ (firstZero pivs))
 normPivs {n = ℕ.suc n} pivs i with pivs 0F
-normPivs {_} {ℕ.suc n} pivs 0F | just i = i
-normPivs {_} {ℕ.suc n} pivs (suc i) | just _ = normPivs (tail pivs) i
+normPivs {n = ℕ.suc n} pivs 0F | just i = i
+normPivs {n = ℕ.suc n} pivs (suc i) | just _ = normPivs (tail pivs) i
 
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
@@ -145,14 +140,4 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   sizeF = firstZero pivs
   n′ = toℕ sizeF
-
-  removedZero : Matrix F n′ m
-  removedZero = xs ∘ inject! {i = sizeF}
-
-  nPivs′ : Vector (Fin m ⁺) n′
-  nPivs′ = pivs ∘ inject!
-
-  nPivs-isJust : ∀ i → Is-just (nPivs′ i)
-  nPivs-isJust = firstZeroIsJust pivs
-
   nPivs = normPivs pivs
