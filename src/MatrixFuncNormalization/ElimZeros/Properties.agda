@@ -95,6 +95,12 @@ normPivs {n = ℕ.suc n} pivs i with pivs 0F
 normPivs {n = ℕ.suc n} pivs 0F | just i = i
 normPivs {n = ℕ.suc n} pivs (suc i) | just _ = normPivs (tail pivs) i
 
+mPivs≁0′ : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs)
+  → MatrixPivots≁0 (xs ∘ inject!) (normPivs pivs)
+mPivs≁0′ {n = ℕ.suc n} xs pivs mPivs i with pivs 0F | mPivs 0F
+mPivs≁0′ {_} {ℕ.suc n} xs pivs mPivs 0F | just x | c  = c
+mPivs≁0′ {_} {ℕ.suc n} xs pivs mPivs (suc i) | just x | _ = mPivs≁0′ (tail xs) (tail pivs) (mPivs ∘ suc) i
+
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   open FromNormalization xsNormed
@@ -140,4 +146,10 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   sizeF = firstZero pivs
   n′ = toℕ sizeF
-  nPivs = normPivs pivs
+
+  ys≁0 : Matrix F n′ m
+  ys≁0 = ys ∘ inject! {i = sizeF}
+  pivs≁0 = normPivs pivs
+
+  mPivs≁0 : MatrixPivots≁0 ys≁0 pivs≁0
+  mPivs≁0 = mPivs≁0′ ys pivs mPivots
