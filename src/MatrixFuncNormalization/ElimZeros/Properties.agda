@@ -6,12 +6,14 @@ open import Algebra
 open import Algebra.Apartness
 open import Function
 open import Data.Product
-open import Data.Fin as F using (Fin; zero; suc)
--- open import Data.Maybe as Maybe
+open import Data.Fin as F using (Fin; zero; suc; inject!; toℕ)
+open import Data.Fin.Patterns
+open import Data.Maybe
 -- open import Data.Bool using (Bool; false; true; T)
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ; NonZero)
 open import Data.Vec.Functional as V
 open import Data.Maybe.Relation.Unary.All
+open import Data.Maybe.Relation.Unary.Any
 -- open import Relation.Nullary
 open import Relation.Nullary.Construct.Add.Supremum
 
@@ -84,6 +86,20 @@ invVecValue#0 : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → invVecValu
 invVecValue#0 xs ⊤⁺ vPos = 1#0
 invVecValue#0 xs [ p ] vPos = x⁻¹#0 _ _
 
+firstZero : Vector (Fin m ⁺) n → Fin (ℕ.suc n)
+firstZero {n = ℕ.zero} xs = 0F
+firstZero {n = ℕ.suc n} xs = maybe′ (const (suc (firstZero (tail xs)))) 0F (xs 0F)
+
+firstZeroIsJust : ∀ (pivs : Vector (Fin m ⁺) n) i → Is-just (pivs (inject! {i = firstZero pivs} i))
+firstZeroIsJust {n = ℕ.suc n} pivs i with pivs 0F in eq
+firstZeroIsJust {n = ℕ.suc n} pivs 0F | just _ rewrite eq = just _
+firstZeroIsJust {n = ℕ.suc n} pivs (suc i) | just _ = firstZeroIsJust {n = n} (tail pivs) i
+
+normPivs : ∀ (pivs : Vector (Fin m ⁺) n) → Vector (Fin m) (toℕ (firstZero pivs))
+normPivs {n = ℕ.suc n} pivs i with pivs 0F
+normPivs {_} {ℕ.suc n} pivs 0F | just i = i
+normPivs {_} {ℕ.suc n} pivs (suc i) | just _ = normPivs (tail pivs) i
+
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   open FromNormalization xsNormed
@@ -124,3 +140,19 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
       }
     ; xs≋ⱽys   = xs≋ⱽmNormed
     }
+
+  -- Removing Zeros
+
+  sizeF = firstZero pivs
+  n′ = toℕ sizeF
+
+  removedZero : Matrix F n′ m
+  removedZero = xs ∘ inject! {i = sizeF}
+
+  nPivs′ : Vector (Fin m ⁺) n′
+  nPivs′ = pivs ∘ inject!
+
+  nPivs-isJust : ∀ i → Is-just (nPivs′ i)
+  nPivs-isJust = firstZeroIsJust pivs
+
+  nPivs = normPivs pivs

@@ -8,6 +8,7 @@ open import Algebra
 open import Algebra.Apartness
 open import Data.Bool.Base hiding (_<_)
 open import Data.List as L using (List)
+open import Data.Maybe
 open import Data.Maybe.Relation.Unary.All
 open import Data.Product
 open import Data.Nat.Base using (ℕ)
