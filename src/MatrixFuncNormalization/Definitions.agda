@@ -6,15 +6,17 @@ open import Level
 open import Function
 open import Algebra
 open import Algebra.Apartness
-open import Data.Bool.Base
+open import Data.Bool.Base hiding (_<_)
 open import Data.List as L using (List)
 open import Data.Maybe.Relation.Unary.All
 open import Data.Product
 open import Data.Nat.Base using (ℕ)
-open import Data.Fin as F using (Fin)
+open import Data.Fin as F using (Fin; _<_)
 open import Data.Vec.Functional
 open import Relation.Nullary.Construct.Add.Supremum
 open import Relation.Nullary
+open import Relation.Binary.Definitions
+open import Relation.Binary.PropositionalEquality
 import Algebra.Module.Definition as MDefinition
 import Algebra.Module.Props as MProps
 
@@ -104,3 +106,21 @@ record FromNormalization≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂)
     ys       : Matrix F n m
     ysNormed : MatrixIsNormed≈1 ys
     xs≋ⱽys   : xs ≋ⱽ ys
+
+-- Normalization without zeros
+
+MatrixPivots≁0 : Matrix F n m → Vector (Fin m) n → Set _
+MatrixPivots≁0 xs v = ∀ i → Lookup≢0 (xs i) (v i)
+
+AllRowsNormalized≁0 : Vector (Fin m) n → Set _
+AllRowsNormalized≁0 xs = Monotonic₁ _<_ _<_ xs
+
+ColumnsZero≁0 : Matrix F n m → Vector (Fin m) n → Set _
+ColumnsZero≁0 xs pivs = ∀ i j → i ≢ j → xs j (pivs i) ≈ 0#
+
+record MatrixIsNormed≁0 (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
+  field
+    pivs         : Vector (Fin m) n
+    mPivots      : MatrixPivots≁0 xs pivs
+    pivsCrescent : AllRowsNormalized≁0 pivs
+    columnsZero  : ColumnsZero≁0 xs pivs
