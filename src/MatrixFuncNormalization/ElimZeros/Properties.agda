@@ -2,12 +2,14 @@ open import Algebra.DecidableField
 
 module MatrixFuncNormalization.ElimZeros.Properties {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
+open import Level using (Level)
 open import Algebra
 open import Algebra.Apartness
 open import Function
 open import Data.Product
 open import Data.Fin as F using (Fin; zero; suc; inject!; toℕ)
 open import Data.Fin.Patterns
+open import Data.Fin.Properties
 open import Data.Maybe
 open import Data.Sum
 -- open import Data.Bool using (Bool; false; true; T)
@@ -17,7 +19,7 @@ open import Data.Maybe.Relation.Unary.All
 open import Data.Maybe.Relation.Unary.Any
 -- open import Relation.Nullary
 open import Relation.Nullary.Construct.Add.Supremum
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; cong)
 open import Relation.Binary.Construct.Add.Supremum.Strict
 
 -- open import Vector
@@ -114,6 +116,17 @@ private
   injectPreserves {ℕ.suc n} {k = suc k} {0F} {suc j} (s<s z≤n) = s<s z≤n
   injectPreserves {ℕ.suc n} {k = suc k} {suc i} {suc j} (s<s i<j) = s<s (injectPreserves i<j)
 
+  inject⇒≡ : ∀ {k : Fin (ℕ.suc n)} {i j : F.Fin′ k} → inject! i ≡ inject! j → i ≡ j
+  inject⇒≡ {ℕ.zero} {0F} {i = ()} x
+  inject⇒≡ {ℕ.zero} {suc ()} {i = 0F} {0F} x
+  inject⇒≡ {ℕ.zero} {suc ()} {i = 0F} {suc j} x
+  inject⇒≡ {ℕ.zero} {suc ()} {i = suc i} x
+  inject⇒≡ {ℕ.suc n} {suc k} {0F} {0F} ≡.refl = ≡.refl
+  inject⇒≡ {ℕ.suc n} {suc k} {suc i} {suc j} eq rewrite inject⇒≡ (suc-injective eq) = ≡.refl
+
+  inject⇒≢ : ∀ {k : Fin (ℕ.suc n)} {i j : F.Fin′ k} → i ≢ j → inject! i ≢ inject! j
+  inject⇒≢ = _∘ inject⇒≡
+
 pivsCrescent≁0′ : {pivs : Vector (Fin m ⁺) n} (normed : AllRowsNormalized pivs)  → AllRowsNormalized≁0 (normPivs pivs)
 pivsCrescent≁0′ {pivs = pivs} normed {i} {j} i<j = helper $ normed _ _ $ injectPreserves i<j
   where
@@ -122,6 +135,14 @@ pivsCrescent≁0′ {pivs = pivs} normed {i} {j} i<j = helper $ normed _ _ $ inj
 
   helper : pivs (inject! i) <′ pivs (inject! j) → _
   helper rewrite ≡.sym (normPivsSame pivs i) | ≡.sym (normPivsSame pivs j) = helper2
+
+cols0≁0′ : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (cols0 : ColumnsZero xs pivs)
+  → ColumnsZero≁0 (xs ∘ inject!) (normPivs pivs)
+cols0≁0′ {n = ℕ.suc n} xs pivs cols0 i j i≢j = helper $ cols0 _ _ $ inject⇒≢ i≢j
+  where
+  helper : Maybe≈0 (xs (inject! j)) (pivs (inject! i)) → _
+  helper rewrite ≡.sym (normPivsSame pivs i) = id
+
 
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
@@ -178,3 +199,6 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   pivsCrescent≁0 : AllRowsNormalized≁0 pivs≁0
   pivsCrescent≁0 x<y = pivsCrescent≁0′ pivsCrescent x<y
+
+  colsZero : ColumnsZero≁0 ys≁0 pivs≁0
+  colsZero = cols0≁0′ _ _ columnsZero
