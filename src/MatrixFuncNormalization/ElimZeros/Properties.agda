@@ -9,13 +9,15 @@ open import Data.Product
 open import Data.Fin as F using (Fin; zero; suc; inject!; toℕ)
 open import Data.Fin.Patterns
 open import Data.Maybe
+open import Data.Sum
 -- open import Data.Bool using (Bool; false; true; T)
-open import Data.Nat using (ℕ; NonZero)
+open import Data.Nat using (ℕ; NonZero; z≤n; s<s)
 open import Data.Vec.Functional as V
 open import Data.Maybe.Relation.Unary.All
 open import Data.Maybe.Relation.Unary.Any
 -- open import Relation.Nullary
 open import Relation.Nullary.Construct.Add.Supremum
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
 -- open import Vector
 open import Algebra.Matrix
@@ -43,7 +45,7 @@ open import Relation.Binary.Reasoning.Setoid setoid
 open Units ring
 open module PFieldN {n} = PField heytingCommutativeRing (leftModule n)
 open module MDefN {n} = MDefinition (leftModule n)
-
+open PNorm
 
 private variable
   m n : ℕ
@@ -100,6 +102,11 @@ mPivs≁0′ : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : Matrix
 mPivs≁0′ {n = ℕ.suc n} xs pivs mPivs i with pivs 0F | mPivs 0F
 mPivs≁0′ {_} {ℕ.suc n} xs pivs mPivs 0F | just x | c  = c
 mPivs≁0′ {_} {ℕ.suc n} xs pivs mPivs (suc i) | just x | _ = mPivs≁0′ (tail xs) (tail pivs) (mPivs ∘ suc) i
+
+normPivsSame : ∀ (pivs : Vector (Fin m ⁺) n) i → just (normPivs pivs i) ≡ pivs (inject! i)
+normPivsSame {n = ℕ.suc n} pivs i with pivs 0F in eq
+normPivsSame {n = ℕ.suc n} pivs 0F | just x rewrite eq = ≡.refl
+normPivsSame {n = ℕ.suc n} pivs (suc i) | just x rewrite eq = normPivsSame {n = n} (tail pivs) i
 
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
