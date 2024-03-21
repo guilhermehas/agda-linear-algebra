@@ -2,7 +2,7 @@ open import Algebra.DecidableField
 
 module MatrixFuncNormalization.ElimZeros.Properties {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
-open import Level using (Level)
+open import Level using (Level; lift)
 open import Algebra
 open import Algebra.Apartness
 open import Function
@@ -41,6 +41,7 @@ open import Algebra.Ring.Properties
 import Algebra.Module.Definition as MDefinition
 import Algebra.Module.PropsField as PField
 open import Algebra.Module.Instances.FunctionalVector ring
+open import Algebra.BigOps
 
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
@@ -49,6 +50,7 @@ open Units ring
 open module PFieldN {n} = PField heytingCommutativeRing (leftModule n)
 open module MDefN {n} = MDefinition (leftModule n)
 open PNorm
+open module ∑ {n} = SumMonoid (monoid n)
 
 private variable
   m n : ℕ
@@ -148,6 +150,36 @@ pivsOne≁0′ : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (pivsOne : Pi
 pivsOne≁0′ {n = ℕ.suc n} xs pivs pivsOne i with pivs 0F | pivsOne 0F
 pivsOne≁0′ {_} {ℕ.suc n} xs pivs pivsOne 0F | just a | just b = b
 pivsOne≁0′ {_} {ℕ.suc n} xs pivs pivsOne (suc i) | just a | just b = pivsOne≁0′ (tail xs) (tail pivs) (pivsOne ∘ F.suc) i
+
+sumZero : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+  → firstZero pivs ≡ 0F
+  → ∑ xs ≈ᴹ 0ᴹ
+sumZero {n = ℕ.zero} xs pivs mPivs normed eq i = refl
+sumZero {m} {n = ℕ.suc n} xs pivs mPivs normed eq i with pivs 0F | mPivs 0F
+... | ⊤⁺ | lift lower = begin
+  _ + ∑ (tail xs) i ≈⟨ +-cong (lower _) (∑Ext tailI≈0 i)  ⟩
+  0# + ∑ {m} {n} (const (const 0#)) i ≈⟨ {!!} ⟩
+  0# + 0# ≈⟨ +-identityʳ _ ⟩
+  0# ∎ where
+  tailI≈0 : ∀ j k → tail xs j k ≈ 0#
+  tailI≈0 j k = {!!}
+
+open _reaches_ renaming (ys to ws; xs*ys≈x to xs*ws≈x)
+
+sameVecSpace : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+  → xs ⊆ⱽ xs ∘ inject! {i = firstZero pivs}
+sameVecSpace {n = ℕ.zero} xs pivs mPivs normed (ys by xs*ys≈x) = ys by xs*ys≈x
+ws (sameVecSpace {n = ℕ.suc n} xs pivs mPivs normed (ys by xs*ys≈x)) = ys ∘ inject!
+xs*ws≈x (sameVecSpace {n = ℕ.suc n} xs pivs mPivs normed {x} (ys by xs*ys≈x)) i with firstZero pivs in eq
+... | 0F = begin
+  0# ≈⟨ {!!} ⟩
+  -- {!!} ≈⟨ {!!} ⟩
+  {!!} + {!!} ≈⟨ xs*ys≈x i ⟩
+  x i ∎
+... | suc c = {!head (λ i₁ x₁ → ys (inject! i₁) * xs (inject! i₁) x₁) i!}
+-- head (λ i₁ x₁ → ys (inject! i₁) * xs (inject! i₁) x₁) i
+-- ys (inject! i) * xs (inject! i)
+
 
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
