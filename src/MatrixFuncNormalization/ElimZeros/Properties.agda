@@ -18,6 +18,7 @@ open import Data.Maybe.Relation.Unary.Any
 -- open import Relation.Nullary
 open import Relation.Nullary.Construct.Add.Supremum
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+open import Relation.Binary.Construct.Add.Supremum.Strict
 
 -- open import Vector
 open import Algebra.Matrix
@@ -108,6 +109,20 @@ normPivsSame {n = ℕ.suc n} pivs i with pivs 0F in eq
 normPivsSame {n = ℕ.suc n} pivs 0F | just x rewrite eq = ≡.refl
 normPivsSame {n = ℕ.suc n} pivs (suc i) | just x rewrite eq = normPivsSame {n = n} (tail pivs) i
 
+private
+  injectPreserves : ∀ {k : Fin (ℕ.suc n)} {i j : F.Fin′ k} → i F.< j → inject! i F.< inject! j
+  injectPreserves {ℕ.suc n} {k = suc k} {0F} {suc j} (s<s z≤n) = s<s z≤n
+  injectPreserves {ℕ.suc n} {k = suc k} {suc i} {suc j} (s<s i<j) = s<s (injectPreserves i<j)
+
+pivsCrescent≁0′ : {pivs : Vector (Fin m ⁺) n} (normed : AllRowsNormalized pivs)  → AllRowsNormalized≁0 (normPivs pivs)
+pivsCrescent≁0′ {pivs = pivs} normed {i} {j} i<j = helper $ normed _ _ $ injectPreserves i<j
+  where
+  helper2 : _ → _
+  helper2 (inj₁ [ pI<pJ ]) = pI<pJ
+
+  helper : pivs (inject! i) <′ pivs (inject! j) → _
+  helper rewrite ≡.sym (normPivsSame pivs i) | ≡.sym (normPivsSame pivs j) = helper2
+
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   open FromNormalization xsNormed
@@ -160,3 +175,6 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   mPivs≁0 : MatrixPivots≁0 ys≁0 pivs≁0
   mPivs≁0 = mPivs≁0′ ys pivs mPivots
+
+  pivsCrescent≁0 : AllRowsNormalized≁0 pivs≁0
+  pivsCrescent≁0 x<y = pivsCrescent≁0′ pivsCrescent x<y
