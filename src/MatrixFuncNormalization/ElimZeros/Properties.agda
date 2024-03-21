@@ -127,7 +127,7 @@ private
   inject⇒≢ : ∀ {k : Fin (ℕ.suc n)} {i j : F.Fin′ k} → i ≢ j → inject! i ≢ inject! j
   inject⇒≢ = _∘ inject⇒≡
 
-pivsCrescent≁0′ : {pivs : Vector (Fin m ⁺) n} (normed : AllRowsNormalized pivs)  → AllRowsNormalized≁0 (normPivs pivs)
+pivsCrescent≁0′ : {pivs : Vector (Fin m ⁺) n} (normed : AllRowsNormalized pivs) → AllRowsNormalized≁0 (normPivs pivs)
 pivsCrescent≁0′ {pivs = pivs} normed {i} {j} i<j = helper $ normed _ _ $ injectPreserves i<j
   where
   helper2 : _ → _
@@ -143,6 +143,11 @@ cols0≁0′ {n = ℕ.suc n} xs pivs cols0 i j i≢j = helper $ cols0 _ _ $ inje
   helper : Maybe≈0 (xs (inject! j)) (pivs (inject! i)) → _
   helper rewrite ≡.sym (normPivsSame pivs i) = id
 
+pivsOne≁0′ : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (pivsOne : PivsOne xs pivs)
+  → PivsOne≁0 (xs ∘ inject!) (normPivs pivs)
+pivsOne≁0′ {n = ℕ.suc n} xs pivs pivsOne i with pivs 0F | pivsOne 0F
+pivsOne≁0′ {_} {ℕ.suc n} xs pivs pivsOne 0F | just a | just b = b
+pivsOne≁0′ {_} {ℕ.suc n} xs pivs pivsOne (suc i) | just a | just b = pivsOne≁0′ (tail xs) (tail pivs) (pivsOne ∘ F.suc) i
 
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
@@ -202,3 +207,6 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   colsZero : ColumnsZero≁0 ys≁0 pivs≁0
   colsZero = cols0≁0′ _ _ columnsZero
+
+  pivsOne≁0 : PivsOne ys pivs → PivsOne≁0 ys≁0 pivs≁0
+  pivsOne≁0 = pivsOne≁0′ _ _
