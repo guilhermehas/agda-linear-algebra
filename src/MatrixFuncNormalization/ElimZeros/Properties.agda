@@ -32,10 +32,10 @@ open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZe
 open import MatrixFuncNormalization.NormAfter.PropsFlip dField
 open import MatrixFuncNormalization.Definitions dField
 
-open DecidableField dField renaming (Carrier to F; heytingField to hField)
+open DecidableField dField renaming (Carrier to F; heytingField to hField) hiding (sym)
 open HeytingField hField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
-open CommutativeRing commutativeRing using (ring)
+open CommutativeRing commutativeRing using (ring; sym)
 open import Algebra.HeytingField.Properties hField
 open import Algebra.Ring.Properties
 import Algebra.Module.Definition as MDefinition
@@ -151,18 +151,40 @@ pivsOne≁0′ {n = ℕ.suc n} xs pivs pivsOne i with pivs 0F | pivsOne 0F
 pivsOne≁0′ {_} {ℕ.suc n} xs pivs pivsOne 0F | just a | just b = b
 pivsOne≁0′ {_} {ℕ.suc n} xs pivs pivsOne (suc i) | just a | just b = pivsOne≁0′ (tail xs) (tail pivs) (pivsOne ∘ F.suc) i
 
+eq0Piv : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+  → firstZero pivs ≡ 0F → ∀ i
+  → xs i ≋ 0ᴹ
+eq0Piv {n = ℕ.suc n} xs pivs mPivs normed fP≈0 0F j with pivs 0F | mPivs 0F
+... | ⊤⁺ | lift lower = lower _
+eq0Piv {n = ℕ.suc n} xs pivs mPivs normed fP≈0 (suc i) j with pivs 0F | pivs (suc i) | normed 0F (suc i) (s<s z≤n) |  mPivs (suc i)
+... | ⊤⁺ | ⊤⁺ | inj₂ _ | lift lower = lower _
+
+
 sumZero : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
   → firstZero pivs ≡ 0F
   → ∑ xs ≈ᴹ 0ᴹ
-sumZero {n = ℕ.zero} xs pivs mPivs normed eq i = refl
-sumZero {m} {n = ℕ.suc n} xs pivs mPivs normed eq i with pivs 0F | mPivs 0F
-... | ⊤⁺ | lift lower = begin
-  _ + ∑ (tail xs) i ≈⟨ +-cong (lower _) (∑Ext tailI≈0 i)  ⟩
-  0# + ∑ {m} {n} (const (const 0#)) i ≈⟨ {!!} ⟩
-  0# + 0# ≈⟨ +-identityʳ _ ⟩
-  0# ∎ where
-  tailI≈0 : ∀ j k → tail xs j k ≈ 0#
-  tailI≈0 j k = {!!}
+sumZero {n = n} xs pivs mPivs normed fZ i = begin
+  ∑ xs i ≈⟨ ∑Ext (eq0Piv xs pivs mPivs normed fZ) i ⟩
+  ∑ {_} {n} (const (const 0#)) i ≈⟨ ∑0r n _ ⟩
+  0# ∎
+
+injSuc : ∀ {c : Fin (ℕ.suc n)} i → inject! {i = suc c} (suc i) ≡ F.suc (inject! {i = c} i)
+injSuc i = ≡.refl
+
+∑Inj′ : ∀ (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs) {c}
+  → firstZero pivs ≡ c
+  → ∑ (xs ∘ inject! {i = c}) ≈ᴹ ∑ xs
+∑Inj′ xs pivs mPivs normed {0F} eqn i = sym $ sumZero xs pivs mPivs normed eqn i
+∑Inj′ {n = ℕ.suc n} xs pivs mPivs normed {suc c} eqn i  with pivs 0F
+... | just _ = begin
+  xs 0F i + ∑ {_} {toℕ c} (xs ∘ suc ∘ inject! {i = c}) i ≈⟨ +-congˡ
+    (∑Inj′ (tail xs) (tail pivs) (mPivs ∘ suc) (λ a b a<b → normed (suc a) (suc b) (s<s a<b)) {c} (suc-injective eqn) i) ⟩
+  xs 0F i + ∑ {_} {n} (xs ∘ suc) i ∎
+
+∑Inj : ∀ {xs : Matrix F _ m} {pivs : Vector (Fin m ⁺) n} (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+  → ∑ (xs ∘ inject! {i = firstZero pivs}) ≈ᴹ ∑ xs
+∑Inj mPivs normed = ∑Inj′ _ _ mPivs normed ≡.refl
+
 
 open _reaches_ renaming (ys to ws; xs*ys≈x to xs*ws≈x)
 
