@@ -186,6 +186,27 @@ injSuc i = ≡.refl
   → ∑ (xs ∘ inject! {i = firstZero pivs}) ≈ᴹ ∑ xs
 ∑Inj mPivs normed = ∑Inj′ _ _ mPivs normed ≡.refl
 
+sumZero′ : (xs : Matrix F _ m) (ys : Vector F n) (pivs : Vector (Fin m ⁺) n)
+  (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+  → firstZero pivs ≡ 0F
+  → ∑ (ys *ᵣ xs) ≈ᴹ 0ᴹ
+sumZero′ {n = n} xs ys pivs mPivs normed eqn i = begin
+  ∑ (ys *ᵣ xs) i ≈⟨ ∑Ext (λ j k → trans (*-congˡ (eq0Piv xs pivs mPivs normed eqn j k)) (zeroʳ _)) i ⟩
+  ∑ {_} {n} (const $ const 0#) i ≈⟨ ∑0r n _ ⟩
+  0# ∎
+
+∑Inj′₂ : ∀ (xs : Matrix F _ m) (ys : Vector F n) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs)
+  (normed : AllRowsNormalized pivs) {c}
+  → firstZero pivs ≡ c
+  → ∑ ((ys *ᵣ xs) ∘ inject! {i = c}) ≈ᴹ ∑ (ys *ᵣ xs)
+∑Inj′₂ xs ys pivs mPivs normed {0F} eq i = sym (sumZero′ xs ys pivs mPivs normed eq i)
+∑Inj′₂ {n = ℕ.suc n} xs ys pivs mPivs normed {suc c} eq i with pivs 0F
+... | just x = +-congˡ (∑Inj′₂ (tail xs) (tail ys) (tail pivs) (mPivs ∘ suc) (λ a b a<b → normed _ _ (s<s a<b)) (suc-injective eq) i)
+
+∑Inj₂ : ∀ {xs : Matrix F _ m} {pivs : Vector (Fin m ⁺) n} (ys : Vector F n) (mPivs : MatrixPivots xs pivs)
+  (normed : AllRowsNormalized pivs)
+  → ∑ ((ys *ᵣ xs) ∘ inject! {i = firstZero pivs}) ≈ᴹ ∑ (ys *ᵣ xs)
+∑Inj₂ ys mPivs normed = ∑Inj′₂ _ ys _ mPivs normed ≡.refl
 
 open _reaches_ renaming (ys to ws; xs*ys≈x to xs*ws≈x)
 
