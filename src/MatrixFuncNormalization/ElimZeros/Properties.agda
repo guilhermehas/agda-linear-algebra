@@ -50,7 +50,8 @@ open Units ring
 open module PFieldN {n} = PField heytingCommutativeRing (leftModule n)
 open module MDefN {n} = MDefinition (leftModule n)
 open PNorm
-open module ∑ {n} = SumMonoid (monoid n)
+open module ∑′ {n} = SumCommMonoid (commutativeMonoid n)
+-- open SumRing ring using (∑Mulrdist; ∑Split)
 
 private variable
   m n : ℕ
@@ -192,15 +193,11 @@ sameVecSpace : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : Matrix
   → xs ⊆ⱽ xs ∘ inject! {i = firstZero pivs}
 sameVecSpace {n = ℕ.zero} xs pivs mPivs normed (ys by xs*ys≈x) = ys by xs*ys≈x
 ws (sameVecSpace {n = ℕ.suc n} xs pivs mPivs normed (ys by xs*ys≈x)) = ys ∘ inject!
-xs*ws≈x (sameVecSpace {n = ℕ.suc n} xs pivs mPivs normed {x} (ys by xs*ys≈x)) i with firstZero pivs in eq
-... | 0F = begin
-  0# ≈⟨ {!!} ⟩
+xs*ws≈x (sameVecSpace {n = ℕ.suc n} xs pivs mPivs normed {x} (ys by xs*ys≈x)) i = begin
+  ∑ ((ys *ᵣ xs) ∘ inject! {i = firstZero pivs}) i ≈⟨ ∑Inj (λ j → {!mPivs ?!}) normed i ⟩
+  {!!} ≈⟨ {!!} ⟩
   -- {!!} ≈⟨ {!!} ⟩
-  {!!} + {!!} ≈⟨ xs*ys≈x i ⟩
   x i ∎
-... | suc c = {!head (λ i₁ x₁ → ys (inject! i₁) * xs (inject! i₁) x₁) i!}
--- head (λ i₁ x₁ → ys (inject! i₁) * xs (inject! i₁) x₁) i
--- ys (inject! i) * xs (inject! i)
 
 
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
