@@ -210,14 +210,13 @@ sumZero′ {n = n} xs ys pivs mPivs normed eqn i = begin
 
 open _reaches_ renaming (ys to ws; xs*ys≈x to xs*ws≈x)
 
-sameVecSpace : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+⊆xsⱽxs∘inj : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
   → xs ⊆ⱽ xs ∘ inject! {i = firstZero pivs}
-sameVecSpace {n = ℕ.zero} xs pivs mPivs normed (ys by xs*ys≈x) = ys by xs*ys≈x
-ws (sameVecSpace {n = ℕ.suc n} xs pivs mPivs normed (ys by xs*ys≈x)) = ys ∘ inject!
-xs*ws≈x (sameVecSpace {n = ℕ.suc n} xs pivs mPivs normed {x} (ys by xs*ys≈x)) i = begin
-  ∑ ((ys *ᵣ xs) ∘ inject! {i = firstZero pivs}) i ≈⟨ ∑Inj (λ j → {!mPivs ?!}) normed i ⟩
-  {!!} ≈⟨ {!!} ⟩
-  -- {!!} ≈⟨ {!!} ⟩
+⊆xsⱽxs∘inj {n = ℕ.zero} xs pivs mPivs normed (ys by xs*ys≈x) = ys by xs*ys≈x
+ws (⊆xsⱽxs∘inj {n = ℕ.suc n} xs pivs mPivs normed (ys by xs*ys≈x)) = ys ∘ inject!
+xs*ws≈x (⊆xsⱽxs∘inj {n = ℕ.suc n} xs pivs mPivs normed {x} (ys by xs*ys≈x)) i = begin
+  ∑ ((ys *ᵣ xs) ∘ inject! {i = firstZero pivs}) i ≈⟨ ∑Inj₂ ys mPivs normed i ⟩
+  ∑ (ys *ᵣ xs) i                                  ≈⟨ xs*ys≈x i ⟩
   x i ∎
 
 
