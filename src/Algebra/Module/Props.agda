@@ -105,7 +105,7 @@ sameSolutions {m} {xs} {n} {ys} {α} xs⊆ys αXs k with xs⊆ys (xsReachesItsel
 ≋ⱽ-sym : Symmetric (_≋ⱽ_ {n})
 ≋ⱽ-sym record { fwd = fwd ; bwd = bwd } = record { fwd = bwd ; bwd = fwd }
 
-≋ⱽ-trans : Transitive (_≋ⱽ_ {n})
+≋ⱽ-trans : xs ≋ⱽ ys → ys ≋ⱽ zs → xs ≋ⱽ zs
 ≋ⱽ-trans record { fwd = fwdA ; bwd = bwdA } record { fwd = fwdB ; bwd = bwdB } =
   record { fwd = fwdB ∘ fwdA ; bwd = bwdA ∘ bwdB }
 

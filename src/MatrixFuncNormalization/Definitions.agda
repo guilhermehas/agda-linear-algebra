@@ -155,11 +155,11 @@ record MatrixNormed≁0≈1 (m n : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
 
   open MatrixIsNormed≁0≈1 isNormed≈1 public
 
-record FromNormalization≁0 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+record FromNormalization≁0 (xs : Matrix F n m) (p : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
   field
-    ys       : Matrix F n m
-    ysNormed : MatrixIsNormed≁0 ys
-    xs≋ⱽys   : xs ≋ⱽ ys
+    ys       : Matrix F p m
+    ysNormed : MatrixIsNormed≁0 {n = p} ys
+    xs≋ⱽys   : _≋ⱽ_ xs ys
 
   open MatrixIsNormed≁0 ysNormed public
 

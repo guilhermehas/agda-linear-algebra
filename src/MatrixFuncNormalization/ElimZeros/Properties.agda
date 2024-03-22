@@ -317,3 +317,16 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   ys≋ⱽys≁0 : ys ≋ⱽ ys≁0
   ys≋ⱽys≁0 = xs≋ⱽxs∘inj ys pivs mPivots pivsCrescent
+
+  xs≋ⱽys≁0 : xs ≋ⱽ ys≁0
+  xs≋ⱽys≁0 = ≋ⱽ-trans xs≋ⱽys ys≋ⱽys≁0
+
+  normalizeZero : FromNormalization≁0 xs _
+  normalizeZero = record
+    { ysNormed = record
+      { mPivots = mPivs≁0
+      ; pivsCrescent = pivsCrescent≁0
+      ; columnsZero = colsZero
+      }
+    ; xs≋ⱽys = xs≋ⱽys≁0
+    }
