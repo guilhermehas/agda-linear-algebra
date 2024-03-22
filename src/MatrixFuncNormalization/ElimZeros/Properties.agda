@@ -210,14 +210,47 @@ sumZero′ {n = n} xs ys pivs mPivs normed eqn i = begin
 
 open _reaches_ renaming (ys to ws; xs*ys≈x to xs*ws≈x)
 
-⊆xsⱽxs∘inj : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+xs⊆ⱽxs∘inj : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
   → xs ⊆ⱽ xs ∘ inject! {i = firstZero pivs}
-⊆xsⱽxs∘inj {n = ℕ.zero} xs pivs mPivs normed (ys by xs*ys≈x) = ys by xs*ys≈x
-ws (⊆xsⱽxs∘inj {n = ℕ.suc n} xs pivs mPivs normed (ys by xs*ys≈x)) = ys ∘ inject!
-xs*ws≈x (⊆xsⱽxs∘inj {n = ℕ.suc n} xs pivs mPivs normed {x} (ys by xs*ys≈x)) i = begin
+ws (xs⊆ⱽxs∘inj xs pivs mPivs normed (ys by xs*ys≈x)) = ys ∘ inject!
+xs*ws≈x (xs⊆ⱽxs∘inj xs pivs mPivs normed {x} (ys by xs*ys≈x)) i = begin
   ∑ ((ys *ᵣ xs) ∘ inject! {i = firstZero pivs}) i ≈⟨ ∑Inj₂ ys mPivs normed i ⟩
   ∑ (ys *ᵣ xs) i                                  ≈⟨ xs*ys≈x i ⟩
   x i ∎
+
+vecInj : (k : Fin (ℕ.suc n)) (ys : Vector F $ toℕ $ k) → Vector F n
+vecInj 0F ys i = 0#
+vecInj (suc k) ys 0F = ys 0F
+vecInj (suc k) ys (suc i) = vecInj k (tail ys) i
+
+vecInjProp : ∀ (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (ys : Vector F _)
+  (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs) c
+  → firstZero pivs ≡ c
+  → ∑ (vecInj (firstZero pivs) ys *ᵣ xs) ≈ᴹ ∑ (ys *ᵣ xs ∘ inject!)
+vecInjProp {n = ℕ.zero} xs pivs ys mPivs normed 0F eqn i = refl
+vecInjProp {n = ℕ.suc n} xs pivs ys mPivs normed 0F eqn i with pivs 0F
+... | ⊤⁺ = begin
+  0# * _ + ∑ {_} {n} (λ _ _ → 0# * _) i ≈⟨ +-cong (zeroˡ _) (trans (∑Ext {_} {n} (λ j k → zeroˡ _) i) (∑0r n i)) ⟩
+  0# + 0# ≈⟨ +-identityˡ _ ⟩
+  0# ∎
+vecInjProp {n = ℕ.suc n} xs pivs ys mPivs normed (suc c) eqn i with pivs 0F
+... | just x = +-congˡ $ vecInjProp (tail xs) (tail pivs) (tail ys) (mPivs ∘ suc) (λ a b a<b → normed _ _ (s<s a<b))
+  c (suc-injective eqn) i
+
+xs⊇ⱽxs∘inj : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+  → xs ⊇ⱽ xs ∘ inject! {i = firstZero pivs}
+ws (xs⊇ⱽxs∘inj {n = n} xs pivs mPivs normed (ys by xs*ys≈x)) = vecInj (firstZero pivs) ys
+xs*ws≈x (xs⊇ⱽxs∘inj {n = n} xs pivs mPivs normed {x} (ys by xs*ys≈x)) i = begin
+  ∑ (vecInj (firstZero pivs) ys *ᵣ xs) i ≈⟨ vecInjProp xs pivs ys mPivs normed _ ≡.refl i ⟩
+  ∑ (ys *ᵣ xs ∘ inject!) i               ≈⟨ xs*ys≈x i ⟩
+  x i ∎
+
+xs≋ⱽxs∘inj : (xs : Matrix F _ m) (pivs : Vector (Fin m ⁺) n) (mPivs : MatrixPivots xs pivs) (normed : AllRowsNormalized pivs)
+  → xs ≋ⱽ xs ∘ inject! {i = firstZero pivs}
+xs≋ⱽxs∘inj xs pivs mPivs normed = record
+  { fwd = xs⊆ⱽxs∘inj xs pivs mPivs normed
+  ; bwd = xs⊇ⱽxs∘inj xs pivs mPivs normed
+  }
 
 
 module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
@@ -281,3 +314,6 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
 
   pivsOne≁0 : PivsOne ys pivs → PivsOne≁0 ys≁0 pivs≁0
   pivsOne≁0 = pivsOne≁0′ _ _
+
+  ys≋ⱽys≁0 : ys ≋ⱽ ys≁0
+  ys≋ⱽys≁0 = xs≋ⱽxs∘inj ys pivs mPivots pivsCrescent
