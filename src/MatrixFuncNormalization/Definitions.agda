@@ -102,6 +102,15 @@ record FromNormalization (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) whe
   αys⇒αxs : α isSolutionOf ys → α isSolutionOf xs
   αys⇒αxs = sameSolutions (_≋ⱽ_.fwd xs≋ⱽys)
 
+record FromNormalization′ (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    ys       : Matrix F n m
+    ysNormed : MatrixIsNormed ys
+    xs≋ⱽys   : xs ≋ⱽ ys
+
+  open MatrixIsNormed ysNormed public
+
+
 record FromNormalization≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
   field
     ys       : Matrix F n m
@@ -109,6 +118,17 @@ record FromNormalization≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂)
     xs≋ⱽys   : xs ≋ⱽ ys
 
   open MatrixIsNormed≈1 ysNormed public
+
+  fromNormalization : FromNormalization′ xs
+  fromNormalization = record
+    { ysNormed = record
+      { mPivots = mPivots
+      ; pivsCrescent = pivsCrescent
+      ; columnsZero = columnsZero
+      }
+    ; xs≋ⱽys = xs≋ⱽys
+    }
+
 
 -- Normalization without zeros
 

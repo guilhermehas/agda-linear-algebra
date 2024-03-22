@@ -253,9 +253,9 @@ xs≋ⱽxs∘inj xs pivs mPivs normed = record
   }
 
 
-module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
+module _ {xs : Matrix F n m} (xsNormed : FromNormalization′ xs) where
 
-  open FromNormalization xsNormed
+  open FromNormalization′ xsNormed
 
   matDivided : Matrix F n m
   matDivided i = divideVec (ys i) (pivs i) (mPivots i)
@@ -329,4 +329,18 @@ module _ {xs : Matrix F n m} (xsNormed : FromNormalization xs) where
       ; columnsZero = colsZero
       }
     ; xs≋ⱽys = xs≋ⱽys≁0
+    }
+
+module _ {xs : Matrix F n m} (xsNormed : FromNormalization≈1 xs) where
+
+  open FromNormalization≈1 xsNormed
+
+  normalizeZero≁0 : FromNormalization≁0 xs _
+  normalizeZero≁0 = record
+    { ysNormed = record
+      { mPivots      = mPivs≁0 fromNormalization
+      ; pivsCrescent = pivsCrescent≁0 fromNormalization
+      ; columnsZero  = colsZero fromNormalization
+      }
+    ; xs≋ⱽys = xs≋ⱽys≁0 fromNormalization
     }

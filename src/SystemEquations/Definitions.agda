@@ -101,4 +101,4 @@ embed cols rows va = record {
   A = λ r c → coeff (va c) r ;
   b = λ r → constant (va {!r!}) }
   -- each Affine contributes one row of A and one element in b
--}  
+-}
