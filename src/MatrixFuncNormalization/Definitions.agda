@@ -79,6 +79,18 @@ record MatrixNormed≈1 (m n : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
 
   open MatrixIsNormed≈1 isNormed≈1 public
 
+  xsNormed : MatrixNormed m n
+  xsNormed = record { isNormed = isNormed }
+
+
+record FromNormalization′ (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+  field
+    ys       : Matrix F n m
+    ysNormed : MatrixIsNormed ys
+    xs≋ⱽys   : xs ≋ⱽ ys
+
+  open MatrixIsNormed ysNormed public
+
 record FromNormalization (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
   field
     ys       : Matrix F n m
@@ -102,14 +114,11 @@ record FromNormalization (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) whe
   αys⇒αxs : α isSolutionOf ys → α isSolutionOf xs
   αys⇒αxs = sameSolutions (_≋ⱽ_.fwd xs≋ⱽys)
 
-record FromNormalization′ (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
-  field
-    ys       : Matrix F n m
-    ysNormed : MatrixIsNormed ys
-    xs≋ⱽys   : xs ≋ⱽ ys
-
-  open MatrixIsNormed ysNormed public
-
+  fromNormalization′ : FromNormalization′ xs
+  fromNormalization′ = record
+    { ysNormed = ysNormed
+    ; xs≋ⱽys   = xs≋ⱽys
+    }
 
 record FromNormalization≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
   field
@@ -186,9 +195,9 @@ record FromNormalization≁0 (xs : Matrix F n m) (p : ℕ) : Set (c ⊔ ℓ₁ �
   αys⇒αxs : α isSolutionOf ys → α isSolutionOf xs
   αys⇒αxs = sameSolutions (_≋ⱽ_.fwd xs≋ⱽys)
 
-record FromNormalization≁0≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
+record FromNormalization≁0≈1 (xs : Matrix F n m) (p : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
   field
-    ys       : Matrix F n m
+    ys       : Matrix F p m
     ysNormed : MatrixIsNormed≁0≈1 ys
     xs≋ⱽys   : xs ≋ⱽ ys
 

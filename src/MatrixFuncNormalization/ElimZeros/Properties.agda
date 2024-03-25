@@ -12,20 +12,15 @@ open import Data.Fin.Patterns
 open import Data.Fin.Properties
 open import Data.Maybe
 open import Data.Sum
--- open import Data.Bool using (Bool; false; true; T)
 open import Data.Nat using (ℕ; NonZero; z≤n; s<s)
 open import Data.Vec.Functional as V
 open import Data.Maybe.Relation.Unary.All
 open import Data.Maybe.Relation.Unary.Any
--- open import Relation.Nullary
 open import Relation.Nullary.Construct.Add.Supremum
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; cong)
 open import Relation.Binary.Construct.Add.Supremum.Strict
 
--- open import Vector
 open import Algebra.Matrix
--- open import Algebra.MatrixData renaming (Matrix to MatrixData)
--- open import MatrixFuncNormalization.normBef dField using (findNonZeroPos)
 open import MatrixFuncNormalization.normBef dField using (VecPivotPos; MatrixPivots)
 open import MatrixFuncNormalization.ElimZeros.Base dField hiding (divideVec)
 open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZero; Maybe≈0)
@@ -51,7 +46,6 @@ open module PFieldN {n} = PField heytingCommutativeRing (leftModule n)
 open module MDefN {n} = MDefinition (leftModule n)
 open PNorm
 open module ∑′ {n} = SumCommMonoid (commutativeMonoid n)
--- open SumRing ring using (∑Mulrdist; ∑Split)
 
 private variable
   m n : ℕ
@@ -252,95 +246,112 @@ xs≋ⱽxs∘inj xs pivs mPivs normed = record
   ; bwd = xs⊇ⱽxs∘inj xs pivs mPivs normed
   }
 
+module MatNormed (xsNormed : MatrixNormed m n) where
 
-module _ {xs : Matrix F n m} (xsNormed : FromNormalization′ xs) where
+  open MatrixNormed xsNormed
 
-  open FromNormalization′ xsNormed
+  ys : Matrix F n m
+  ys i = divideVec (xs i) (pivs i) (mPivots i)
 
-  matDivided : Matrix F n m
-  matDivided i = divideVec (ys i) (pivs i) (mPivots i)
-
-  mPivAfter : MatrixPivots matDivided pivs
+  mPivAfter : MatrixPivots ys pivs
   mPivAfter _ = divideVecPreservesPos _ _ _
 
-  columnsZeros : ColumnsZero matDivided pivs
+  columnsZeros : ColumnsZero ys pivs
   columnsZeros i j i≢j = helper (columnsZero i j i≢j)
     where
-    helper : Maybe≈0 (ys j) (pivs i) → Maybe≈0 (divideVec (ys j) (pivs j) (mPivots j)) (pivs i)
+    helper : Maybe≈0 (xs j) (pivs i) → Maybe≈0 (divideVec (xs j) (pivs j) (mPivots j)) (pivs i)
     helper with pivs i
     ... | ⊤⁺  = λ _ → _
     ... | [ p ]  = divideVec≈0 (mPivots j) p
 
-  pivsOne : PivsOne matDivided pivs
+  pivsOne : PivsOne ys pivs
   pivsOne _ = divideVecP≈1 _
 
-  ys≋ⱽmNormed : ys ≋ⱽ matDivided
-  ys≋ⱽmNormed = ≋ⱽ-trans (*#0≈ⱽ ys λ i → invVecValue#0 (ys i) (pivs i) (mPivots i))
-    (≋⇒≋ⱽ λ i → dV₂≈dV (ys i) (pivs i) (mPivots i))
+  xs≋ⱽys : xs ≋ⱽ ys
+  xs≋ⱽys = ≋ⱽ-trans (*#0≈ⱽ xs λ i → invVecValue#0 (xs i) (pivs i) (mPivots i))
+    (≋⇒≋ⱽ λ i → dV₂≈dV (xs i) (pivs i) (mPivots i))
 
-  xs≋ⱽmNormed : xs ≋ⱽ matDivided
-  xs≋ⱽmNormed = ≋ⱽ-trans xs≋ⱽys ys≋ⱽmNormed
-
-  normalizeOne : FromNormalization≈1 xs
-  normalizeOne = record
-    { ysNormed = record
-      { isNormed = record
-        { mPivots      = mPivAfter
-        ; pivsCrescent = pivsCrescent
-        ; columnsZero  = columnsZeros
-        }
-      ; pivsOne  = pivsOne
-      }
-    ; xs≋ⱽys   = xs≋ⱽmNormed
+  ysNormed : MatrixIsNormed ys
+  ysNormed = record
+    { mPivots = mPivAfter
+    ; pivsCrescent = pivsCrescent
+    ; columnsZero = columnsZeros
     }
 
-  -- Removing Zeros
+  ysIsNormed≈1 : MatrixIsNormed≈1 ys
+  ysIsNormed≈1 = record { isNormed = ysNormed ; pivsOne = pivsOne }
+
+  ysNormed≈1 : MatrixNormed≈1 m n
+  ysNormed≈1 = record { isNormed≈1 = ysIsNormed≈1 }
 
   sizeF = firstZero pivs
   n′ = toℕ sizeF
 
-  ys≁0 : Matrix F n′ m
-  ys≁0 = ys ∘ inject! {i = sizeF}
+  xs≁0 : Matrix F n′ m
+  xs≁0 = xs ∘ inject! {i = sizeF}
   pivs≁0 = normPivs pivs
 
-  mPivs≁0 : MatrixPivots≁0 ys≁0 pivs≁0
-  mPivs≁0 = mPivs≁0′ ys pivs mPivots
+  mPivs≁0 : MatrixPivots≁0 xs≁0 pivs≁0
+  mPivs≁0 = mPivs≁0′ xs pivs mPivots
 
   pivsCrescent≁0 : AllRowsNormalized≁0 pivs≁0
   pivsCrescent≁0 x<y = pivsCrescent≁0′ pivsCrescent x<y
 
-  colsZero : ColumnsZero≁0 ys≁0 pivs≁0
+  colsZero : ColumnsZero≁0 xs≁0 pivs≁0
   colsZero = cols0≁0′ _ _ columnsZero
 
-  pivsOne≁0 : PivsOne ys pivs → PivsOne≁0 ys≁0 pivs≁0
+  pivsOne≁0 : PivsOne xs pivs → PivsOne≁0 xs≁0 pivs≁0
   pivsOne≁0 = pivsOne≁0′ _ _
 
-  ys≋ⱽys≁0 : ys ≋ⱽ ys≁0
-  ys≋ⱽys≁0 = xs≋ⱽxs∘inj ys pivs mPivots pivsCrescent
+  xs≋ⱽxs≁0 : xs ≋ⱽ xs≁0
+  xs≋ⱽxs≁0 = xs≋ⱽxs∘inj xs pivs mPivots pivsCrescent
 
-  xs≋ⱽys≁0 : xs ≋ⱽ ys≁0
-  xs≋ⱽys≁0 = ≋ⱽ-trans xs≋ⱽys ys≋ⱽys≁0
-
-  normalizeZero : FromNormalization≁0 xs _
-  normalizeZero = record
-    { ysNormed = record
-      { mPivots = mPivs≁0
-      ; pivsCrescent = pivsCrescent≁0
-      ; columnsZero = colsZero
-      }
-    ; xs≋ⱽys = xs≋ⱽys≁0
+  xsIsNormed≁0 : MatrixIsNormed≁0 xs≁0
+  xsIsNormed≁0 = record
+    { mPivots = mPivs≁0
+    ; pivsCrescent = pivsCrescent≁0
+    ; columnsZero = colsZero
     }
 
-module _ {xs : Matrix F n m} (xsNormed : FromNormalization≈1 xs) where
+  xsNormed≁0 : MatrixNormed≁0 _ _
+  xsNormed≁0 = record { isNormed = xsIsNormed≁0 }
 
-  open FromNormalization≈1 xsNormed
+  module _ (pivsOne : PivsOne≁0 xs≁0 pivs≁0) where
 
-  normalizeZero≁0 : FromNormalization≁0 xs _
-  normalizeZero≁0 = record
-    { ysNormed = record
-      { mPivots      = mPivs≁0 fromNormalization
-      ; pivsCrescent = pivsCrescent≁0 fromNormalization
-      ; columnsZero  = colsZero fromNormalization
-      }
-    ; xs≋ⱽys = xs≋ⱽys≁0 fromNormalization
+    xs≁0≈1isNormed : MatrixIsNormed≁0≈1 xs≁0
+    xs≁0≈1isNormed = record { isNormed = xsIsNormed≁0 ; pivsOne = pivsOne }
+
+    xs≁0≈1Normed : MatrixNormed≁0≈1 _ _
+    xs≁0≈1Normed = record { isNormed≈1 = xs≁0≈1isNormed }
+
+
+module FromNormed (xsNormed : MatrixNormed m n) where
+
+  open MatrixNormed xsNormed
+  open MatNormed xsNormed public
+
+  ysFromNormalization : FromNormalization≈1 xs
+  ysFromNormalization = record
+    { ysNormed = ysIsNormed≈1
+    ; xs≋ⱽys   = xs≋ⱽys
+    }
+
+  xs≁0FromFormalization : FromNormalization≁0 xs _
+  xs≁0FromFormalization = record
+    { ysNormed = xsIsNormed≁0
+    ; xs≋ⱽys   = xs≋ⱽxs≁0
+    }
+
+module FromNormed≈1 (xsNormed≈1 : MatrixNormed≈1 m n) where
+
+  open MatrixNormed≈1 xsNormed≈1
+  open FromNormed xsNormed hiding (pivsOne) public
+
+  xs≁0Normed : MatrixIsNormed≁0≈1 xs≁0
+  xs≁0Normed = xs≁0≈1isNormed (pivsOne≁0 pivsOne)
+
+  xs≁0≈1FromFormalization : FromNormalization≁0≈1 xs _
+  xs≁0≈1FromFormalization = record
+    { ysNormed = xs≁0Normed
+    ; xs≋ⱽys   = xs≋ⱽxs≁0
     }
