@@ -130,3 +130,6 @@ isLeftModule = record
   ; -ᴹ‿cong = -ᴹ‿cong
   ; -ᴹ‿inverse = -ᴹ‿inverse
   }
+
+leftModule : (n : ℕ) → LeftModule (v-ring n) _ _
+leftModule n = record { isLeftModule = isLeftModule }
