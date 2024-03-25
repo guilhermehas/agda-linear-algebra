@@ -30,7 +30,7 @@ open PVec
 private variable
   m n p rows cols : ℕ
 
--- This is the "syntax" of a affine function : Vector F p -> Fn
+-- This is the "syntax" of a affine function : Vector F p → Fn
 record Affine (p : ℕ) : Set c where
   field
     coeff    : Vector F p
@@ -47,7 +47,7 @@ VecAffine nVars freeVars = Vector (Affine freeVars) nVars
 open Affine
 
 
-getRow : (r : Fin rows) -> Matrix F rows cols -> Vector F cols
+getRow : (r : Fin rows) → Matrix F rows cols → Vector F cols
 getRow r m = m r
 
 
@@ -86,17 +86,17 @@ open SystemEquations systemEquation
 
 -- x - 2*y = 0
 
--- x = 2w -> Affine coeff [2] constant 0
--- y = w  -> Affine coeff [1] constant 0
+-- x = 2w → Affine coeff [2] constant 0
+-- y = w  → Affine coeff [1] constant 0
 
 -- ----------------
 
 -- postulate 1ᴹ : Matrix A n n
-embedUniqueSol : (nVars : ℕ) → VecAffine nVars 0 -> SystemEquations nVars nVars
+embedUniqueSol : (nVars : ℕ) → VecAffine nVars 0 → SystemEquations nVars nVars
 embedUniqueSol n va = record { A = 1ᴹ; b = λ r → constant (va r) }
 {-
 -- TODO (fix)
-embed : (cols p : ℕ) → VecAffine cols p -> SystemEquations (cols + p) cols
+embed : (cols p : ℕ) → VecAffine cols p → SystemEquations (cols + p) cols
 embed cols rows va = record {
   A = λ r c → coeff (va c) r ;
   b = λ r → constant (va {!r!}) }
