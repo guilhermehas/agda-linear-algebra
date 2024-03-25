@@ -30,7 +30,7 @@ private variable
 
 normalize : (xs : Matrix F n m) → FromNormalization xs
 normalize xs = let ys , pivs , mPivs , xs≈ⱽys , colsZero , pivsCrescent = allTheoremsTogether xs in record
-  { xs≈ⱽys = xs≈ⱽys
+  { xs≈ⱽys   = xs≈ⱽys
   ; ysNormed = record
     { mPivots      = mPivs
     ; pivsCrescent = pivsCrescent
@@ -48,4 +48,4 @@ normalize≈1≁0 : (xs : Matrix F n m) → FromNormalization≁0≈1 xs _
 normalize≈1≁0 xs = record { ysNormed = xs≁0Normed ; xs≋ⱽys = ≋ⱽ-trans xs≋ⱽys xs≋ⱽxs≁0 }
   where
   open FromNormalization≈1 (normalize≈1 xs)
-  open FromNormed≈1 (record { isNormed≈1 = ysNormed }) renaming (xs≋ⱽys to xs≋ⱽys₂)
+  open FromNormed≈1 (record { isNormed≈1 = ysNormed }) hiding (xs≋ⱽys)

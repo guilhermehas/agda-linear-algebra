@@ -138,7 +138,6 @@ record FromNormalization≈1 (xs : Matrix F n m) : Set (c ⊔ ℓ₁ ⊔ ℓ₂)
     ; xs≋ⱽys = xs≋ⱽys
     }
 
-
 -- Normalization without zeros
 
 MatrixPivots≁0 : Matrix F n m → Vector (Fin m) n → Set _
