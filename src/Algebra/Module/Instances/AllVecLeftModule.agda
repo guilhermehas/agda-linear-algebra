@@ -29,9 +29,8 @@ private variable
 _*ₗ_ : Op₂ $ Vector Carrier n
 _*ₗ_ = _*ⱽ_
 
-private
-  𝟘 : Vector Carrier n
-  𝟘 _ = 0#
+𝟘 : Vector Carrier n
+𝟘 _ = 0#
 
 *ₗ-cong : Congruent _≋_ (_*ₗ_ {n})
 *ₗ-cong x≈y u≈v i = *-cong (x≈y i) (u≈v i)
