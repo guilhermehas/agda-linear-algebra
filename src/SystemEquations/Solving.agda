@@ -42,19 +42,9 @@ private
 A++b⇒systemEquations : Matrix F n (m ℕ.+ 1) → SystemEquations n m
 A++b⇒systemEquations xs = record { A = λ i j → xs i (injF j) ; b = λ i → xs i (lastFin _) }
 
-open SystemEquations renaming (IsSolution to IsSol) using ()
+open SystemEquations
 
-sameSolutionsSE : (xs ys : Matrix F n (m ℕ.+ 1)) → xs ⊆ⱽ ys → ∀ v
-  → IsSol (A++b⇒systemEquations xs) v
-  → IsSol (A++b⇒systemEquations ys) v
-sameSolutionsSE xs ys xs⊆ⱽys v isSolXs i = {!!}
-  where
-
-  sXs = A++b⇒systemEquations xs
-  sYs = A++b⇒systemEquations ys
-
-  open SystemEquations sXs renaming (A to Ax; b to bx; A++b to Ax++bx)
-  open SystemEquations sYs renaming (A to Ay; b to by)
-
-  sameSols : {!!} isSolutionOf xs
-  sameSols = sameSolutions xs⊆ⱽys {!Ax++bx!}
+sameSolutionsSE : (sx sy : SystemEquations n m) → A++b sy ⊆ⱽ A++b sx → ∀ v
+  → IsSolutionA++b sx v
+  → IsSolutionA++b sy v
+sameSolutionsSE sx sy sy⊆ⱽsx v isSolXs = sameSolutions sy⊆ⱽsx isSolXs

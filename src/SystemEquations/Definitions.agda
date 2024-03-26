@@ -10,6 +10,7 @@ open import Data.Nat.Base as ℕ using (ℕ)
 open import Data.Vec.Functional
 open import Data.Fin as F using (Fin)
 open import Relation.Nullary.Construct.Add.Supremum
+import Algebra.Module.Definition as MDef′
 
 open import Algebra.Matrix.Structures
 open import Vector.Structures
@@ -22,10 +23,12 @@ open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
+open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
 open MRing rawRing hiding (matOps→func)
 open VRing rawRing using (_∙ⱽ_)
 open PNorm
 open PVec
+open module MDef {n} = MDef′ (leftModule n)
 
 private variable
   m n p rows cols : ℕ
@@ -64,6 +67,9 @@ record SystemEquations (rows cols : ℕ) : Set c where
 
   IsFamilySolution : VecAffine cols p → Set (c ⊔ ℓ₁)
   IsFamilySolution affine = ∀ vecs → IsSolution (λ i → eval (affine i) vecs)
+
+  IsSolutionA++b : Vector F _ → Set _
+  IsSolutionA++b v = v isSolutionOf A++b
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
 -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)
