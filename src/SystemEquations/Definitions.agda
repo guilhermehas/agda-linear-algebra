@@ -60,7 +60,7 @@ record SystemEquations (rows cols : ℕ) : Set c where
     b : Vector F rows
 
   IsSolution : Vector F cols → Set ℓ₁
-  IsSolution x = ∀ r → getRow r A ∙ⱽ x ≈ b r
+  IsSolution x = ∀ r → A r ∙ⱽ x ≈ b r
 
   A++b : Matrix F rows (cols ℕ.+ 1)
   A++b = A ++ⱽ const ∘ b
@@ -69,7 +69,7 @@ record SystemEquations (rows cols : ℕ) : Set c where
   IsFamilySolution affine = ∀ vecs → IsSolution (λ i → eval (affine i) vecs)
 
   IsSolutionA++b : Vector F _ → Set _
-  IsSolutionA++b v = v isSolutionOf A++b
+  IsSolutionA++b = _isSolutionOf A++b
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
 -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)
