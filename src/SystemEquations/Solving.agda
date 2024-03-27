@@ -6,8 +6,9 @@ open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
 open import Function
+open import Data.Sum
 open import Data.Nat as ℕ using (ℕ)
-open import Data.Fin as F using (Fin; suc)
+open import Data.Fin as F using (Fin; suc; splitAt)
 open import Data.Fin.Patterns
 open import Data.Vec.Functional
 
@@ -16,11 +17,12 @@ open import Algebra.Matrix.Structures
 open import SystemEquations.Definitions dField
 import Algebra.Module.Definition as MDefinition
 import Algebra.Module.Props as MProps′
+open import Algebra.BigOps
 
-open DecidableField dField renaming (Carrier to F)
+open DecidableField dField renaming (Carrier to F) hiding (sym)
 open HeytingField heytingField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
-open CommutativeRing commutativeRing using (rawRing; ring)
+open CommutativeRing commutativeRing using (rawRing; ring; sym; +-commutativeMonoid)
 open import Algebra.Properties.Ring ring
 open VRing rawRing
 open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
@@ -28,9 +30,11 @@ open MRing rawRing using (Matrix)
 open import Algebra.Module.Instances.CommutativeRing commutativeRing
 open import Data.Vec.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.Reasoning.Setoid setoid
+open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid
 
 open module MD {n} = MDefinition (leftModule n)
 open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
+open SumRing ring using (∑Ext; ∑0r)
 
 private variable
   m n : ℕ
@@ -59,19 +63,37 @@ module _ where
     → ∀ v → IsSolutionA++b sx v → IsSolutionA++b sy v
   sameSolutionsSE sy⊆ⱽsx _ = sameSolutions sy⊆ⱽsx
 
+tail-lemma : ∀ (u : Vector F (ℕ.suc n)) b k → tail (u ++ [ b ]) k ≈ (tail u ++ [ b ]) k
+tail-lemma {n} _ _ k with splitAt n k
+... | inj₁ _ = refl
+... | inj₂ _ = refl
+
+add-1∑ : ∀ (v : Vector F n) b (u : Vector F n) → (add-1 v ∙ⱽ (u ++ [ b ])) ≈ u ∙ⱽ v - b
+add-1∑ {ℕ.zero} v b u = begin
+  - 1# * b + 0# ≈⟨ +-identityʳ _ ⟩
+  - 1# * b      ≈⟨ -1*x≈-x _ ⟩
+  - b          ≈˘⟨ +-identityˡ (- b) ⟩
+  0# + - b ∎
+add-1∑ {ℕ.suc n} v b u = begin
+  v 0F * u 0F + add-1 (tail v) ∙ⱽ tail (u ++ [ b ]) ≈⟨ +-cong (*-comm _ _)
+    (∑Ext {n ℕ.+ 1} λ j → *-congˡ (tail-lemma u b j)) ⟩
+  u 0F * v 0F + add-1 (tail v) ∙ⱽ (tail u ++ [ b ]) ≈⟨ +-congˡ (add-1∑ _ b (tail u)) ⟩
+  u 0F * v 0F + (tail u ∙ⱽ tail v - b)             ≈˘⟨ +-assoc _ _ (- b) ⟩
+  u 0F * v 0F + tail u ∙ⱽ tail v - b ∎
+
+
 sameSolutionsA++b : ∀ {sx : SystemEquations n m} {v}
   (open SystemEquations sx)
   → IsSolutionA++b $ add-1 v → IsSolution v
-sameSolutionsA++b {m = ℕ.zero} {sx = sx} {v} sv i = begin
-  0#            ≈˘⟨ -0#≈0# ⟩
-  - 0#          ≈˘⟨ -‿cong (sv i 0F) ⟩
-  - (- 1# * b i) ≈⟨ -‿cong (-1*x≈-x (b i)) ⟩
-  - (- b i)      ≈⟨ -‿involutive (b i) ⟩
+sameSolutionsA++b {n = n} {m = m} {sx = sx} {v} sv i = begin
+  A i ∙ⱽ v ≈⟨ +-inverseˡ-unique (A i ∙ⱽ v) (- b i) sv-lemma ⟩
+  - - b i  ≈⟨ -‿involutive _ ⟩
   b i ∎
   where
   open SystemEquations sx
 
-sameSolutionsA++b {m = ℕ.suc m} {sx = sx} {v} sv i = begin
-  A i ∙ⱽ v ≈⟨ {!sv i 0F!} ⟩
-  b i ∎
-  where open SystemEquations sx
+  sv-lemma = begin
+    A i ∙ⱽ v - b i             ≈˘⟨ add-1∑ v (b i) (A i) ⟩
+    add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ ∑Ext (sv i) ⟩
+    ∑ {m ℕ.+ 1} (const 0#)      ≈⟨ ∑0r (m ℕ.+ 1) ⟩
+    0# ∎
