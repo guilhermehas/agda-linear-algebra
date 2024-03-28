@@ -6,7 +6,9 @@ open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
 open import Function
+open import Data.Product
 open import Data.Sum
+open import Data.Empty
 open import Data.Nat as ℕ using (ℕ)
 open import Data.Fin as F using (Fin; suc; splitAt)
 open import Data.Fin.Patterns
@@ -28,7 +30,7 @@ open VRing rawRing
 open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
 open MRing rawRing using (Matrix)
 open import Algebra.Module.Instances.CommutativeRing commutativeRing
-open import Data.Vec.Relation.Binary.Equality.Setoid setoid
+open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid
 
@@ -81,19 +83,40 @@ add-1∑ {ℕ.suc n} v b u = begin
   u 0F * v 0F + (tail u ∙ⱽ tail v - b)             ≈˘⟨ +-assoc _ _ (- b) ⟩
   u 0F * v 0F + tail u ∙ⱽ tail v - b ∎
 
-
 sameSolutionsA++b : ∀ {sx : SystemEquations n m} {v}
   (open SystemEquations sx)
   → IsSolutionA++b $ add-1 v → IsSolution v
-sameSolutionsA++b {n = n} {m = m} {sx = sx} {v} sv i = begin
+sameSolutionsA++b {n = n} {m = m} {sx = system A b} {v} sv i = begin
   A i ∙ⱽ v ≈⟨ +-inverseˡ-unique (A i ∙ⱽ v) (- b i) sv-lemma ⟩
   - - b i  ≈⟨ -‿involutive _ ⟩
   b i ∎
   where
-  open SystemEquations sx
 
   sv-lemma = begin
     A i ∙ⱽ v - b i             ≈˘⟨ add-1∑ v (b i) (A i) ⟩
     add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ ∑Ext (sv i) ⟩
     ∑ {m ℕ.+ 1} (const 0#)      ≈⟨ ∑0r (m ℕ.+ 1) ⟩
+    0# ∎
+
+systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) i → A i ≋ const 0# → b i # 0#
+  → ∀ {v} → IsSolutionA++b $ add-1 v → ⊥
+systemUnsolvable {n = n} {m} {sx = system A b} i A0 b#0 {v} sv = tight _ _ .proj₂
+  (begin
+    b i    ≈˘⟨ -‿involutive _ ⟩
+    - - b i ≈⟨ -‿cong sv-lemma ⟩
+    - 0#    ≈⟨ -0#≈0# ⟩
+    0# ∎) b#0
+  where
+
+  Ai∙ⱽv≈0 = begin
+    A i ∙ⱽ v ≈⟨ ∑Ext (λ j → trans (*-congʳ (A0 j)) (zeroˡ _)) ⟩
+    ∑ {m} (const 0#) ≈⟨ ∑0r m ⟩
+    0# ∎
+
+  sv-lemma = begin
+    - b i ≈˘⟨ +-identityˡ _ ⟩
+    0# + - b i ≈˘⟨ +-congʳ Ai∙ⱽv≈0 ⟩
+    A i ∙ⱽ v - b i             ≈˘⟨ add-1∑ v (b i) (A i) ⟩
+    add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ ∑Ext (sv i) ⟩
+    ∑ {m ℕ.+ 1} (const 0#) ≈⟨ ∑0r (m ℕ.+ 1) ⟩
     0# ∎

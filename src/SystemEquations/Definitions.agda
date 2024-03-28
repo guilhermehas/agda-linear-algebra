@@ -55,6 +55,7 @@ getRow r m = m r
 
 
 record SystemEquations (rows cols : ℕ) : Set c where
+  constructor system
   field
     A : Matrix F rows cols
     b : Vector F rows
