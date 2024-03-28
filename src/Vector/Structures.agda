@@ -28,7 +28,8 @@ module VRing (rawRing : RawRing a ℓ) where
   infixl 7 _∙ⱽ_
 
   open RawRing rawRing renaming (Carrier to A)
-  open VMonoid *-rawMonoid public
+  open VMonoid +-rawMonoid using (0ⱽ) public
+  open VMonoid *-rawMonoid renaming (0ⱽ to 1ⱽ) public
   open SumRawMonoid +-rawMonoid public
 
   _∙ⱽ_ : (u v : Vector A n) → A

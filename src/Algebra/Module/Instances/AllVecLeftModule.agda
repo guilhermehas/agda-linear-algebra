@@ -17,7 +17,7 @@ open import Algebra.Module.Instances.FunctionalVector ring
 import Algebra.Module.Definitions.Left as DLeft′
 
 open Ring ring
-open VRing rawRing renaming (0ⱽ to 𝟙)
+open VRing rawRing renaming (1ⱽ to 𝟙)
 
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open module DLeft {n} = DLeft′ (Vector Carrier n) (_≋_ {n})

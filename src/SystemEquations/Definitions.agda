@@ -70,7 +70,7 @@ record SystemEquations (rows cols : ℕ) : Set c where
   IsFamilySolution affine = ∀ vecs → IsSolution (λ i → eval (affine i) vecs)
 
   IsSolutionA++b : Vector F _ → Set _
-  IsSolutionA++b = _isSolutionOf A++b
+  IsSolutionA++b = _isSolutionOf A++b by λ v → ∑ v ≈ 0#
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
 -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)

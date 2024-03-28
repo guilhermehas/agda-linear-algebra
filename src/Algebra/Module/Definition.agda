@@ -21,6 +21,7 @@ open LeftModule leftModule renaming (Carrierᴹ to M)
 open SumMonoid +ᴹ-monoid
 
 private variable
+  ℓ : Level
   m n : ℕ
 
 infix 4 _⊆ⱽ_ _⊇ⱽ_ _≋ⱽ_
@@ -44,5 +45,5 @@ record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) w
     fwd : xs ⊆ⱽ ys
     bwd : ys ⊆ⱽ xs
 
-_isSolutionOf_ : A → Vector M n → Set _
-α isSolutionOf v = ∀ k → α *ₗ v k ≈ᴹ 0ᴹ
+_isSolutionOf_by_ : A → Vector M n → (M → Set ℓ) → Set _
+α isSolutionOf v by ∑≡  = ∀ k → ∑≡ (α *ₗ v k)

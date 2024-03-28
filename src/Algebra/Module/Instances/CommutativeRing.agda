@@ -24,7 +24,7 @@ open import Algebra.Module.Instances.AllVecLeftModule ring
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open module AD′ {n} = AD (_≋_ {n})
 open module AS′ {n} = AS (_≋_ {n})
-open VRing rawRing renaming (0ⱽ to 𝟙)
+open VRing rawRing renaming (1ⱽ to 𝟙)
 
 *ⱽ-comm : Commutative {n} _*ⱽ_
 *ⱽ-comm x y i = *-comm _ _
