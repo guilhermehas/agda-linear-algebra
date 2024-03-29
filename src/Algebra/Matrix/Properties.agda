@@ -28,7 +28,7 @@ private variable
 module MRingProps (ring : Ring a ℓ) where
 
   open Ring ring hiding (zero)
-  open MRing rawRing renaming (Matrix to Matrix′) hiding (flip)
+  open MRing rawRing renaming (Matrix to Matrix′) hiding (flip; ∑; δ; δss≡δ)
   open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
   open SumRing ring
   open IsLinear
