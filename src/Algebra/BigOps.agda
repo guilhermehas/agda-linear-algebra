@@ -189,7 +189,7 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
 module SumRing (ring : Ring a ℓ) where
 
   open Ring ring renaming (Carrier to A)
-  open SumRawRing rawRing
+  open SumRawRing rawRing using (∑; δ; δss≡δ) public
   open import Relation.Binary.Reasoning.Setoid setoid
   open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
   open import Vector.Setoid.Properties setoid hiding (++-cong)
