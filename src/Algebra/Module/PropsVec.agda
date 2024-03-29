@@ -8,8 +8,9 @@ module Algebra.Module.PropsVec
 import Algebra.Module.Props as MProps′
 open import Function
 open import Algebra.Module
-open import Data.Fin using (Fin)
-open import Data.Nat using (ℕ; suc)
+open import Data.Fin.Patterns
+open import Data.Fin as F using (Fin)
+open import Data.Nat using (ℕ; zero; suc)
 open import Data.Vec.Functional
 open import Vector.Structures
 
@@ -33,9 +34,40 @@ module ∑ {n} = SumRing (CR.ring n)
 open ≈-Reasoning
 
 private variable
-  n : ℕ
+  m n : ℕ
   xs ys zs : Vector M n
   α : F n
+
+∑∑≈∑∑ : ∀ (xs : Vector (F m) n) → ∑ (∑.∑ xs) ≈ ∑ λ i → ∑ (xs i)
+∑∑≈∑∑ xs = {!refl!}
+
+
+∑-flip-matrix≈ : ∀ (xs : Vector (F m) n) → ∑ {m} (∑.∑ xs) ≈ ∑ (∑.∑ (λ i j → xs j i))
+∑-flip-matrix≈ {zero} {zero} xs = refl
+∑-flip-matrix≈ {suc m} {zero} xs = begin
+  0# + ∑ (∑.∑ (λ i j → xs i (F.suc j))) ≈⟨
+    +-congˡ (∑-flip-matrix≈ λ i j → xs i (F.suc j)) ⟩
+  0# + 0# ≈⟨ +-identityˡ _ ⟩
+  0# ∎
+∑-flip-matrix≈ {zero} {suc n} xs = begin
+  0# ≈˘⟨ +-identityˡ _ ⟩
+  0# + 0# ≈⟨ +-congˡ (∑-flip-matrix≈ λ i j → xs (F.suc i) j) ⟩
+  0# + ∑ (∑.∑ (λ i j → xs (F.suc j) i)) ∎
+∑-flip-matrix≈ {suc m} {suc n} xs = begin
+  ∑.∑ xs 0F + ∑ (λ i → xs 0F (F.suc i) + ∑.∑ {suc m} {n} (λ j → xs (F.suc j)) (F.suc i))
+    ≈⟨ +-congˡ (∑Split (λ i → xs 0F (F.suc i)) _) ⟩
+  ∑.∑ xs 0F + (∑ (λ i → xs 0F (F.suc i)) + ∑ λ i → ∑.∑ (λ j → xs (F.suc j)) (F.suc i))
+    ≈⟨ +-congˡ (+-congˡ ((∑-flip-matrix≈ (λ i j → xs (F.suc i) {!!})))) ⟩
+  ∑.∑ xs 0F + (_ + {!!}) ≈⟨ {!!} ⟩
+  {!!} ≈⟨ {!!} ⟩
+  -- {!!} ≈⟨ {!!} ⟩
+  ∑.∑ (λ i j → xs j i) 0F + {!!} ∎
+-- foldr _+_ 0#
+-- (λ x →
+--    xs 0F (F.suc x) +
+--    foldr (λ xs₁ ys i → xs₁ i + ys i) (λ _ → 0#)
+--    (λ x₁ → xs (F.suc x₁)) (F.suc x))
+
 
 _isSolutionOf_ : F n → Vector M n → Set _
 α isSolutionOf v  = ∀ k → α ∙ⱽ v k ≈ 0#
