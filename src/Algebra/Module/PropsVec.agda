@@ -69,32 +69,12 @@ private variable
   ∑ (λ j → ∑ λ i → xs i j) ≈⟨ ∑∑≈∑∑′ xs ⟩
   (∑ λ i → ∑ (xs i)) ∎
 
--- ∑-flip-matrix≈ : ∀ (xs : Vector (F m) n) → ∑ {m} (∑.∑ xs) ≈ ∑ (∑.∑ (λ i j → xs j i))
--- ∑-flip-matrix≈ {zero} {zero} xs = refl
--- ∑-flip-matrix≈ {suc m} {zero} xs = begin
---   0# + ∑ (∑.∑ (λ i j → xs i (F.suc j))) ≈⟨
---     +-congˡ (∑-flip-matrix≈ λ i j → xs i (F.suc j)) ⟩
---   0# + 0# ≈⟨ +-identityˡ _ ⟩
---   0# ∎
--- ∑-flip-matrix≈ {zero} {suc n} xs = begin
---   0# ≈˘⟨ +-identityˡ _ ⟩
---   0# + 0# ≈⟨ +-congˡ (∑-flip-matrix≈ λ i j → xs (F.suc i) j) ⟩
---   0# + ∑ (∑.∑ (λ i j → xs (F.suc j) i)) ∎
--- ∑-flip-matrix≈ {suc m} {suc n} xs = begin
---   ∑.∑ xs 0F + ∑ (λ i → xs 0F (F.suc i) + ∑.∑ {suc m} {n} (λ j → xs (F.suc j)) (F.suc i))
---     ≈⟨ +-congˡ (∑Split (λ i → xs 0F (F.suc i)) _) ⟩
---   ∑.∑ xs 0F + (∑ (λ i → xs 0F (F.suc i)) + ∑ λ i → ∑.∑ (λ j → xs (F.suc j)) (F.suc i))
---     ≈⟨ +-congˡ (+-congˡ ((∑-flip-matrix≈ (λ i j → xs (F.suc i) {!!})))) ⟩
---   ∑.∑ xs 0F + (_ + {!!}) ≈⟨ {!!} ⟩
---   {!!} ≈⟨ {!!} ⟩
---   -- {!!} ≈⟨ {!!} ⟩
---   ∑.∑ (λ i j → xs j i) 0F + {!!} ∎
--- -- foldr _+_ 0#
--- -- (λ x →
--- --    xs 0F (F.suc x) +
--- --    foldr (λ xs₁ ys i → xs₁ i + ys i) (λ _ → 0#)
--- --    (λ x₁ → xs (F.suc x₁)) (F.suc x))
-
+∑-flip-matrix≈ : ∀ (xs : Vector (F m) n) → ∑ (∑.∑ xs) ≈ ∑ (∑.∑ (λ i j → xs j i))
+∑-flip-matrix≈ xs = begin
+  ∑ (∑.∑ xs) ≈⟨ ∑∑≈∑∑ xs ⟩
+  ∑ (λ i → ∑ (xs i)) ≈˘⟨ ∑∑≈∑∑′ xs ⟩
+  ∑ (λ i → ∑ (λ j → xs j i)) ≈˘⟨ ∑∑≈∑∑ (λ j i → xs i j) ⟩
+  ∑ (∑.∑ (λ i j → xs j i)) ∎
 
 _isSolutionOf_ : F n → Vector M n → Set _
 α isSolutionOf v  = ∀ k → α ∙ⱽ v k ≈ 0#
