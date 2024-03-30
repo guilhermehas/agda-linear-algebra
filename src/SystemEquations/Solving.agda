@@ -35,10 +35,11 @@ open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid
+open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
 
-open module MD {n} = MDefinition (leftModule n)
 open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
 open SumRing ring using (∑Ext; ∑0r)
+open MDef′
 
 private variable
   m n : ℕ
@@ -110,21 +111,16 @@ sameSolutionsA++b {n = n} {m = m} {sx = system A b} {v} sv i = begin
 
   sv-lemma = begin
     A i ∙ⱽ v - b i             ≈˘⟨ add-1∑ v (b i) (A i) ⟩
-    add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ ∑Ext (sv i) ⟩
-    ∑ {m ℕ.+ 1} 0ⱽ              ≈⟨ ∑0r (m ℕ.+ 1) ⟩
+    add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ sv i ⟩
     0# ∎
 
 sameSolutionsA++b-inv : ∀ {sx : SystemEquations n m} {v}
   (open SystemEquations sx)
   → IsSolution v → IsSolutionA++b $ add-1 v
-sameSolutionsA++b-inv {m = m} {system A b} {v} sv i j with splitAt m j in eqn
-... | inj₁ k rewrite splitAt-1-inj₁ v j k eqn = {!!}
-... | inj₂ k rewrite splitAt-1-inj₂ v j k eqn = {!sv i!}
-
-  -- begin
-  -- add-1 v j * (A i ++ [ b i ]) j ≈⟨ {!!} ⟩
-  -- -- {!!} ≈⟨ {!!} ⟩
-  -- 0# ∎
+sameSolutionsA++b-inv {m = m} {system A b} {v} sv i = begin
+  add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ {!!} ⟩
+  -- {!!} ≈⟨ {!!} ⟩
+  0# ∎
 
 
 systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) i → A i ≋ 0ⱽ → b i # 0#

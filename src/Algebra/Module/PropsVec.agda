@@ -76,19 +76,21 @@ private variable
   ∑ (λ i → ∑ (λ j → xs j i)) ≈˘⟨ ∑∑≈∑∑ (λ j i → xs i j) ⟩
   ∑ (∑.∑ (λ i j → xs j i)) ∎
 
-_isSolutionOf_ : F n → Vector M n → Set _
+_isSolutionOf_ : F n → Vector (M {n}) m → Set _
 α isSolutionOf v  = ∀ k → α ∙ⱽ v k ≈ 0#
 
 sameSolutions : xs ⊆ⱽ ys → α isSolutionOf ys → α isSolutionOf xs
-sameSolutions {n} {xs} {ys} {α} xs⊆ys sol i = begin
-  ∑ (α *ⱽ xs i) ≈˘⟨ ∑Ext {n} (λ j → *-congˡ (xs*ys≈x j)) ⟩
-  ∑ (α *ⱽ ∑.∑ (λ k l → ws k * ys k l)) ≈⟨ ∑Ext {n} (λ j → ∑.∑Mulrdist {n} {n} α _ _) ⟩
-  ∑ {n} (∑.∑ {n} {n} λ k l → α l * (ws k * ys k l)) ≈⟨
-    ∑Ext {n} (∑.∑Ext {n} {n} λ k l → *.solve 3 (λ a b c → a *.⊕ (b *.⊕ c) *.⊜ b *.⊕ a *.⊕ c) refl (α l) (ws k) (ys k l)) ⟩
-  ∑ {n} (∑.∑ {n} {n} λ k l → ws k * (α l * ys k l)) ≈⟨ ∑-flip-matrix≈ (λ k l → ws k * (α l * ys k l)) ⟩
-  ∑ {n} (∑.∑ {n} {n} λ l k → ws k * (α l * ys k l)) ≈˘⟨ ∑Ext (∑.∑Mulrdist ws (λ l k → α l * ys k l)) ⟩
+sameSolutions {n} {m} {xs} {p} {ys = ys} {α} xs⊆ys sol i =
+  begin
+  ∑ (α *ⱽ xs i) ≈˘⟨ ∑Ext (λ j → *-congˡ (xs*ys≈x j)) ⟩
+  ∑ (α *ⱽ ∑.∑ (λ k l → ws k * ys k l)) ≈⟨ ∑Ext {m} {α *ⱽ ∑.∑ (λ k l → ws k * ys k l)}  (λ j → ∑.∑Mulrdist α (λ k l → ws k * ys k l) _) ⟩
+  ∑ (∑.∑ λ k l → α l * (ws k * ys k l)) ≈⟨
+    ∑Ext (∑.∑Ext λ k l → *.solve 3 (λ a b c → a *.⊕ (b *.⊕ c) *.⊜ b *.⊕ a *.⊕ c) refl (α l) (ws k) (ys k l)) ⟩
+  ∑ (∑.∑ λ k l → ws k * (α l * ys k l)) ≈⟨ ∑-flip-matrix≈ (λ k l → ws k * (α l * ys k l)) ⟩
+  ∑ (∑.∑ λ l k → ws k * (α l * ys k l)) ≈˘⟨ ∑Ext (∑.∑Mulrdist ws (λ l k → α l * ys k l)) ⟩
   ∑ (ws *ⱽ ∑.∑ (λ l k → α l * ys k l)) ≈⟨ ∑Ext (λ j → *-congˡ (∑∑≈∑ (λ l k → α l * ys k l) j)) ⟩
   ∑ (ws *ⱽ λ k → α ∙ⱽ ys k) ≈⟨ ∑Ext (λ k → *-congˡ (sol k)) ⟩
-  ∑ (λ i → ws i * 0#) ≈⟨ ∑Ext (λ i → zeroʳ (ws i)) ⟩
-  _ ≈⟨ ∑0r n ⟩
-  0# ∎ where open _reaches_ (xs⊆ys (xsReachesItself xs i)) renaming (ys to ws)
+  ∑ (λ i → ws i * 0#) ≈⟨ ∑Ext {p} (λ i → zeroʳ (ws i)) ⟩
+  ∑ {p} (λ i → 0#) ≈⟨ ∑0r p ⟩
+  0# ∎
+  where open _reaches_ (xs⊆ys (xsReachesItself xs i)) renaming (ys to ws)

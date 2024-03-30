@@ -24,6 +24,7 @@ open HeytingField hField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
 open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
+open import Algebra.Module.PropsVec commutativeRing hiding (module MDef′)
 open MRing rawRing hiding (matOps→func)
 open VRing rawRing using (_∙ⱽ_)
 open PNorm
@@ -70,7 +71,7 @@ record SystemEquations (rows cols : ℕ) : Set c where
   IsFamilySolution affine = ∀ vecs → IsSolution (λ i → eval (affine i) vecs)
 
   IsSolutionA++b : Vector F _ → Set _
-  IsSolutionA++b = _isSolutionOf A++b by λ v → ∑ v ≈ 0#
+  IsSolutionA++b = _isSolutionOf A++b
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
 -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)
