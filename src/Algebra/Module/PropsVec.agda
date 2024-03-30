@@ -21,6 +21,7 @@ open CommutativeRing cRing renaming (Carrier to A) hiding (zero)
 open VRing rawRing using (_∙ⱽ_; _*ⱽ_)
 
 -- open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
+open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid
 open import Algebra.Module.Instances.FunctionalVector ring using (leftModule)
 open import Algebra.Module.Instances.CommutativeRing cRing
 open module CR n = CommutativeRing (*ⱽ-commutativeRing n) renaming (Carrier to F) using ()
@@ -42,30 +43,31 @@ private variable
 ∑∑≈∑ {suc m} {zero} xs i = refl
 ∑∑≈∑ {suc m} {suc n} xs i = +-congˡ (∑∑≈∑ (tail xs) i)
 
+∑∑≈∑∑′ : ∀ (xs : Vector (F m) n) → ∑ (λ j → ∑ λ i → xs i j) ≈ ∑ λ i → ∑ (xs i)
+∑∑≈∑∑′ {zero} {zero} xs = refl
+∑∑≈∑∑′ {zero} {suc n} xs = begin
+  0# ≈˘⟨ +-identityˡ _ ⟩
+  0# + 0# ≈⟨ +-congˡ (∑∑≈∑∑′ (tail xs)) ⟩
+  0# + ∑ (λ i → ∑ (tail xs i)) ∎
+∑∑≈∑∑′ {suc m} {zero} xs = begin
+  0# + ∑ (λ j → ∑ (λ i → xs i (F.suc j))) ≈⟨ +-congˡ (∑∑≈∑∑′ (λ i j → xs i (F.suc j))) ⟩
+  0# + 0# ≈⟨ +-identityˡ _ ⟩
+  0# ∎
+∑∑≈∑∑′ {suc m} {suc n} xs = begin
+  (xs 0F 0F + ∑ (λ i → xs (F.suc i) 0F)) + ∑ (λ j → ∑ (λ i → xs i (F.suc j)))
+    ≈⟨ +-congˡ (∑∑≈∑∑′ (λ i j → xs i (F.suc j))) ⟩
+  (xs 0F 0F + ∑ (λ i → xs (F.suc i) 0F)) + (∑ (λ j → xs 0F (F.suc j)) + ∑ (λ i → ∑ (λ j → xs (F.suc i) (F.suc j))))
+    ≈⟨ solve 4 (λ a b c d → (a ⊕ b) ⊕ c ⊕ d ⊜ (a ⊕ c) ⊕ b ⊕ d) refl (xs 0F 0F) (∑ (λ i → xs (F.suc i) 0F)) (∑ (λ j → xs 0F (F.suc j))) (∑ (λ i → ∑ (λ j → xs (F.suc i) (F.suc j)))) ⟩
+  (xs 0F 0F + ∑ (λ j → xs 0F (F.suc j))) + (∑ (λ i → xs (F.suc i) 0F) + ∑ (λ i → ∑ (λ j → xs (F.suc i) (F.suc j))))
+    ≈˘⟨ +-congˡ (∑Split (λ i → xs (F.suc i) 0F) _) ⟩
+  (xs 0F 0F + ∑ (λ j → xs 0F (F.suc j))) + ∑ (λ i → xs (F.suc i) 0F + ∑ (λ j → xs (F.suc i) (F.suc j))) ∎
+
+
 ∑∑≈∑∑ : ∀ (xs : Vector (F m) n) → ∑ (∑.∑ xs) ≈ ∑ λ i → ∑ (xs i)
 ∑∑≈∑∑ xs = begin
   ∑ (λ i → ∑.∑ xs i) ≈⟨ ∑Ext (λ i → ∑∑≈∑ xs i)  ⟩
-  ∑ (λ j → ∑ λ i → xs i j) ≈⟨ {!!} ⟩
-  -- {!!} ≈⟨ {!!} ⟩
+  ∑ (λ j → ∑ λ i → xs i j) ≈⟨ ∑∑≈∑∑′ xs ⟩
   (∑ λ i → ∑ (xs i)) ∎
-
--- ∑∑≈∑∑ : ∀ (xs : Vector (F m) n) → ∑ (∑.∑ xs) ≈ ∑ λ i → ∑ (xs i)
--- ∑∑≈∑∑ {zero} {zero} xs = refl
--- ∑∑≈∑∑ {suc m} {zero} xs = begin
---   0# + ∑ (∑.∑ (λ i j → xs i (F.suc j))) ≈⟨ +-congˡ (∑∑≈∑∑ (λ i j → xs i (F.suc j))) ⟩
---   0# + 0# ≈⟨ +-identityˡ _ ⟩
---   0# ∎
--- ∑∑≈∑∑ {zero} {suc n} xs = begin
---   0#     ≈˘⟨ +-identityˡ _ ⟩
---   0# + 0# ≈⟨ +-congˡ (∑∑≈∑∑ (tail xs)) ⟩
---   0# + ∑ (λ i → ∑ (xs (F.suc i))) ∎
--- ∑∑≈∑∑ {suc m} {suc n} xs = begin
---   ∑.∑ xs 0F + ∑ (∑.∑ λ i j → xs i {!j!}) ≈⟨ +-cong {!!} (∑∑≈∑∑ (λ i j → xs i {!F.suc j!})) ⟩
---   {!!} ≈⟨ {!!} ⟩
---   -- {!!} ≈⟨ {!!} ⟩
---   ∑ (xs 0F) + {!!} ∎
-  
-
 
 -- ∑-flip-matrix≈ : ∀ (xs : Vector (F m) n) → ∑ {m} (∑.∑ xs) ≈ ∑ (∑.∑ (λ i j → xs j i))
 -- ∑-flip-matrix≈ {zero} {zero} xs = refl
