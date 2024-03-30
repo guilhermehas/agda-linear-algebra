@@ -118,10 +118,10 @@ sameSolutionsA++b-inv : ∀ {sx : SystemEquations n m} {v}
   (open SystemEquations sx)
   → IsSolution v → IsSolutionA++b $ add-1 v
 sameSolutionsA++b-inv {m = m} {system A b} {v} sv i = begin
-  add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ {!!} ⟩
-  -- {!!} ≈⟨ {!!} ⟩
+  add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ add-1∑ v _ _ ⟩
+  A i ∙ⱽ v - b i              ≈⟨ +-congʳ (sv i) ⟩
+  b i - b i                   ≈⟨ -‿inverseʳ (b i) ⟩
   0# ∎
-
 
 systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) i → A i ≋ 0ⱽ → b i # 0#
   → ∀ {v} → IsSolution v → ⊥
