@@ -5,6 +5,7 @@ open import Function
 open import Algebra.Bundles
 import Algebra.Definitions as ADefinitions
 open import Data.Nat as ℕ using (ℕ)
+open import Data.Nat.Properties as ℕ using ()
 open import Data.Fin hiding (_+_)
 open import Data.Fin.Properties
 open import Data.Sum.Base using (_⊎_; inj₁; inj₂; [_,_])
@@ -24,6 +25,7 @@ private variable
   a ℓ : Level
   l m m₁ m₂ n n₁ n₂ p q k : ℕ
   i j h : Fin n
+  A : Set ℓ
 
 module MRingProps (ring : Ring a ℓ) where
 
@@ -305,3 +307,8 @@ module MRingProps (ring : Ring a ℓ) where
 
   flip-flip : (xs : Matrix n m) → flipM (flipM xs) ≈ᴹ xs
   flip-flip xs i j rewrite opposite-involutive i | opposite-involutive j = refl
+
+open import Algebra.Matrix.Base
+
+swapMatrixColumns : Matrix A m (n ℕ.+ p) → Matrix A m (p ℕ.+ n)
+swapMatrixColumns {n = n} {p} xs i j = xs i (cast (ℕ.+-comm p n) j)

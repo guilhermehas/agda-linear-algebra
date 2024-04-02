@@ -11,13 +11,14 @@ open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ)
-open import Data.Fin as F using (Fin; suc; splitAt)
+open import Data.Fin as F using (Fin; suc; splitAt; fromℕ)
 open import Data.Fin.Patterns
 open import Data.Vec.Functional
 
 open import Vector.Structures
 open import Algebra.Matrix.Structures
 open import SystemEquations.Definitions dField
+open import MatrixFuncNormalization.Definitions dField
 import Algebra.Module.Definition as MDefinition
 import Algebra.Module.Props as MProps′
 open import Algebra.BigOps
@@ -128,3 +129,13 @@ systemUnsolvable {n = n} {m} {system A b} (i , A0 , b#0) {v} sv = tight _ _ .pro
     A i ∙ⱽ v         ≈⟨ ∑Ext (λ j → trans (*-congʳ (A0 j)) (zeroˡ _)) ⟩
     ∑ {m} 0ⱽ ≈⟨ ∑0r m ⟩
     0# ∎) b#0
+
+open MatrixIsNormed≁0≈1
+open MatrixIsNormed≁0
+
+emptyNormed : (A : Matrix F 0 n) → MatrixIsNormed≁0≈1 A
+pivs (isNormed (emptyNormed A)) ()
+mPivots (isNormed (emptyNormed A)) ()
+pivsCrescent (isNormed (emptyNormed A)) {y = ()} x
+columnsZero (isNormed (emptyNormed A)) () j x
+pivsOne (emptyNormed A) ()

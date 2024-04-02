@@ -184,7 +184,7 @@ record FromNormalization≁0 (xs : Matrix F n m) (p : ℕ) : Set (c ⊔ ℓ₁ �
   field
     ys       : Matrix F p m
     ysNormed : MatrixIsNormed≁0 {n = p} ys
-    xs≋ⱽys   : _≋ⱽ_ xs ys
+    xs≋ⱽys   : xs ≋ⱽ ys
 
   open MatrixIsNormed≁0 ysNormed public
 
