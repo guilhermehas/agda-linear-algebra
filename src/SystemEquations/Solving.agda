@@ -100,8 +100,7 @@ add-1∑ {ℕ.suc n} v b u = begin
   u 0F * v 0F + (tail u ∙ⱽ tail v - b)             ≈˘⟨ +-assoc _ _ (- b) ⟩
   u 0F * v 0F + tail u ∙ⱽ tail v - b ∎
 
-sameSolutionsA++b : ∀ {sx : SystemEquations n m} {v}
-  (open SystemEquations sx)
+sameSolutionsA++b : ∀ {sx : SystemEquations n m} {v} (open SystemEquations sx)
   → IsSolutionA++b $ add-1 v → IsSolution v
 sameSolutionsA++b {n = n} {m = m} {sx = system A b} {v} sv i = begin
   A i ∙ⱽ v ≈⟨ +-inverseˡ-unique (A i ∙ⱽ v) (- b i) sv-lemma ⟩
@@ -114,8 +113,7 @@ sameSolutionsA++b {n = n} {m = m} {sx = system A b} {v} sv i = begin
     add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ sv i ⟩
     0# ∎
 
-sameSolutionsA++b-inv : ∀ {sx : SystemEquations n m} {v}
-  (open SystemEquations sx)
+sameSolutionsA++b-inv : ∀ {sx : SystemEquations n m} {v} (open SystemEquations sx)
   → IsSolution v → IsSolutionA++b $ add-1 v
 sameSolutionsA++b-inv {m = m} {system A b} {v} sv i = begin
   add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ add-1∑ v _ _ ⟩
@@ -123,9 +121,8 @@ sameSolutionsA++b-inv {m = m} {system A b} {v} sv i = begin
   b i - b i                   ≈⟨ -‿inverseʳ (b i) ⟩
   0# ∎
 
-systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) i → A i ≋ 0ⱽ → b i # 0#
-  → ∀ {v} → IsSolution v → ⊥
-systemUnsolvable {n = n} {m} {system A b} i A0 b#0 {v} sv = tight _ _ .proj₂
+systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) → A≈0∧b#0 → ∀ {v} → IsSolution v → ⊥
+systemUnsolvable {n = n} {m} {system A b} (i , A0 , b#0) {v} sv = tight _ _ .proj₂
   (begin
     b i             ≈˘⟨ sv i ⟩
     A i ∙ⱽ v         ≈⟨ ∑Ext (λ j → trans (*-congʳ (A0 j)) (zeroˡ _)) ⟩

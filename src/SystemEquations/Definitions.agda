@@ -6,6 +6,7 @@ open import Level
 open import Function
 open import Algebra
 open import Algebra.Apartness
+open import Data.Product
 open import Data.Nat.Base as ℕ using (ℕ)
 open import Data.Vec.Functional
 open import Data.Fin as F using (Fin)
@@ -23,6 +24,7 @@ open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
+open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MDef′)
 open MRing rawRing hiding (matOps→func)
@@ -72,6 +74,13 @@ record SystemEquations (rows cols : ℕ) : Set c where
 
   IsSolutionA++b : Vector F _ → Set _
   IsSolutionA++b = _isSolutionOf A++b
+
+  A≈0∧b#0I : Fin _ → Set _
+  A≈0∧b#0I i = A i ≋ 0ⱽ × b i # 0#
+
+  A≈0∧b#0 : Set _
+  A≈0∧b#0 = ∃ A≈0∧b#0I
+
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
 -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)
