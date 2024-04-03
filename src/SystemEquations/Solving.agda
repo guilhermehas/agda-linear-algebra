@@ -12,6 +12,7 @@ open import Data.Sum
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ)
 open import Data.Fin as F using (Fin; suc; splitAt; fromℕ)
+open import Data.Fin.Properties as F
 open import Data.Fin.Patterns
 open import Data.Vec.Functional
 open import Relation.Nullary
@@ -129,12 +130,14 @@ systemNormedSplit : ∀ (sx : SystemEquations n m) (open SystemEquations sx) →
 systemNormedSplit {ℕ.zero} sx normed = inj₂ (emptyNormed _)
 systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots pivsCrescent columnsZero) pivsOne)
   with pivs (fromℕ n) F.≟ fromℕ m
-... | yes p = inj₁ (fromℕ _ , (λ i → A≈0 (mPivots (fromℕ n) .proj₂ (F.inject₁ i) {!!}))  , (b#0 $ mPivots (fromℕ _) .proj₁))
+... | yes p = inj₁ (fromℕ _ , (λ i → A≈0 (mPivots (fromℕ n) .proj₂ (F.inject₁ i) (inj₁< i)))  , (b#0 $ mPivots (fromℕ _) .proj₁))
   where
   b#0 : appendLast (A $ fromℕ n) (b $ fromℕ n) (pivs $ fromℕ n) # 0# → b (fromℕ n) # 0#
   b#0 rewrite p | appendLastFromℕ (A $ fromℕ n) (b $ fromℕ n) = id
 
   A≈0 : {i : Fin _} → appendLast (A (fromℕ n)) (b (fromℕ n)) (F.inject₁ i) ≈ 0# → A (fromℕ n) i ≈ 0#
-  A≈0 {i} = {!!}
+  A≈0 {i} rewrite appendLastInj (A (fromℕ n)) (b (fromℕ n)) i = id
 
+  inj₁< : ∀ i → F.inject₁ i F.< pivs (fromℕ n)
+  inj₁< i = ≡.subst (λ x → F.inject₁ i F.< x) (≡.sym p) (≤∧≢⇒< (≤fromℕ _) (fromℕ≢inject₁ ∘ ≡.sym))
 ... | no ¬p = {!!}
