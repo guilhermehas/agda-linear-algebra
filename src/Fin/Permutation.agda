@@ -21,10 +21,10 @@ shift {ℕ.zero} i = id
 shift n@{ℕ.suc n′} i = permutation to from to∘from from∘to
   where
   to : Fin n → Fin n
-  to k = fromℕ< $ m%n<n (toℕ k + toℕ i) n
+  to k = fromℕ< (m%n<n (toℕ k + toℕ i) n)
 
   from : Fin n → Fin n
-  from k = fromℕ< $ m%n<n (n + toℕ k ∸ toℕ i) n
+  from k = fromℕ< (m%n<n (n + toℕ k ∸ toℕ i) n)
 
   to∘from : StrictlyInverseˡ _≡_ to from
   to∘from k = begin
@@ -57,7 +57,7 @@ shift n@{ℕ.suc n′} i = permutation to from to∘from from∘to
 
   from∘to : StrictlyInverseʳ _≡_ to from
   from∘to k = begin
-    fromℕ< (m%n<n (n + toℕ (fromℕ< $ m%n<n (toℕ k + toℕ i) n) ∸ toℕ i) n)
+    fromℕ< (m%n<n (n + toℕ (fromℕ< (m%n<n (toℕ k + toℕ i) n)) ∸ toℕ i) n)
       ≡⟨ cong (λ x → fromℕ< (m%n<n (n + x ∸ toℕ i) n)) (toℕ-fromℕ< _) ⟩
     fromℕ< (m%n<n (n + (toℕ k + toℕ i) % n ∸ toℕ i) n) ≡⟨ fromℕ<-cong _ _ helper _ _ ⟩
     fromℕ< (toℕ<n k) ≡⟨ fromℕ<-toℕ k (toℕ<n k) ⟩
@@ -84,7 +84,7 @@ shift n@{ℕ.suc n′} i = permutation to from to∘from from∘to
       toℕ k ∎
       where
       n-i<n : n′ ∸ toℕ i′ < n
-      n-i<n = <-transʳ (m∸n≤m n′ (toℕ i′)) ≤-refl
+      n-i<n = ≤-<-trans (m∸n≤m n′ (toℕ i′)) ≤-refl
 
     helper = begin
       (n + (toℕ k + toℕ i) % n ∸ toℕ i) % n ≡⟨ cong (_% n) (+-∸-comm ((toℕ k + toℕ i) % n) (toℕ≤n i)) ⟩
