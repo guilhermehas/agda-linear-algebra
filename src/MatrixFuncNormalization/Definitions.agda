@@ -147,6 +147,7 @@ ColumnsZero≁0 : Matrix F n m → Vector (Fin m) n → Set _
 ColumnsZero≁0 xs pivs = ∀ i j → i ≢ j → xs j (pivs i) ≈ 0#
 
 record MatrixIsNormed≁0 (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
+  constructor cIsNorm≁0
   field
     pivs         : Vector (Fin m) n
     mPivots      : MatrixPivots≁0 xs pivs
@@ -164,6 +165,7 @@ PivsOne≁0 : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m) n) → Set _
 PivsOne≁0 xs pivs = ∀ i → xs i (pivs i) ≈ 1#
 
 record MatrixIsNormed≁0≈1 (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
+  constructor cIsNorm≁0≈1
   field
     isNormed : MatrixIsNormed≁0 xs
 

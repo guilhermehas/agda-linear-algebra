@@ -144,3 +144,11 @@ firstHasProperty {n = ℕ.suc n} xs f with f (xs zero) in eqF0
 ... | false rewrite eqF0 with findFirst (tail xs) f in eqF | firstHasProperty (tail xs) f
 ... | just _ | prop = prop
 ... | nothing | _ rewrite eqF = _
+
+appendLastFromℕ : ∀ (xs : Vector A n) a → appendLast xs a (fromℕ _) ≡ a
+appendLastFromℕ {n = ℕ.zero} xs a = refl
+appendLastFromℕ {n = ℕ.suc n} xs a = appendLastFromℕ (tail xs) a
+
+appendLastInj : ∀ (xs : Vector A n) a i → appendLast xs a (inject₁ i) ≡ xs i
+appendLastInj xs a zero = refl
+appendLastInj xs a (suc i) = appendLastInj (tail xs) a i

@@ -14,8 +14,10 @@ open import Data.Nat as ℕ using (ℕ)
 open import Data.Fin as F using (Fin; suc; splitAt; fromℕ)
 open import Data.Fin.Patterns
 open import Data.Vec.Functional
+open import Relation.Nullary
 
 open import Vector.Structures
+open import Vector.Properties
 open import Algebra.Matrix.Structures
 open import SystemEquations.Definitions dField
 open import MatrixFuncNormalization.Definitions dField
@@ -35,7 +37,7 @@ open import Algebra.Module.Instances.CommutativeRing commutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 open import Relation.Binary.Reasoning.Setoid setoid
-open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid
+open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
 
 open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
@@ -111,12 +113,28 @@ systemUnsolvable {n = n} {m} {system A b} (i , A0 , b#0) {v} sv = tight _ _ .pro
     ∑ {m} 0ⱽ ≈⟨ ∑0r m ⟩
     0# ∎) b#0
 
-open MatrixIsNormed≁0≈1
-open MatrixIsNormed≁0
+module _ where
+  open MatrixIsNormed≁0≈1
+  open MatrixIsNormed≁0
 
-emptyNormed : (A : Matrix F 0 n) → MatrixIsNormed≁0≈1 A
-pivs (isNormed (emptyNormed A)) ()
-mPivots (isNormed (emptyNormed A)) ()
-pivsCrescent (isNormed (emptyNormed A)) {y = ()} x
-columnsZero (isNormed (emptyNormed A)) () j x
-pivsOne (emptyNormed A) ()
+  emptyNormed : (A : Matrix F 0 n) → MatrixIsNormed≁0≈1 A
+  pivs (isNormed (emptyNormed A)) ()
+  mPivots (isNormed (emptyNormed A)) ()
+  pivsCrescent (isNormed (emptyNormed A)) {y = ()} x
+  columnsZero (isNormed (emptyNormed A)) () j x
+  pivsOne (emptyNormed A) ()
+
+systemNormedSplit : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
+  → A≈0∧b#0 ⊎ MatrixIsNormed≁0≈1 A
+systemNormedSplit {ℕ.zero} sx normed = inj₂ (emptyNormed _)
+systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots pivsCrescent columnsZero) pivsOne)
+  with pivs (fromℕ n) F.≟ fromℕ m
+... | yes p = inj₁ (fromℕ _ , (λ i → A≈0 (mPivots (fromℕ n) .proj₂ (F.inject₁ i) {!!}))  , (b#0 $ mPivots (fromℕ _) .proj₁))
+  where
+  b#0 : appendLast (A $ fromℕ n) (b $ fromℕ n) (pivs $ fromℕ n) # 0# → b (fromℕ n) # 0#
+  b#0 rewrite p | appendLastFromℕ (A $ fromℕ n) (b $ fromℕ n) = id
+
+  A≈0 : {i : Fin _} → appendLast (A (fromℕ n)) (b (fromℕ n)) (F.inject₁ i) ≈ 0# → A (fromℕ n) i ≈ 0#
+  A≈0 {i} = {!!}
+
+... | no ¬p = {!!}
