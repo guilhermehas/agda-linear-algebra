@@ -11,7 +11,8 @@ open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ)
-open import Data.Fin as F using (Fin; suc; splitAt; fromℕ)
+open import Data.Nat.Properties as ℕ using ()
+open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; inject₁)
 open import Data.Fin.Properties as F
 open import Data.Fin.Patterns
 open import Data.Vec.Functional
@@ -36,7 +37,7 @@ open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
 open MRing rawRing using (Matrix)
 open import Algebra.Module.Instances.CommutativeRing commutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_)
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
@@ -130,14 +131,25 @@ systemNormedSplit : ∀ (sx : SystemEquations n m) (open SystemEquations sx) →
 systemNormedSplit {ℕ.zero} sx normed = inj₂ (emptyNormed _)
 systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots pivsCrescent columnsZero) pivsOne)
   with pivs (fromℕ n) F.≟ fromℕ m
-... | yes p = inj₁ (fromℕ _ , (λ i → A≈0 (mPivots (fromℕ n) .proj₂ (F.inject₁ i) (inj₁< i)))  , (b#0 $ mPivots (fromℕ _) .proj₁))
+... | yes p = inj₁ (fromℕ _ , (λ i → A≈0 (mPivots (fromℕ n) .proj₂ (inject₁ i) (inj₁< i)))  , (b#0 $ mPivots (fromℕ _) .proj₁))
   where
   b#0 : appendLast (A $ fromℕ n) (b $ fromℕ n) (pivs $ fromℕ n) # 0# → b (fromℕ n) # 0#
   b#0 rewrite p | appendLastFromℕ (A $ fromℕ n) (b $ fromℕ n) = id
 
-  A≈0 : {i : Fin _} → appendLast (A (fromℕ n)) (b (fromℕ n)) (F.inject₁ i) ≈ 0# → A (fromℕ n) i ≈ 0#
+  A≈0 : {i : Fin _} → appendLast (A (fromℕ n)) (b (fromℕ n)) (inject₁ i) ≈ 0# → A (fromℕ n) i ≈ 0#
   A≈0 {i} rewrite appendLastInj (A (fromℕ n)) (b (fromℕ n)) i = id
 
-  inj₁< : ∀ i → F.inject₁ i F.< pivs (fromℕ n)
-  inj₁< i = ≡.subst (λ x → F.inject₁ i F.< x) (≡.sym p) (≤∧≢⇒< (≤fromℕ _) (fromℕ≢inject₁ ∘ ≡.sym))
-... | no ¬p = {!!}
+  inj₁< : ∀ i → inject₁ i F.< pivs (fromℕ n)
+  inj₁< i = ≡.subst (inject₁ i F.<_) (≡.sym p) (≤∧≢⇒< (≤fromℕ _) (fromℕ≢inject₁ ∘ ≡.sym))
+... | no pn≢fromℕ = inj₂ (cIsNorm≁0≈1 (cIsNorm≁0 pivsR {!!} {!!} {!!}) {!!})
+  where
+  pn<n : pivs (fromℕ n) F.< fromℕ _
+  pn<n = ≤∧≢⇒< (≤fromℕ _) pn≢fromℕ
+
+  pi≢n : ∀ i → pivs i ≢ fromℕ _
+  pi≢n i peq with i F.≟ fromℕ _
+  ... | yes ≡.refl = pn≢fromℕ peq
+  ... | no i≢fn = <⇒≢ (<-trans (pivsCrescent (≤∧≢⇒< (≤fromℕ _) i≢fn)) pn<n) peq
+
+  pivsR : Vector (Fin m) (ℕ.suc n)
+  pivsR i = F.lower₁ (pivs i) λ peq → pi≢n i (toℕ-injective (≡.sym (≡.trans (toℕ-fromℕ _) peq)))
