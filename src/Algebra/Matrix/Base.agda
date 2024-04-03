@@ -9,7 +9,9 @@ open import Data.Sum.Base using (_⊎_; inj₁; inj₂; [_,_])
 open import Data.Vec.Functional
 open import Relation.Nullary
 
-infixr 5 _++ⱽ_
+open import Vector.Base
+
+infixr 5 _++ⱽ_ _++v_
 
 private variable
   a : Level
@@ -21,6 +23,9 @@ Matrix A m n = Vector (Vector A n) m
 
 _++ⱽ_ : Matrix A m n → Matrix A m p → Matrix A m (n ℕ.+ p)
 _++ⱽ_ {n = n} xs ys i j = [ xs i , ys i ] (splitAt n j)
+
+_++v_ : Matrix A m n → Vector A m → Matrix A m (ℕ.suc n)
+(xs ++v v) i = appendLast (xs i) (v i)
 
 takeⱽ : ∀ n → Matrix A m (n ℕ.+ p) → Matrix A m n
 takeⱽ _ = map $ take _

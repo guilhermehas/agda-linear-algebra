@@ -70,3 +70,8 @@ findFirstWithProp : Vector A n → (A → Maybe B) → Maybe (Fin n × B)
 findFirstWithProp {n = ℕ.zero} xs f = nothing
 findFirstWithProp {n = ℕ.suc n} xs f = maybe′ (λ x → just (zero , x)) (Maybe.map (λ (i , a) → suc i , a)
   (findFirstWithProp (tail xs) f)) $ f $ xs zero
+
+appendLast : Vector A n → A → Vector A (ℕ.suc n)
+appendLast {n = ℕ.zero} xs a i = a
+appendLast {n = ℕ.suc n} xs a 0F = xs 0F
+appendLast {n = ℕ.suc n} xs a (suc i) = appendLast (tail xs) a i

@@ -54,24 +54,8 @@ private
   injF 0F = 0F
   injF (suc i) = suc (injF i)
 
-  add-1 : Vector F n → Vector F (n ℕ.+ 1)
-  add-1 {ℕ.zero} v _ = - 1#
-  add-1 {ℕ.suc n} v 0F = v 0F
-  add-1 {ℕ.suc n} v (suc i) = add-1 (tail v) i
-
-  splitAt-1-inj₁ : ∀ (v : Vector F n) i j → splitAt n i ≡ inj₁ j → (add-1 v) i ≡ v j
-  splitAt-1-inj₁ {ℕ.suc n} v 0F 0F eqn = ≡.refl
-  splitAt-1-inj₁ {ℕ.suc n} v (suc i) 0F eqn with splitAt n i
-  splitAt-1-inj₁ {ℕ.suc n} v (suc i) 0F () | inj₁ x
-  splitAt-1-inj₁ {ℕ.suc n} v (suc i) 0F () | inj₂ y
-  splitAt-1-inj₁ {ℕ.suc n} v (suc i) (suc j) eqn with splitAt n i in eqn
-  splitAt-1-inj₁ {ℕ.suc n} v (suc i) (suc .x) ≡.refl | inj₁ x = splitAt-1-inj₁ (tail v) i _ eqn
-
-  splitAt-1-inj₂ : ∀ (v : Vector F n) i j → splitAt n i ≡ inj₂ j → (add-1 v) i ≡ - 1#
-  splitAt-1-inj₂ {ℕ.zero} v i .i ≡.refl = ≡.refl
-  splitAt-1-inj₂ {ℕ.suc n} v (suc i) 0F x with splitAt n i in eqn
-  splitAt-1-inj₂ {ℕ.suc n} v (suc i) 0F ≡.refl | inj₂ .0F = splitAt-1-inj₂ (tail v) i 0F eqn
-
+  add-1 : Vector F n → Vector F (ℕ.suc n)
+  add-1 xs = appendLast xs (- 1#)
 
 A++b⇒systemEquations : Matrix F n (m ℕ.+ 1) → SystemEquations n m
 A++b⇒systemEquations xs = record { A = λ i j → xs i (injF j) ; b = λ i → xs i (lastFin _) }
@@ -81,23 +65,20 @@ module _ where
 
   sameSolutionsSE : {sx sy : SystemEquations n m}  → A++b sy ⊆ⱽ A++b sx
     → ∀ v → IsSolutionA++b sx v → IsSolutionA++b sy v
-  sameSolutionsSE sy⊆ⱽsx _ = sameSolutions sy⊆ⱽsx
+  sameSolutionsSE sy⊆ⱽsx i = sameSolutions {α = i} sy⊆ⱽsx
 
-tail-lemma : ∀ (u : Vector F (ℕ.suc n)) b k → tail (u ++ [ b ]) k ≈ (tail u ++ [ b ]) k
-tail-lemma {n} _ _ k with splitAt n k
-... | inj₁ _ = refl
-... | inj₂ _ = refl
+tail-lemma : ∀ (u : Vector F (ℕ.suc n)) b k → tail (appendLast u b) k ≈ (appendLast (tail u) b) k
+tail-lemma u b k = refl
 
-add-1∑ : ∀ (v : Vector F n) b (u : Vector F n) → (add-1 v ∙ⱽ (u ++ [ b ])) ≈ u ∙ⱽ v - b
+add-1∑ : ∀ (v : Vector F n) b (u : Vector F n) → (add-1 v ∙ⱽ appendLast u b) ≈ u ∙ⱽ v - b
 add-1∑ {ℕ.zero} v b u = begin
   - 1# * b + 0# ≈⟨ +-identityʳ _ ⟩
   - 1# * b      ≈⟨ -1*x≈-x _ ⟩
   - b          ≈˘⟨ +-identityˡ (- b) ⟩
   0# + - b ∎
 add-1∑ {ℕ.suc n} v b u = begin
-  v 0F * u 0F + add-1 (tail v) ∙ⱽ tail (u ++ [ b ]) ≈⟨ +-cong (*-comm _ _)
-    (∑Ext {n ℕ.+ 1} λ j → *-congˡ (tail-lemma u b j)) ⟩
-  u 0F * v 0F + add-1 (tail v) ∙ⱽ (tail u ++ [ b ]) ≈⟨ +-congˡ (add-1∑ _ b (tail u)) ⟩
+  v 0F * u 0F + add-1 (tail v) ∙ⱽ tail (appendLast u b) ≈⟨ +-congʳ (*-comm _ _)⟩
+  u 0F * v 0F + add-1 (tail v) ∙ⱽ appendLast (tail u) b ≈⟨ +-congˡ (add-1∑ _ b (tail u)) ⟩
   u 0F * v 0F + (tail u ∙ⱽ tail v - b)             ≈˘⟨ +-assoc _ _ (- b) ⟩
   u 0F * v 0F + tail u ∙ⱽ tail v - b ∎
 
@@ -111,15 +92,15 @@ sameSolutionsA++b {n = n} {m = m} {sx = system A b} {v} sv i = begin
 
   sv-lemma = begin
     A i ∙ⱽ v - b i             ≈˘⟨ add-1∑ v (b i) (A i) ⟩
-    add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ sv i ⟩
+    add-1 v ∙ⱽ appendLast (A i) (b i) ≈⟨ sv i ⟩
     0# ∎
 
 sameSolutionsA++b-inv : ∀ {sx : SystemEquations n m} {v} (open SystemEquations sx)
   → IsSolution v → IsSolutionA++b $ add-1 v
 sameSolutionsA++b-inv {m = m} {system A b} {v} sv i = begin
-  add-1 v ∙ⱽ (A i ++ [ b i ]) ≈⟨ add-1∑ v _ _ ⟩
-  A i ∙ⱽ v - b i              ≈⟨ +-congʳ (sv i) ⟩
-  b i - b i                   ≈⟨ -‿inverseʳ (b i) ⟩
+  add-1 v ∙ⱽ appendLast (A i) (b i) ≈⟨ add-1∑ v _ _ ⟩
+  A i ∙ⱽ v - b i                    ≈⟨ +-congʳ (sv i) ⟩
+  b i - b i                         ≈⟨ -‿inverseʳ (b i) ⟩
   0# ∎
 
 systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) → A≈0∧b#0 → ∀ {v} → IsSolution v → ⊥

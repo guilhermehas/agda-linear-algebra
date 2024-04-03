@@ -66,8 +66,8 @@ record SystemEquations (rows cols : ℕ) : Set c where
   IsSolution : Vector F cols → Set ℓ₁
   IsSolution x = ∀ r → A r ∙ⱽ x ≈ b r
 
-  A++b : Matrix F rows (cols ℕ.+ 1)
-  A++b = A ++ⱽ const ∘ b
+  A++b : Matrix F rows (ℕ.suc cols)
+  A++b = A ++v b
 
   IsFamilySolution : VecAffine cols p → Set (c ⊔ ℓ₁)
   IsFamilySolution affine = ∀ vecs → IsSolution (λ i → eval (affine i) vecs)
