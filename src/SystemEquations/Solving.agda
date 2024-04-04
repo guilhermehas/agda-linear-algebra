@@ -141,7 +141,7 @@ systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 piv
 
   inj₁< : ∀ i → inject₁ i F.< pivs (fromℕ n)
   inj₁< i = ≡.subst (inject₁ i F.<_) (≡.sym p) (≤∧≢⇒< (≤fromℕ _) (fromℕ≢inject₁ ∘ ≡.sym))
-... | no pn≢fromℕ = inj₂ (cIsNorm≁0≈1 (cIsNorm≁0 pivsR {!!} {!!} {!!}) {!!})
+... | no pn≢fromℕ = inj₂ (cIsNorm≁0≈1 (cIsNorm≁0 pivsR mPivotsR {!!} {!!}) {!!})
   where
   pn<n : pivs (fromℕ n) F.< fromℕ _
   pn<n = ≤∧≢⇒< (≤fromℕ _) pn≢fromℕ
@@ -151,5 +151,15 @@ systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 piv
   ... | yes ≡.refl = pn≢fromℕ peq
   ... | no i≢fn = <⇒≢ (<-trans (pivsCrescent (≤∧≢⇒< (≤fromℕ _) i≢fn)) pn<n) peq
 
+  toℕ-pi≢n : ∀ i → m ≢ F.toℕ (pivs i)
+  toℕ-pi≢n i peq = pi≢n i (toℕ-injective (≡.sym (≡.trans (toℕ-fromℕ _) peq)))
+
   pivsR : Vector (Fin m) (ℕ.suc n)
-  pivsR i = F.lower₁ (pivs i) λ peq → pi≢n i (toℕ-injective (≡.sym (≡.trans (toℕ-fromℕ _) peq)))
+  pivsR i = F.lower₁ (pivs i) (toℕ-pi≢n i)
+
+  mPivotsR : MatrixPivots≁0 A pivsR
+  proj₁ (mPivotsR i) = help $ mPivots i .proj₁
+    where
+    help : appendLast (A i) (b i) (pivs i) # 0# → _
+    help rewrite appendLastLower (A i) (b i) (pivs i) (toℕ-pi≢n i) = id
+  proj₂ (mPivotsR i) j j<pI = {! !}

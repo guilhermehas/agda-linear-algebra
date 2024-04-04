@@ -152,3 +152,8 @@ appendLastFromℕ {n = ℕ.suc n} xs a = appendLastFromℕ (tail xs) a
 appendLastInj : ∀ (xs : Vector A n) a i → appendLast xs a (inject₁ i) ≡ xs i
 appendLastInj xs a zero = refl
 appendLastInj xs a (suc i) = appendLastInj (tail xs) a i
+
+appendLastLower : ∀ (xs : Vector A n) a i (n≢i : n ≢ toℕ i) → appendLast xs a i ≡ xs (lower₁ i n≢i)
+appendLastLower {n = ℕ.zero} xs a zero n≢i = contradiction refl n≢i
+appendLastLower {n = ℕ.suc n} xs a zero n≢i = refl
+appendLastLower {n = ℕ.suc n} xs a (suc i) n≢i = appendLastLower (tail xs) a i (λ n≡i → n≢i (cong ℕ.suc n≡i))
