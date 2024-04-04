@@ -162,4 +162,8 @@ systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 piv
     where
     help : appendLast (A i) (b i) (pivs i) # 0# → _
     help rewrite appendLastLower (A i) (b i) (pivs i) (toℕ-pi≢n i) = id
-  proj₂ (mPivotsR i) j j<pI = {! !}
+  proj₂ (mPivotsR i) j j<pI = help $ mPivots i .proj₂ (inject₁ j) (≡.subst (ℕ._< _) (≡.sym (toℕ-inject₁ _))
+    (≡.subst (_ ℕ.<_) (toℕ-lower₁ _ (toℕ-pi≢n _)) j<pI))
+    where
+    help : appendLast (A i) (b i) (inject₁ j) ≈ 0# → _
+    help = {!!}
