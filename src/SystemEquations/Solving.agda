@@ -12,7 +12,7 @@ open import Data.Sum
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ)
 open import Data.Nat.Properties as ℕ using ()
-open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; inject₁)
+open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; toℕ; inject₁)
 open import Data.Fin.Properties as F
 open import Data.Fin.Patterns
 open import Data.Vec.Functional
@@ -37,7 +37,7 @@ open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
 open MRing rawRing using (Matrix)
 open import Algebra.Module.Instances.CommutativeRing commutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_)
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; subst; subst₂; cong)
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
@@ -157,13 +157,15 @@ systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 piv
   pivsR : Vector (Fin m) (ℕ.suc n)
   pivsR i = F.lower₁ (pivs i) (toℕ-pi≢n i)
 
+  toℕ-pivR-≡ : ∀ i → toℕ (pivsR i) ≡ toℕ (pivs i)
+  toℕ-pivR-≡ i = toℕ-lower₁ _ (toℕ-pi≢n _)
+
   mPivotsR : MatrixPivots≁0 A pivsR
   proj₁ (mPivotsR i) = help $ mPivots i .proj₁
     where
     help : appendLast (A i) (b i) (pivs i) # 0# → _
     help rewrite appendLastLower (A i) (b i) (pivs i) (toℕ-pi≢n i) = id
-  proj₂ (mPivotsR i) j j<pI = help $ mPivots i .proj₂ (inject₁ j) (≡.subst (ℕ._< _) (≡.sym (toℕ-inject₁ _))
-    (≡.subst (_ ℕ.<_) (toℕ-lower₁ _ (toℕ-pi≢n _)) j<pI))
+  proj₂ (mPivotsR i) j j<pI = help $ mPivots i .proj₂ (inject₁ j) (subst₂ ℕ._<_ (≡.sym (toℕ-inject₁ _)) (toℕ-pivR-≡ _) j<pI)
     where
     help : appendLast (A i) (b i) (inject₁ j) ≈ 0# → _
-    help = {!!}
+    help rewrite appendLastInj (A i) (b i) j = id
