@@ -43,7 +43,7 @@ open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
 
 open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
-open SumRing ring using (∑Ext; ∑0r)
+open SumRing ring using (∑Ext; ∑0r; δ; ∑Mul1r)
 open MDef′
 
 private variable
@@ -185,3 +185,36 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
 
   pivs≁0 : PivsOne≁0 A pivsR
   pivs≁0 i = trans (sym (reflexive (A++b≡piv _))) (pivsOne i)
+
+mId : (A : Matrix F n n) → MatrixIsNormed≁0≈1 A → ∀ i j → A i j ≈ δ i j
+mId {ℕ.suc n} A normed 0F 0F = {!!}
+mId {ℕ.suc n} A normed 0F (suc j) = {!!}
+mId {ℕ.suc n} A normed (suc i) j = {!!}
+
+solveSimpleNormedEquation : ∀ (sx : SystemEquations n n) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
+  ∃ λ p → ∃ (IsFamilySolution {p = p})
+solveSimpleNormedEquation {n = n} sx ANormed = 0 , vSolution , isSol
+  where
+  open SystemEquations sx
+  open MatrixIsNormed≁0≈1 ANormed
+
+  vSolution = λ i → record { coeff = λ () ; constant = b i }
+
+  A≈δ : ∀ i j → A i j ≈ δ i j
+  A≈δ i j with i F.≟ j
+  ... | yes ≡.refl = {!pivsOne ?!}
+  ... | no i≢j = {!c!}
+
+
+  isSol : IsFamilySolution vSolution
+  isSol vecs j = begin
+   ∑ {n} (λ i → A j i * (0# + b i)) ≈⟨ ∑Ext (λ i → *-cong (A≈δ j i) (+-identityˡ (b i))) ⟩
+   ∑ {n} (λ i → δ j i * b i)        ≈⟨ ∑Mul1r b j ⟩
+   b j ∎
+
+solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
+  ∃ λ p → ∃ (IsFamilySolution {p = p})
+solveNormedEquation sx ANormed = {!!} , {!!} , {!!}
+  where
+  open SystemEquations sx
+  open MatrixIsNormed≁0≈1 ANormed
