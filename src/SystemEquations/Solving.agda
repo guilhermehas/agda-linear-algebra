@@ -129,10 +129,12 @@ module _ where
 systemNormedSplit : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
   → A≈0∧b#0 ⊎ MatrixIsNormed≁0≈1 A
 systemNormedSplit {ℕ.zero} sx normed = inj₂ (emptyNormed _)
-systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots pivsCrescent columnsZero) pivsOne)
+systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots pivsCrescent columnsZero) pivsOne)
   with pivs (fromℕ n) F.≟ fromℕ m
 ... | yes p = inj₁ (fromℕ _ , (λ i → A≈0 (mPivots (fromℕ n) .proj₂ (inject₁ i) (inj₁< i)))  , (b#0 $ mPivots (fromℕ _) .proj₁))
   where
+  open SystemEquations sx
+
   b#0 : appendLast (A $ fromℕ n) (b $ fromℕ n) (pivs $ fromℕ n) # 0# → b (fromℕ n) # 0#
   b#0 rewrite p | appendLastFromℕ (A $ fromℕ n) (b $ fromℕ n) = id
 
@@ -141,8 +143,10 @@ systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 piv
 
   inj₁< : ∀ i → inject₁ i F.< pivs (fromℕ n)
   inj₁< i = ≡.subst (inject₁ i F.<_) (≡.sym p) (≤∧≢⇒< (≤fromℕ _) (fromℕ≢inject₁ ∘ ≡.sym))
-... | no pn≢fromℕ = inj₂ (cIsNorm≁0≈1 (cIsNorm≁0 pivsR mPivotsR {!!} {!!}) {!!})
+... | no pn≢fromℕ = inj₂ (cIsNorm≁0≈1 (cIsNorm≁0 pivsR mPivotsR allRowsR cols0R) pivs≁0)
   where
+  open SystemEquations sx
+
   pn<n : pivs (fromℕ n) F.< fromℕ _
   pn<n = ≤∧≢⇒< (≤fromℕ _) pn≢fromℕ
 
@@ -160,12 +164,24 @@ systemNormedSplit {ℕ.suc n} {m} (system A b) (cIsNorm≁0≈1 (cIsNorm≁0 piv
   toℕ-pivR-≡ : ∀ i → toℕ (pivsR i) ≡ toℕ (pivs i)
   toℕ-pivR-≡ i = toℕ-lower₁ _ (toℕ-pi≢n _)
 
+  A++b≡piv : ∀ i → A++b i (pivs i) ≡ A i (pivsR i)
+  A++b≡piv i = appendLastLower (A i) (b i) (pivs i) (toℕ-pi≢n i)
+
   mPivotsR : MatrixPivots≁0 A pivsR
   proj₁ (mPivotsR i) = help $ mPivots i .proj₁
     where
-    help : appendLast (A i) (b i) (pivs i) # 0# → _
-    help rewrite appendLastLower (A i) (b i) (pivs i) (toℕ-pi≢n i) = id
+    help : A++b i (pivs i) # 0# → _
+    help rewrite A++b≡piv i = id
   proj₂ (mPivotsR i) j j<pI = help $ mPivots i .proj₂ (inject₁ j) (subst₂ ℕ._<_ (≡.sym (toℕ-inject₁ _)) (toℕ-pivR-≡ _) j<pI)
     where
     help : appendLast (A i) (b i) (inject₁ j) ≈ 0# → _
     help rewrite appendLastInj (A i) (b i) j = id
+
+  allRowsR : AllRowsNormalized≁0 pivsR
+  allRowsR = subst₂ ℕ._<_ (≡.sym $ toℕ-lower₁ _ $ toℕ-pi≢n _) (≡.sym $ toℕ-lower₁ _ $ toℕ-pi≢n _) ∘ pivsCrescent
+
+  cols0R : ColumnsZero≁0 A pivsR
+  cols0R i j i≢j = trans (sym (reflexive (appendLastLower (A _) (b _) _ (toℕ-pi≢n _)))) (columnsZero i j i≢j)
+
+  pivs≁0 : PivsOne≁0 A pivsR
+  pivs≁0 i = trans (sym (reflexive (A++b≡piv _))) (pivsOne i)
