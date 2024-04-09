@@ -6,11 +6,12 @@ open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
 open import Function
+open import Data.Bool using (Bool; true; false)
 open import Data.Product
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum
 open import Data.Empty
-open import Data.Nat as ℕ using (ℕ)
+open import Data.Nat as ℕ using (ℕ; _∸_)
 open import Data.Nat.Properties as ℕ using ()
 open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; toℕ; inject₁)
 open import Data.Fin.Properties as F
@@ -186,35 +187,37 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
   pivs≁0 : PivsOne≁0 A pivsR
   pivs≁0 i = trans (sym (reflexive (A++b≡piv _))) (pivsOne i)
 
-mId : (A : Matrix F n n) → MatrixIsNormed≁0≈1 A → ∀ i j → A i j ≈ δ i j
-mId {ℕ.suc n} A normed 0F 0F = {!!}
-mId {ℕ.suc n} A normed 0F (suc j) = {!!}
-mId {ℕ.suc n} A normed (suc i) j = {!!}
+vecIn→vecBool : Vector (Fin n) m → Vector Bool n
+vecIn→vecBool {m = ℕ.zero} xs i = false
+vecIn→vecBool {m = ℕ.suc m} xs i with isYes (xs 0F F.≟ i)
+... | true = true
+... | false = vecIn→vecBool (tail xs) i
 
-solveSimpleNormedEquation : ∀ (sx : SystemEquations n n) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
-  ∃ λ p → ∃ (IsFamilySolution {p = p})
-solveSimpleNormedEquation {n = n} sx ANormed = 0 , vSolution , isSol
-  where
-  open SystemEquations sx
-  open MatrixIsNormed≁0≈1 ANormed
++-right : ∀ m p → m ℕ.+ ℕ.suc p ≡ ℕ.suc (m ℕ.+ p)
++-right ℕ.zero p = ≡.refl
++-right (ℕ.suc m) p rewrite +-right m p = ≡.refl
 
-  vSolution = λ i → record { coeff = λ () ; constant = b i }
+vecBool→×Vec : Vector Bool n → Σ[ m ∈ ℕ ] (Σ[ p ∈ ℕ ] (m ℕ.+ p ≡ n × Vector (Fin n) m × Vector (Fin n) p))
+vecBool→×Vec {ℕ.zero} _ = _ , _ , ≡.refl , [] , []
+vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
+... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
+... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
 
-  A≈δ : ∀ i j → A i j ≈ δ i j
-  A≈δ i j with i F.≟ j
-  ... | yes ≡.refl = {!pivsOne ?!}
-  ... | no i≢j = {!c!}
+sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → (let m′ , _ = vecBool→×Vec (vecIn→vecBool xs)) → m ≡ m′
+sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
+sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
+sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = {!proj₁ (vecBool→×Vec (tail (λ i → false)))!}
+sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed = {!!}
 
-
-  isSol : IsFamilySolution vSolution
-  isSol vecs j = begin
-   ∑ {n} (λ i → A j i * (0# + b i)) ≈⟨ ∑Ext (λ i → *-cong (A≈δ j i) (+-identityˡ (b i))) ⟩
-   ∑ {n} (λ i → δ j i * b i)        ≈⟨ ∑Mul1r b j ⟩
-   b j ∎
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
   ∃ λ p → ∃ (IsFamilySolution {p = p})
-solveNormedEquation sx ANormed = {!!} , {!!} , {!!}
+solveNormedEquation {n} {m} sx ANormed = m ∸ n , {!!} , {!!}
   where
   open SystemEquations sx
   open MatrixIsNormed≁0≈1 ANormed
+
+  vAffine : VecAffine m (m ∸ n)
+  vAffine i with vecIn→vecBool pivs i
+  ... | false = vAff {!!} 0#
+  ... | true  = {!!}

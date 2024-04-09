@@ -38,6 +38,7 @@ private variable
 
 -- This is the "syntax" of a affine function : Vector F p → Fn
 record Affine (p : ℕ) : Set c where
+  constructor vAff
   field
     coeff    : Vector F p
     constant : F
