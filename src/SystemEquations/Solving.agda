@@ -44,7 +44,7 @@ open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
 
 open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
-open SumRing ring using (∑Ext; ∑0r; δ; ∑Mul1r)
+open SumRing ring using (∑Ext; ∑0r; δ; ∑Mul1r; ∑Split)
 open MDef′
 
 private variable
@@ -250,13 +250,40 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
 
   vAffine : VecAffine m (m ∸ n)
   vAffine i with vSplit i
-  ... | inj₁ _ = vAff (const 1#) 0#
+  ... | inj₁ j = vAff (δ j) 0#
   ... | inj₂ j  = vAff (λ k → - A j (pivRes k)) (b j)
 
   open Affine
 
+
   vAffFamily : IsFamilySolution vAffine
   vAffFamily vecs i = begin
     ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈⟨ {!!} ⟩
-    -- {!!} ≈⟨ {!!} ⟩
+    ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j)))) +
+    ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j))))
+      ≈⟨ +-cong ∑Piv ∑NPiv ⟩
+    b i + ∑ (λ k → - vecs k) + ∑ vecs ≈⟨ +-assoc (b i) _ _ ⟩
+    b i + (∑ {m ∸ n} (λ k → - vecs k) + ∑ vecs) ≈⟨ +-congˡ
+      (begin
+        _ ≈˘⟨ ∑Split _ vecs ⟩
+        _ ≈⟨ ∑Ext (λ k → -‿inverseˡ (vecs k)) ⟩
+        ∑ {m ∸ n} (const 0#) ≈⟨ ∑0r (m ∸ n) ⟩
+        _ ∎) ⟩
+    b i + 0# ≈⟨ +-identityʳ _ ⟩
     b i ∎
+    where
+
+    ∑Piv = begin
+      ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j)))) ≈⟨ {!!} ⟩
+      ∑ (λ j → δ i j * (λ p → ∑ (λ k → vecs k * coeff (vAffine (pivs p)) k) + constant (vAffine (pivs p))) j )
+        ≈⟨ ∑Mul1r {n} _ i ⟩
+      ∑ (λ k → vecs k * coeff (vAffine (pivs i)) k) + constant (vAffine (pivs i)) ≈⟨ {!!} ⟩
+      -- {!!} ≈⟨ {!!} ⟩
+      b i + ∑ (λ k → - vecs k) ∎
+
+    ∑NPiv = begin
+      ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j)))) ≈⟨ {!!} ⟩
+      ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * δ j k) + 0#)) ≈⟨ {!!} ⟩
+      ∑ (λ j → A i (pivRes j) * vecs j) ≈⟨ {!!} ⟩
+      -- {!!} ≈⟨ {!!} ⟩
+      ∑ vecs ∎
