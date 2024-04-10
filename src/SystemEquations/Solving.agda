@@ -262,28 +262,49 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
     ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j)))) +
     ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j))))
       ≈⟨ +-cong ∑Piv ∑NPiv ⟩
-    b i + ∑ (λ k → - vecs k) + ∑ vecs ≈⟨ +-assoc (b i) _ _ ⟩
-    b i + (∑ {m ∸ n} (λ k → - vecs k) + ∑ vecs) ≈⟨ +-congˡ
+    b i + ∑ (λ k → - (A i (pivRes k) * vecs k)) + ∑ (λ k → A i (pivRes k) * vecs k) ≈⟨ +-assoc (b i) _ _ ⟩
+    b i + (∑ {m ∸ n} (λ k → - (A i (pivRes k) * vecs k)) + ∑ λ k → A i (pivRes k) * vecs k) ≈⟨ +-congˡ
       (begin
-        _ ≈˘⟨ ∑Split _ vecs ⟩
-        _ ≈⟨ ∑Ext (λ k → -‿inverseˡ (vecs k)) ⟩
+        _ ≈˘⟨ ∑Split _ (λ k → A i (pivRes k) * vecs k) ⟩
+        _ ≈⟨ ∑Ext (λ k → -‿inverseˡ (A i (pivRes k) * vecs k)) ⟩
         ∑ {m ∸ n} (const 0#) ≈⟨ ∑0r (m ∸ n) ⟩
         _ ∎) ⟩
     b i + 0# ≈⟨ +-identityʳ _ ⟩
     b i ∎
     where
 
+    AiPj≈δij : (i j : Fin n) → A i (pivs j) ≈ δ i j
+    AiPj≈δij i j with i F.≟ j
+    ... | yes ≡.refl = pivsOne _
+    ... | no i≢j = columnsZero _ _ (i≢j ∘ ≡.sym)
+
+
+    constVAffine≈ = {!!}
+
     ∑Piv = begin
-      ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j)))) ≈⟨ {!!} ⟩
+      ∑ {n} (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j))))
+        ≈⟨ ∑Ext {n} (λ j → *-congʳ (AiPj≈δij i j)) ⟩
       ∑ (λ j → δ i j * (λ p → ∑ (λ k → vecs k * coeff (vAffine (pivs p)) k) + constant (vAffine (pivs p))) j )
         ≈⟨ ∑Mul1r {n} _ i ⟩
-      ∑ (λ k → vecs k * coeff (vAffine (pivs i)) k) + constant (vAffine (pivs i)) ≈⟨ {!!} ⟩
-      -- {!!} ≈⟨ {!!} ⟩
-      b i + ∑ (λ k → - vecs k) ∎
+      ∑ (λ k → vecs k * coeff (vAffine (pivs i)) k) + constant (vAffine (pivs i))
+        ≈⟨ +-cong {!!} constVAffine≈ ⟩
+      ∑ (λ k → - (A i (pivRes k) * vecs k)) + b i ≈⟨ +-comm _ _ ⟩
+      b i + ∑ (λ k → - (A i (pivRes k) * vecs k)) ∎
+
+    ∑CoeffConst₁ : ∀ j k → coeff (vAffine (pivRes j)) k ≈ δ j k
+    ∑CoeffConst₁ j k =  {!!}
+
+    ∑CoeffConst₂ : ∀ j → constant (vAffine (pivRes j)) ≈ 0#
+    ∑CoeffConst₂ j = {!!}
+
+    ∑Eq = λ j → begin
+      _ ≈⟨ +-identityʳ _ ⟩
+      ∑ (λ k → vecs k * δ j k) ≈⟨ ∑Ext (λ k → *-comm (vecs k) _) ⟩
+      ∑ (λ k → δ j k * vecs k) ≈⟨ ∑Mul1r _ j ⟩
+      vecs j ∎
 
     ∑NPiv = begin
-      ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j)))) ≈⟨ {!!} ⟩
-      ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * δ j k) + 0#)) ≈⟨ {!!} ⟩
-      ∑ (λ j → A i (pivRes j) * vecs j) ≈⟨ {!!} ⟩
-      -- {!!} ≈⟨ {!!} ⟩
-      ∑ vecs ∎
+      ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j))))
+        ≈⟨ ∑Ext (λ j → *-congˡ (+-cong (∑Ext (λ k → *-congˡ (∑CoeffConst₁ j k))) (∑CoeffConst₂ j))) ⟩
+      ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * δ j k) + 0#)) ≈⟨ ∑Ext (λ j → *-congˡ (∑Eq j)) ⟩
+      ∑ (λ j → A i (pivRes j) * vecs j) ∎
