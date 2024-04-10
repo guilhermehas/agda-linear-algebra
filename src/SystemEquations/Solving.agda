@@ -12,7 +12,7 @@ open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ; _∸_)
-open import Data.Nat.Properties as ℕ using ()
+open import Data.Nat.Properties as ℕ using (module ≤-Reasoning)
 open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; toℕ; inject₁)
 open import Data.Fin.Properties as F
 open import Data.Fin.Patterns
@@ -209,15 +209,54 @@ sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
 sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = {!proj₁ (vecBool→×Vec (tail (λ i → false)))!}
 sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed = {!!}
 
+vecIn→vecOut : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → ∃ (Vector (Fin n))
+vecIn→vecOut {ℕ.zero} _ _ = _ , []
+vecIn→vecOut {ℕ.suc n} {ℕ.zero} _ _ = _ , 0F ∷ F.suc ∘ proj₂ (vecIn→vecOut {n} [] p)
+  where
+  p : AllRowsNormalized≁0 []
+  p {()}
+vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
+... | 0F = _ , F.suc ∘ proj₂ (vecIn→vecOut {n} (proj₂ ys) allRowsNormed)
+  where
+  ys : ∃ (Vector (Fin n))
+  proj₁ ys = _
+  proj₂ ys i = F.reduce≥ (tail xs i) (<.begin-strict
+    0                <.≡˘⟨ cong toℕ eqXs ⟩
+    toℕ (xs 0F)       <.<⟨ normed (ℕ.s≤s ℕ.z≤n) ⟩
+    toℕ (xs (F.suc i)) <.∎)
+    where module < = ≤-Reasoning
+
+  allRowsNormed : AllRowsNormalized≁0 (proj₂ ys)
+  allRowsNormed {x} {y} x<y = {!!}
+
+... | suc c = {!!}
+
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
   ∃ λ p → ∃ (IsFamilySolution {p = p})
-solveNormedEquation {n} {m} sx ANormed = m ∸ n , {!!} , {!!}
+solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
   where
   open SystemEquations sx
   open MatrixIsNormed≁0≈1 ANormed
 
+  vBool : Vector Bool m
+  vBool = vecIn→vecBool pivs
+
+  pivRes : Vector (Fin m) (m ∸ n)
+  pivRes = {!!}
+
+  vSplit : Vector (Fin (m ∸ n) ⊎ Fin n) m
+  vSplit = {!!}
+
   vAffine : VecAffine m (m ∸ n)
-  vAffine i with vecIn→vecBool pivs i
-  ... | false = vAff {!!} 0#
-  ... | true  = {!!}
+  vAffine i with vSplit i
+  ... | inj₁ _ = vAff (const 1#) 0#
+  ... | inj₂ j  = vAff (λ k → - A j (pivRes k)) (b j)
+
+  open Affine
+
+  vAffFamily : IsFamilySolution vAffine
+  vAffFamily vecs i = begin
+    ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈⟨ {!!} ⟩
+    -- {!!} ≈⟨ {!!} ⟩
+    b i ∎
