@@ -158,6 +158,10 @@ punchIn-fromℕ (suc i) = cong suc (punchIn-fromℕ i)
 ≤Rec : Recomputable (F._≤_ {_} {n} i)
 ≤Rec = dec⇒recomputable (F._≤?_ _)
 
+suc-pred : n ℕ.> 0 → ℕ.suc (ℕ.pred n) ≡ n
+suc-pred (s≤s {n = zero} z≤n) = refl
+suc-pred (s≤s {n = suc n} z≤n) rewrite suc-pred ((s≤s {n = n} z≤n)) = refl
+
 module hFieldProps (hField : HeytingField c ℓ₁ ℓ₂) where
 
   open module HF = HeytingField hField

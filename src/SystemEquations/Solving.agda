@@ -19,6 +19,7 @@ open import Data.Fin.Patterns
 open import Data.Vec.Functional
 open import Relation.Nullary
 
+open import Fin.Properties
 open import Vector.Structures
 open import Vector.Properties
 open import Algebra.Matrix.Structures
@@ -42,6 +43,8 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; su
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
+
+open import lbry
 
 open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
 open SumRing ring using (∑Ext; ∑0r; δ; ∑Mul1r; ∑Split)
@@ -210,7 +213,7 @@ sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = {!proj₁ (vecBool→×Vec (t
 sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed = {!!}
 
 vecIn→vecOut : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → ∃ (Vector (Fin n))
-vecIn→vecOut {ℕ.zero} _ _ = _ , []
+vecIn→vecOut {ℕ.zero} _ _ = ℕ.zero , []
 vecIn→vecOut {ℕ.suc n} {ℕ.zero} _ _ = _ , 0F ∷ F.suc ∘ proj₂ (vecIn→vecOut {n} [] p)
   where
   p : AllRowsNormalized≁0 []
@@ -218,18 +221,50 @@ vecIn→vecOut {ℕ.suc n} {ℕ.zero} _ _ = _ , 0F ∷ F.suc ∘ proj₂ (vecIn�
 vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
 ... | 0F = _ , F.suc ∘ proj₂ (vecIn→vecOut {n} (proj₂ ys) allRowsNormed)
   where
-  ys : ∃ (Vector (Fin n))
-  proj₁ ys = _
-  proj₂ ys i = F.reduce≥ (tail xs i) (<.begin-strict
+
+  tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
+  tailXs>0 i = <.begin-strict
     0                <.≡˘⟨ cong toℕ eqXs ⟩
     toℕ (xs 0F)       <.<⟨ normed (ℕ.s≤s ℕ.z≤n) ⟩
-    toℕ (xs (F.suc i)) <.∎)
+    toℕ (xs (F.suc i)) <.∎
     where module < = ≤-Reasoning
 
-  allRowsNormed : AllRowsNormalized≁0 (proj₂ ys)
-  allRowsNormed {x} {y} x<y = {!!}
+  ys : ∃ (Vector (Fin n))
+  proj₁ ys = _
+  proj₂ ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
 
-... | suc c = {!!}
+  allRowsNormed : AllRowsNormalized≁0 (proj₂ ys)
+  allRowsNormed {x} {y} x<y
+    rewrite toℕ-reduce≥ _ (tailXs>0 x) | toℕ-reduce≥ _ (tailXs>0 y) = <.begin
+      ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 _) ⟩
+      toℕ (xs (suc x)) <.≤⟨ ℕ.∸-monoˡ-≤ 1 (normed (ℕ.s≤s x<y)) ⟩
+      toℕ (xs (suc y)) ∸ 1 <.∎
+    where module < = ≤-Reasoning
+
+
+... | suc c = _ , F.suc ∘ proj₂ (vecIn→vecOut (proj₂ ys) allRowsNormed)
+  where
+
+  tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
+  tailXs>0 i = <.begin-strict
+    0                 <.≤⟨ ℕ.z≤n ⟩
+    ℕ.suc (toℕ c)    <.≡˘⟨ cong toℕ eqXs ⟩
+    toℕ (xs 0F)       <.<⟨ normed (ℕ.s≤s ℕ.z≤n) ⟩
+    toℕ (xs (F.suc i)) <.∎
+    where module < = ≤-Reasoning
+
+  ys : ∃ (Vector (Fin n))
+  proj₁ ys = _
+  proj₂ ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
+
+  allRowsNormed : AllRowsNormalized≁0 (proj₂ ys)
+  allRowsNormed {x} {y} x<y
+    rewrite toℕ-reduce≥ _ (tailXs>0 x) | toℕ-reduce≥ _ (tailXs>0 y) = <.begin
+      ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 _) ⟩
+      toℕ (xs (suc x)) <.≤⟨ ℕ.∸-monoˡ-≤ 1 (normed (ℕ.s≤s x<y)) ⟩
+      toℕ (xs (suc y)) ∸ 1 <.∎
+    where module < = ≤-Reasoning
+
 
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
