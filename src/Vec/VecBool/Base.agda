@@ -14,10 +14,10 @@ private variable
   ℓ : Level
   m n p : ℕ
 
-data VecBool : (m p n : ℕ) → Set where
-  []    : VecBool zero zero zero
-  consF : VecBool p m n → VecBool (suc p) m (suc n)
-  consT : VecBool p m n → VecBool p (suc m) (suc n)
+data VecBool : (m n : ℕ) → Set where
+  []    : VecBool zero zero
+  consF : VecBool m n → VecBool m (suc n)
+  consT : VecBool m n → VecBool (suc m) (suc n)
 
 IsNormed : (xs : Vec (Fin n) m) → Set
 IsNormed = Linked F._<_
@@ -40,18 +40,21 @@ proj₂ (tailIsNormed {m = suc m} {F.suc x ∷ xs} 0<xs (x<r ∷ isNormed)) =
   help {zero} {F.suc y ∷ xs} {x} _ (s≤s x<r) isNormed = x<r
   help {suc m} {F.suc y ∷ xs} {x} _ (s≤s x<r) (_ ∷ isNormed) = x<r
 
-tailIsNormedHead : ∀ {xs : Vec (Fin (ℕ.suc n)) (suc m)} {x : Fin n} (x<xs : F.suc x F.< head xs) (isNormed : IsNormed xs)
-  → Σ (Vec (Fin n) (suc m)) IsNormed
-tailIsNormedHead = {!!}
+isNormedPred′ : ∀ {xs : Vec (Fin (ℕ.suc n)) (suc m)} {x : Fin n} (isNormed : IsNormed (F.suc x ∷ xs))
+  → Vec (Fin n) (suc m)
+isNormedPred′ {m = zero} {xs = F.suc y ∷ xs} {x} (x<r ∷ isNormed) = [ y ]
+isNormedPred′ {m = suc m} {xs = F.suc y ∷ xs} {x} (x<r ∷ isNormed) = y ∷ isNormedPred′ isNormed
 
-toVBool : {xs : Vec (Fin n) m} (isNormed : IsNormed xs) → VecBool (n ∸ m) m n
+isNormedPred : ∀ {xs : Vec (Fin (ℕ.suc n)) (suc m)} {x : Fin n} (isNormed : IsNormed (F.suc x ∷ xs))
+  → Σ[ ys ∈ (Vec (Fin n) (suc m)) ] IsNormed (x ∷ ys)
+proj₁ (isNormedPred isNormed) = isNormedPred′ isNormed
+proj₂ (isNormedPred {m = zero} {F.suc y ∷ xs} {x} (s≤s x<r ∷ isNormed)) = x<r ∷ [-]
+proj₂ (isNormedPred {m = suc m} {F.suc y ∷ xs} {x} (s≤s x<r ∷ isNormed)) = x<r ∷ proj₂ (isNormedPred isNormed)
+
+toVBool : {xs : Vec (Fin n) m} (isNormed : IsNormed xs) → VecBool m n
 toVBool {zero} {xs = []} [] = []
 toVBool {suc n} {xs = []} [] = consF (toVBool [])
 toVBool {suc n} {xs = x ∷ _} [-] = consT (toVBool [])
 toVBool {suc n} {xs = 0F ∷ xs} (x<ys ∷ linked) = consT (toVBool (proj₂ (tailIsNormed x<ys linked)))
-toVBool {2+ n} {xs = F.suc x ∷ xs} (_∷_ {m} x<ys linked) =
-  let
-  w0 , w1 = tailIsNormedHead x<ys linked
-  w2 = toVBool {xs = x ∷ w0} {!!}
-  w3 = consF w2
-  in {!!}
+toVBool {2+ n} {xs = F.suc x ∷ xs} normed@(_∷_ {m} x<ys linked) =
+  consF (toVBool (isNormedPred normed .proj₂))
