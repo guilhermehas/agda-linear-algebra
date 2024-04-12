@@ -3,7 +3,7 @@ module Vec.VecBool.Base where
 open import Level using (Level)
 open import Function
 open import Data.Nat
-open import Data.Vec
+open import Data.Vec as V
 open import Data.Product
 open import Data.Vec.Relation.Unary.Linked as L hiding (head)
 open import Data.Fin as F using (Fin)
@@ -58,3 +58,24 @@ toVBool {suc n} {xs = x ∷ _} [-] = consT (toVBool [])
 toVBool {suc n} {xs = 0F ∷ xs} (x<ys ∷ linked) = consT (toVBool (proj₂ (tailIsNormed x<ys linked)))
 toVBool {2+ n} {xs = F.suc x ∷ xs} normed@(_∷_ {m} x<ys linked) =
   consF (toVBool (isNormedPred normed .proj₂))
+
+vBool→vec : VecBool m n → Vec (Fin n) m
+vBool→vec [] = []
+vBool→vec (consT xs) = 0F ∷ V.map F.suc (vBool→vec xs)
+vBool→vec (consF xs) = V.map F.suc (vBool→vec xs)
+
+linkSuc : ∀ {xs : Vec (Fin n) m} → IsNormed xs → IsNormed (V.map F.suc xs)
+linkSuc [] = []
+linkSuc [-] = [-]
+linkSuc (_∷_ {xs = y ∷ ys} x<y normed) = s<s x<y ∷ linkSuc normed
+
+isNomedVBool : (xs : VecBool m n) → IsNormed (vBool→vec xs)
+isNomedVBool [] = []
+isNomedVBool (consT {zero} xs) with vBool→vec xs
+... | [] = [-]
+isNomedVBool (consT {suc m} xs) = help $ isNomedVBool xs
+  where
+  help : IsNormed (vBool→vec xs) → IsNormed (0F ∷ V.map F.suc (vBool→vec xs))
+  help with vBool→vec xs
+  ... | y ∷ ys = λ linked → s≤s z≤n ∷ linkSuc linked
+isNomedVBool (consF xs) = linkSuc (isNomedVBool xs)
