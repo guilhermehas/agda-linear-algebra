@@ -206,11 +206,14 @@ vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
 ... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
 ... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
 
-sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → (let m′ , _ = vecBool→×Vec (vecIn→vecBool xs)) → m ≡ m′
+sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → proj₁ (vecBool→×Vec (vecIn→vecBool xs)) ≡ m
 sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
 sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
-sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = {!proj₁ (vecBool→×Vec (tail (λ i → false)))!}
-sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed = {!!}
+sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
+sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
+... | 0F = cong ℕ.suc ?
+... | suc c = {!!}
+
 
 vecIn→vecOut : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → ∃ (Vector (Fin n))
 vecIn→vecOut {ℕ.zero} _ _ = ℕ.zero , []
