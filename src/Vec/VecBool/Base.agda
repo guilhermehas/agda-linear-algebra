@@ -45,10 +45,20 @@ proj₂ (tailIsNormed {m = suc m} {F.suc x ∷ xs} 0<xs (x<r ∷ isNormed)) =
   help {zero} {F.suc y ∷ xs} {x} _ (s≤s x<r) isNormed = x<r
   help {suc m} {F.suc y ∷ xs} {x} _ (s≤s x<r) (_ ∷ isNormed) = x<r
 
+sucTails : {xs : Vec (Fin (ℕ.suc n)) (suc m)} (0<xs : F.zero {suc m} F.< head xs) (isNormed : IsNormed xs)
+  → V.map F.suc (tailIsNormed′ 0<xs isNormed) ≋ xs
+sucTails {m = zero} {F.suc x ∷ []} 0<xs isNormed = ≡⇒≋ refl
+sucTails {m = suc m} {F.suc x ∷ xs} 0<xs (x<r ∷ isNormed) = _∷_ {m} refl (sucTails (<-trans 0<xs x<r) isNormed)
+
 isNormedPred′ : ∀ {xs : Vec (Fin (ℕ.suc n)) (suc m)} {x : Fin n} (isNormed : IsNormed (F.suc x ∷ xs))
   → Vec (Fin n) (suc m)
 isNormedPred′ {m = zero} {xs = F.suc y ∷ xs} {x} (x<r ∷ isNormed) = [ y ]
 isNormedPred′ {m = suc m} {xs = F.suc y ∷ xs} {x} (x<r ∷ isNormed) = y ∷ isNormedPred′ isNormed
+
+sucNormPred : ∀ {xs : Vec (Fin (ℕ.suc n)) (suc m)} {x : Fin n} (x<y : F.suc x F.< head xs)
+  (isNormed : IsNormed xs) → V.map F.suc (isNormedPred′ {m = m} {xs = xs} (x<y ∷ isNormed)) ≋ xs
+sucNormPred {n} {zero} {F.suc x ∷ _} x<y [-] = _∷_ {n} refl ([] {n})
+sucNormPred {n} {suc m} {F.suc x ∷ xs} x<y (x<r ∷ isNormed) = _∷_ {n} refl (sucNormPred _ isNormed)
 
 isNormedPred : ∀ {xs : Vec (Fin (ℕ.suc n)) (suc m)} {x : Fin n} (isNormed : IsNormed (F.suc x ∷ xs))
   → Σ[ ys ∈ (Vec (Fin n) (suc m)) ] IsNormed (x ∷ ys)
@@ -92,9 +102,9 @@ vFin→vecBool→vFin {suc n} {xs = []} [] rewrite ≋⇒≡ (vFin→vecBool→v
 vFin→vecBool→vFin {n} {xs = 0F ∷ .[]} [-] = _∷_ {n} refl (vFin→vecBool→vFin [])
 vFin→vecBool→vFin {suc n} {xs = F.suc x ∷ .[]} [-]
   rewrite ≋⇒≡ (vFin→vecBool→vFin {xs = x ∷ []} [-]) = _∷_ {n} refl ([] {n})
-vFin→vecBool→vFin {suc n} {xs = 0F ∷ xs} (_∷_ {m} x<ys normed) = _∷_ {n} refl {!!}
-  where
-  help : V.map F.suc (vBool→vec (toVBool (proj₂ (tailIsNormed x<ys normed)))) ≋ xs
-  help with tailIsNormed x<ys normed .proj₂
-  ... | c = {!!}
-vFin→vecBool→vFin {2+ n} {xs = F.suc x ∷ xs} (x<ys ∷ normed) = {!!}
+vFin→vecBool→vFin {suc n} {xs = 0F ∷ xs} (_∷_ {m} x<ys normed) = _∷_ {n} refl
+  (≋-trans (≡⇒≋ (cong (V.map F.suc) (≋⇒≡ (vFin→vecBool→vFin (proj₂ (tailIsNormed x<ys normed))))))
+    (sucTails x<ys normed))
+vFin→vecBool→vFin {2+ n} {xs = F.suc x ∷ xs} (x<ys ∷ normed) =
+  ≋-trans (≡⇒≋ (cong (V.map F.suc) (≋⇒≡ (vFin→vecBool→vFin (isNormedPred (x<ys ∷ normed) .proj₂)))))
+    (_∷_ {n} refl (sucNormPred _ normed))
