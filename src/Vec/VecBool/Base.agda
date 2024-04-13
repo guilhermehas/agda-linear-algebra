@@ -6,9 +6,14 @@ open import Data.Nat
 open import Data.Vec as V
 open import Data.Product
 open import Data.Vec.Relation.Unary.Linked as L hiding (head)
+import Data.Vec.Relation.Binary.Equality.Propositional as EProp
 open import Data.Fin as F using (Fin)
 open import Data.Fin.Properties
 open import Data.Fin.Patterns
+open import Relation.Binary.PropositionalEquality hiding ([_])
+
+private
+  open module EProp′ {n} = EProp {A = Fin n}
 
 private variable
   ℓ : Level
@@ -54,7 +59,8 @@ proj₂ (isNormedPred {m = suc m} {F.suc y ∷ xs} {x} (s≤s x<r ∷ isNormed))
 toVBool : {xs : Vec (Fin n) m} (isNormed : IsNormed xs) → VecBool m n
 toVBool {zero} {xs = []} [] = []
 toVBool {suc n} {xs = []} [] = consF (toVBool [])
-toVBool {suc n} {xs = x ∷ _} [-] = consT (toVBool [])
+toVBool {suc n} {xs = 0F ∷ _} [-] = consT (toVBool [])
+toVBool {suc n} {xs = F.suc x ∷ _} [-] = consF (toVBool {xs = x ∷ []} [-])
 toVBool {suc n} {xs = 0F ∷ xs} (x<ys ∷ linked) = consT (toVBool (proj₂ (tailIsNormed x<ys linked)))
 toVBool {2+ n} {xs = F.suc x ∷ xs} normed@(_∷_ {m} x<ys linked) =
   consF (toVBool (isNormedPred normed .proj₂))
@@ -79,3 +85,16 @@ isNomedVBool (consT {suc m} xs) = help $ isNomedVBool xs
   help with vBool→vec xs
   ... | y ∷ ys = λ linked → s≤s z≤n ∷ linkSuc linked
 isNomedVBool (consF xs) = linkSuc (isNomedVBool xs)
+
+vFin→vecBool→vFin : {xs : Vec (Fin n) m} (isNormed : IsNormed xs) → vBool→vec (toVBool isNormed) ≋ xs
+vFin→vecBool→vFin {zero} {xs = []} [] = [] {zero}
+vFin→vecBool→vFin {suc n} {xs = []} [] rewrite ≋⇒≡ (vFin→vecBool→vFin {n} []) = [] {suc n}
+vFin→vecBool→vFin {n} {xs = 0F ∷ .[]} [-] = _∷_ {n} refl (vFin→vecBool→vFin [])
+vFin→vecBool→vFin {suc n} {xs = F.suc x ∷ .[]} [-]
+  rewrite ≋⇒≡ (vFin→vecBool→vFin {xs = x ∷ []} [-]) = _∷_ {n} refl ([] {n})
+vFin→vecBool→vFin {suc n} {xs = 0F ∷ xs} (_∷_ {m} x<ys normed) = _∷_ {n} refl {!!}
+  where
+  help : V.map F.suc (vBool→vec (toVBool (proj₂ (tailIsNormed x<ys normed)))) ≋ xs
+  help with tailIsNormed x<ys normed .proj₂
+  ... | c = {!!}
+vFin→vecBool→vFin {2+ n} {xs = F.suc x ∷ xs} (x<ys ∷ normed) = {!!}
