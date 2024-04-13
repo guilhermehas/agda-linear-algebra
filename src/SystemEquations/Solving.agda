@@ -222,8 +222,8 @@ rPivs : {xs : Vector (Fin n) m} → AllRowsNormalized≁0 xs → Vector (Fin n) 
 rPivs {ℕ.zero} {ℕ.zero} _ = []
 rPivs {ℕ.zero} {ℕ.suc m} _ ()
 rPivs {ℕ.suc n} {ℕ.zero} _ = 0F ∷ F.suc ∘ rPivs {n} (allRowsNormed[] n)
-rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F in eqXs
-... | 0F = F.suc ∘ rPivs {n} {xs = ys} allRowsNormed
+rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F F.≟ 0F
+... | yes eqXs = F.suc ∘ rPivs {n} {xs = ys} allRowsNormed
   where
 
   tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
@@ -245,13 +245,12 @@ rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F in eqXs
     where module < = ≤-Reasoning
 
 
-... | suc c = F.suc ∘ rPivs {xs = ys} allRowsNormed
+... | no xs0F≢0F = F.suc ∘ rPivs {xs = ys} allRowsNormed
   where
 
   tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
   tailXs>0 i = <.begin-strict
-    0                 <.≤⟨ ℕ.z≤n ⟩
-    ℕ.suc (toℕ c)    <.≡˘⟨ cong toℕ eqXs ⟩
+    0                 <.<⟨ ≤∧≢⇒< ℕ.z≤n (xs0F≢0F ∘ ≡.sym) ⟩
     toℕ (xs 0F)       <.<⟨ normed (ℕ.s≤s ℕ.z≤n) ⟩
     toℕ (xs (F.suc i)) <.∎
     where module < = ≤-Reasoning
@@ -279,7 +278,9 @@ rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F in eqXs
   0# + _                                    ≈⟨ +-identityˡ _ ⟩
   ∑ (λ x → g (rPivs (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
   ∑ g ∎
-∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g = {!!}
+∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
+... | yes xs0≡0 = {!p!}
+... | no  xs0≢0 = {!c!}
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
   ∃ λ p → ∃ (IsFamilySolution {p = p})
