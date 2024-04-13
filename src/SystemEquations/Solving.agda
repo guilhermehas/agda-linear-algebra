@@ -9,7 +9,7 @@ open import Function
 open import Data.Bool using (Bool; true; false)
 open import Data.Product
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
-open import Data.Sum
+open import Data.Sum renaming ([_,_] to [_∙_])
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ; _∸_)
 open import Data.Nat.Properties as ℕ using (module ≤-Reasoning)
@@ -211,16 +211,16 @@ sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
 sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
 sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
 sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
-... | 0F = cong ℕ.suc ?
+... | 0F = cong ℕ.suc {!!}
 ... | suc c = {!!}
 
 
+allRowsNormed[] : ∀ n → AllRowsNormalized≁0 {n} []
+allRowsNormed[] n {()}
+
 vecIn→vecOut : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → ∃ (Vector (Fin n))
 vecIn→vecOut {ℕ.zero} _ _ = ℕ.zero , []
-vecIn→vecOut {ℕ.suc n} {ℕ.zero} _ _ = _ , 0F ∷ F.suc ∘ proj₂ (vecIn→vecOut {n} [] p)
-  where
-  p : AllRowsNormalized≁0 []
-  p {()}
+vecIn→vecOut {ℕ.suc n} {ℕ.zero} _ _ = _ , 0F ∷ F.suc ∘ proj₂ (vecIn→vecOut {n} [] (allRowsNormed[] n))
 vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
 ... | 0F = _ , F.suc ∘ proj₂ (vecIn→vecOut {n} (proj₂ ys) allRowsNormed)
   where
@@ -268,7 +268,19 @@ vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
       toℕ (xs (suc y)) ∸ 1 <.∎
     where module < = ≤-Reasoning
 
+vecIn→vecOut-size : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs) →
+  proj₁ (vecIn→vecOut xs normed) ≡ n ∸ m
+vecIn→vecOut-size {ℕ.zero} {ℕ.zero} {xs} normed = ≡.refl
+vecIn→vecOut-size {ℕ.zero} {ℕ.suc m} {xs} normed = ≡.refl
+vecIn→vecOut-size {ℕ.suc n} {ℕ.zero} {xs} normed = cong ℕ.suc (vecIn→vecOut-size (allRowsNormed[] n))
+vecIn→vecOut-size {ℕ.suc n} {ℕ.suc m} {xs} normed = {!!}
 
+rPivs : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
+rPivs {n} {m} {xs} normed = subst (Vector (Fin n)) (vecIn→vecOut-size normed) (vecIn→vecOut _ normed .proj₂)
+
+∑-pivs-same : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
+  (g : Fin n → F) → ∑ g ≈ ∑ (g ∘ xs) + ∑ (g ∘ rPivs normed)
+∑-pivs-same normed g = {!!}
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
   ∃ λ p → ∃ (IsFamilySolution {p = p})
@@ -281,10 +293,10 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
   vBool = vecIn→vecBool pivs
 
   pivRes : Vector (Fin m) (m ∸ n)
-  pivRes = {!!}
+  pivRes = rPivs pivsCrescent
 
   vSplit : Vector (Fin (m ∸ n) ⊎ Fin n) m
-  vSplit = {!!}
+  vSplit i = [ pivs ∙ pivRes ] {!splitAt n {!i!}!}
 
   vAffine : VecAffine m (m ∸ n)
   vAffine i with vSplit i
@@ -296,7 +308,8 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
 
   vAffFamily : IsFamilySolution vAffine
   vAffFamily vecs i = begin
-    ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈⟨ {!!} ⟩
+    ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈⟨ ∑-pivs-same pivsCrescent
+      (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ⟩
     ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j)))) +
     ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j))))
       ≈⟨ +-cong ∑Piv ∑NPiv ⟩
