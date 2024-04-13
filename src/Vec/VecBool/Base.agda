@@ -3,6 +3,7 @@ module Vec.VecBool.Base where
 open import Level using (Level)
 open import Function
 open import Data.Nat
+open import Data.Nat.Properties as ℕ using (+-comm)
 open import Data.Vec as V
 open import Data.Product
 open import Data.Vec.Relation.Unary.Linked as L hiding (head)
@@ -14,9 +15,11 @@ open import Relation.Binary.PropositionalEquality hiding ([_])
 
 private
   open module EProp′ {n} = EProp {A = Fin n}
+open ≡-Reasoning
 
 private variable
   ℓ : Level
+  A : Set ℓ
   m n p : ℕ
 
 data VecBool : (m n : ℕ) → Set where
@@ -108,3 +111,24 @@ vFin→vecBool→vFin {suc n} {xs = 0F ∷ xs} (_∷_ {m} x<ys normed) = _∷_ {
 vFin→vecBool→vFin {2+ n} {xs = F.suc x ∷ xs} (x<ys ∷ normed) =
   ≋-trans (≡⇒≋ (cong (V.map F.suc) (≋⇒≡ (vFin→vecBool→vFin (isNormedPred (x<ys ∷ normed) .proj₂)))))
     (_∷_ {n} refl (sucNormPred _ normed))
+
+vBoolFalse : VecBool m n → ℕ
+vBoolFalse [] = zero
+vBoolFalse (consF p) = suc (vBoolFalse p)
+vBoolFalse (consT p) = vBoolFalse p
+
+vBoolFalse+m≡n : (xs : VecBool m n) → m + vBoolFalse xs ≡ n
+vBoolFalse+m≡n [] = refl
+vBoolFalse+m≡n (consF {m} {n} xs) = begin
+  m + suc (vBoolFalse xs) ≡⟨ +-comm m _ ⟩
+  suc (vBoolFalse xs + m) ≡⟨ cong suc (trans (+-comm _ m) (vBoolFalse+m≡n xs)) ⟩
+  suc n ∎
+vBoolFalse+m≡n (consT xs) = cong suc (vBoolFalse+m≡n xs)
+
+VecBoolBoth : (m p n : ℕ) → Set
+VecBoolBoth m p n = Σ[ xs ∈ VecBool m n ] vBoolFalse xs ≡ p
+
+VecBool→Vecs : (xs : Vec A n) (vBool : VecBoolBoth m p n) → Vec A p × Vec A m
+VecBool→Vecs [] ([] , refl) = [] , []
+VecBool→Vecs (x ∷ xs) (consF ys , refl) = let ws , zs = VecBool→Vecs xs (ys , refl) in x ∷ ws , zs
+VecBool→Vecs (x ∷ xs) (consT ys , refl) = let ws , zs = VecBool→Vecs xs (ys , refl) in ws , x ∷ zs
