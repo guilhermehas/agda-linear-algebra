@@ -218,11 +218,12 @@ sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
 allRowsNormed[] : ∀ n → AllRowsNormalized≁0 {n} []
 allRowsNormed[] n {()}
 
-vecIn→vecOut : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → ∃ (Vector (Fin n))
-vecIn→vecOut {ℕ.zero} _ _ = ℕ.zero , []
-vecIn→vecOut {ℕ.suc n} {ℕ.zero} _ _ = _ , 0F ∷ F.suc ∘ proj₂ (vecIn→vecOut {n} [] (allRowsNormed[] n))
-vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
-... | 0F = _ , F.suc ∘ proj₂ (vecIn→vecOut {n} (proj₂ ys) allRowsNormed)
+rPivs : {xs : Vector (Fin n) m} → AllRowsNormalized≁0 xs → Vector (Fin n) (n ∸ m)
+rPivs {ℕ.zero} {ℕ.zero} _ = []
+rPivs {ℕ.zero} {ℕ.suc m} _ ()
+rPivs {ℕ.suc n} {ℕ.zero} _ = 0F ∷ F.suc ∘ rPivs {n} (allRowsNormed[] n)
+rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F in eqXs
+... | 0F = F.suc ∘ rPivs {n} {xs = ys} allRowsNormed
   where
 
   tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
@@ -232,11 +233,10 @@ vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
     toℕ (xs (F.suc i)) <.∎
     where module < = ≤-Reasoning
 
-  ys : ∃ (Vector (Fin n))
-  proj₁ ys = _
-  proj₂ ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
+  ys : Vector (Fin n) _
+  ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
 
-  allRowsNormed : AllRowsNormalized≁0 (proj₂ ys)
+  allRowsNormed : AllRowsNormalized≁0 ys
   allRowsNormed {x} {y} x<y
     rewrite toℕ-reduce≥ _ (tailXs>0 x) | toℕ-reduce≥ _ (tailXs>0 y) = <.begin
       ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 _) ⟩
@@ -245,7 +245,7 @@ vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
     where module < = ≤-Reasoning
 
 
-... | suc c = _ , F.suc ∘ proj₂ (vecIn→vecOut (proj₂ ys) allRowsNormed)
+... | suc c = F.suc ∘ rPivs {xs = ys} allRowsNormed
   where
 
   tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
@@ -256,27 +256,16 @@ vecIn→vecOut {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F in eqXs
     toℕ (xs (F.suc i)) <.∎
     where module < = ≤-Reasoning
 
-  ys : ∃ (Vector (Fin n))
-  proj₁ ys = _
-  proj₂ ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
+  ys : Vector (Fin n) _
+  ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
 
-  allRowsNormed : AllRowsNormalized≁0 (proj₂ ys)
+  allRowsNormed : AllRowsNormalized≁0 ys
   allRowsNormed {x} {y} x<y
     rewrite toℕ-reduce≥ _ (tailXs>0 x) | toℕ-reduce≥ _ (tailXs>0 y) = <.begin
       ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 _) ⟩
       toℕ (xs (suc x)) <.≤⟨ ℕ.∸-monoˡ-≤ 1 (normed (ℕ.s≤s x<y)) ⟩
       toℕ (xs (suc y)) ∸ 1 <.∎
     where module < = ≤-Reasoning
-
-vecIn→vecOut-size : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs) →
-  proj₁ (vecIn→vecOut xs normed) ≡ n ∸ m
-vecIn→vecOut-size {ℕ.zero} {ℕ.zero} {xs} normed = ≡.refl
-vecIn→vecOut-size {ℕ.zero} {ℕ.suc m} {xs} normed = ≡.refl
-vecIn→vecOut-size {ℕ.suc n} {ℕ.zero} {xs} normed = cong ℕ.suc (vecIn→vecOut-size (allRowsNormed[] n))
-vecIn→vecOut-size {ℕ.suc n} {ℕ.suc m} {xs} normed = {!!}
-
-rPivs : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
-rPivs {n} {m} {xs} normed = subst (Vector (Fin n)) (vecIn→vecOut-size normed) (vecIn→vecOut _ normed .proj₂)
 
 ∑-pivs-same : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
   (g : Fin n → F) → ∑ g ≈ ∑ (g ∘ xs) + ∑ (g ∘ rPivs normed)
