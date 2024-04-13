@@ -267,9 +267,19 @@ rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F in eqXs
       toℕ (xs (suc y)) ∸ 1 <.∎
     where module < = ≤-Reasoning
 
+∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs (allRowsNormed[] _) x)) ≈ ∑ g
+∑-rPivs {ℕ.zero} g = refl
+∑-rPivs {ℕ.suc n} g = +-congˡ (∑-rPivs (g ∘ F.suc))
+
 ∑-pivs-same : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
-  (g : Fin n → F) → ∑ g ≈ ∑ (g ∘ xs) + ∑ (g ∘ rPivs normed)
-∑-pivs-same normed g = {!!}
+  (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs normed) ≈ ∑ g
+∑-pivs-same {ℕ.zero} {ℕ.zero} {xs} normed g = +-identityˡ _
+∑-pivs-same {ℕ.zero} {ℕ.suc m} {xs} normed g with () ← xs 0F
+∑-pivs-same {ℕ.suc n} {ℕ.zero} {xs} normed g = begin
+  0# + _                                    ≈⟨ +-identityˡ _ ⟩
+  ∑ (λ x → g (rPivs (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
+  ∑ g ∎
+∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g = {!!}
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
   ∃ λ p → ∃ (IsFamilySolution {p = p})
@@ -297,7 +307,7 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
 
   vAffFamily : IsFamilySolution vAffine
   vAffFamily vecs i = begin
-    ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈⟨ ∑-pivs-same pivsCrescent
+    ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈˘⟨ ∑-pivs-same pivsCrescent
       (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ⟩
     ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j)))) +
     ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j))))
