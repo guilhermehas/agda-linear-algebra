@@ -218,50 +218,50 @@ sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
 allRowsNormed[] : ∀ n → AllRowsNormalized≁0 {n} []
 allRowsNormed[] n {()}
 
-rPivs : {xs : Vector (Fin n) m} → AllRowsNormalized≁0 xs → Vector (Fin n) (n ∸ m)
+rPivs : {xs : Vector (Fin n) m} → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
 rPivs {ℕ.zero} {ℕ.zero} _ = []
 rPivs {ℕ.zero} {ℕ.suc m} _ ()
 rPivs {ℕ.suc n} {ℕ.zero} _ = 0F ∷ F.suc ∘ rPivs {n} (allRowsNormed[] n)
 rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F F.≟ 0F
-... | yes eqXs = F.suc ∘ rPivs {n} {xs = ys} allRowsNormed
+... | yes eqXs = F.suc ∘ rPivs {n} {xs = ys} (allRowsNormed normed)
   where
 
-  tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
-  tailXs>0 i = <.begin-strict
+  tailXs>0 : ∀ (normed : AllRowsNormalized≁0 xs) i → toℕ (tail xs i) ℕ.> 0
+  tailXs>0 normed i = <.begin-strict
     0                <.≡˘⟨ cong toℕ eqXs ⟩
     toℕ (xs 0F)       <.<⟨ normed (ℕ.s≤s ℕ.z≤n) ⟩
     toℕ (xs (F.suc i)) <.∎
     where module < = ≤-Reasoning
 
   ys : Vector (Fin n) _
-  ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
+  ys i = F.reduce≥ (tail xs i) (tailXs>0 normed i)
 
-  allRowsNormed : AllRowsNormalized≁0 ys
-  allRowsNormed {x} {y} x<y
-    rewrite toℕ-reduce≥ _ (tailXs>0 x) | toℕ-reduce≥ _ (tailXs>0 y) = <.begin
-      ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 _) ⟩
+  allRowsNormed : (normed : AllRowsNormalized≁0 xs) → AllRowsNormalized≁0 ys
+  allRowsNormed normed {x} {y} x<y
+    rewrite toℕ-reduce≥ _ (tailXs>0 normed x) | toℕ-reduce≥ _ (tailXs>0 normed y) = <.begin
+      ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 normed _) ⟩
       toℕ (xs (suc x)) <.≤⟨ ℕ.∸-monoˡ-≤ 1 (normed (ℕ.s≤s x<y)) ⟩
       toℕ (xs (suc y)) ∸ 1 <.∎
     where module < = ≤-Reasoning
 
 
-... | no xs0F≢0F = F.suc ∘ rPivs {xs = ys} allRowsNormed
+... | no xs0F≢0F = F.suc ∘ rPivs {xs = ys} (allRowsNormed normed)
   where
 
-  tailXs>0 : ∀ i → toℕ (tail xs i) ℕ.> 0
-  tailXs>0 i = <.begin-strict
+  tailXs>0 : ∀ (normed : AllRowsNormalized≁0 xs) i → toℕ (tail xs i) ℕ.> 0
+  tailXs>0 normed i = <.begin-strict
     0                 <.<⟨ ≤∧≢⇒< ℕ.z≤n (xs0F≢0F ∘ ≡.sym) ⟩
     toℕ (xs 0F)       <.<⟨ normed (ℕ.s≤s ℕ.z≤n) ⟩
     toℕ (xs (F.suc i)) <.∎
     where module < = ≤-Reasoning
 
   ys : Vector (Fin n) _
-  ys i = F.reduce≥ (tail xs i) (tailXs>0 i)
+  ys i = F.reduce≥ (tail xs i) (tailXs>0 normed i)
 
-  allRowsNormed : AllRowsNormalized≁0 ys
-  allRowsNormed {x} {y} x<y
-    rewrite toℕ-reduce≥ _ (tailXs>0 x) | toℕ-reduce≥ _ (tailXs>0 y) = <.begin
-      ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 _) ⟩
+  allRowsNormed : AllRowsNormalized≁0 xs → AllRowsNormalized≁0 ys
+  allRowsNormed normed {x} {y} x<y
+    rewrite toℕ-reduce≥ _ (tailXs>0 normed x) | toℕ-reduce≥ _ (tailXs>0 normed y) = <.begin
+      ℕ.suc (ℕ.pred (toℕ (tail xs x))) <.≡⟨ suc-pred (tailXs>0 normed _) ⟩
       toℕ (xs (suc x)) <.≤⟨ ℕ.∸-monoˡ-≤ 1 (normed (ℕ.s≤s x<y)) ⟩
       toℕ (xs (suc y)) ∸ 1 <.∎
     where module < = ≤-Reasoning
@@ -279,8 +279,13 @@ rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F F.≟ 0F
   ∑ (λ x → g (rPivs (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
   ∑ g ∎
 ∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
-... | yes xs0≡0 = {!p!}
-... | no  xs0≢0 = {!c!}
+... | yes xs0≡0 = begin
+  g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ +-assoc _ _ _ ⟩
+  g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (g ∘ _)) ≈⟨ +-cong (reflexive (cong g xs0≡0))
+    {!!} ⟩
+  -- {!!} ≈⟨ {!!} ⟩
+  g 0F + ∑ (tail g) ∎
+... | no  xs0≢0 = {!!}
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
   ∃ λ p → ∃ (IsFamilySolution {p = p})
