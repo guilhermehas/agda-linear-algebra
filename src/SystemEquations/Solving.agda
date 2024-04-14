@@ -281,9 +281,10 @@ rPivs {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F F.≟ 0F
 ∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
 ... | yes xs0≡0 = begin
   g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ +-assoc _ _ _ ⟩
-  g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (g ∘ suc ∘ rPivs {_} {m} {!xs!} {!!})) ≈⟨ +-cong (reflexive (cong g xs0≡0))
-    {!!} ⟩
+  g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (tail g ∘ rPivs {_} {m} _ {!!})) ≈⟨ +-cong (reflexive (cong g xs0≡0))
+    (+-congʳ {!!}) ⟩
   -- {!!} ≈⟨ {!!} ⟩
+  g 0F + (∑ {m} (tail g ∘ {!!}) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ (∑-pivs-same {n} {m} {!!} (tail g)) ⟩
   g 0F + ∑ (tail g) ∎
 ... | no  xs0≢0 = {!!}
 
