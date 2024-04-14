@@ -259,16 +259,48 @@ module _ {xs : Vector (Fin $ ℕ.suc n) $ ℕ.suc m} where
         toℕ (xs (suc y)) ∸ 1 <.∎
       where module < = ≤-Reasoning
 
+normed≥ : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs) → n ℕ.≥ m
+normed≥ {ℕ.zero} {ℕ.zero} {xs} normed = ℕ.z≤n
+normed≥ {ℕ.zero} {ℕ.suc m} {xs} normed with () ← xs 0F
+normed≥ {ℕ.suc n} {ℕ.zero} {xs} normed = ℕ.z≤n
+normed≥ {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F F.≟ 0F
+... | yes xs0≡0 = ℕ.s≤s (normed≥ {xs = ysPiv xs0≡0 normed} (allRowsNormed xs0≡0 normed))
+  where open EqXs
+... | no  xs0≢0 = ℕ.s≤s (normed≥ {xs = ysPiv xs0≢0 normed} (allRowsNormed xs0≢0 normed))
+  where open NEqXs
+
+normed> : {xs : Vector (Fin $ ℕ.suc n) (ℕ.suc m)} (normed : AllRowsNormalized≁0 xs)
+  (xs≢0F : xs 0F ≢ 0F) → n ℕ.> m
+normed> {ℕ.zero} {xs = xs} normed xs≢0F with xs 0F in eqn
+... | 0F with () ← xs≢0F ≡.refl
+normed> {ℕ.suc n} {ℕ.zero} normed xs≢0F = ℕ.s≤s ℕ.z≤n
+normed> {ℕ.suc n} {ℕ.suc m} {xs} normed xs≢0F with xs 1F | normed {0F} {1F} (ℕ.s≤s ℕ.z≤n)
+... | 0F | ()
+... | 1F | d = {!!}
+... | suc (suc c) | d = {!!}
+
+private
+  n∸m-suc : n ℕ.≥ m → ℕ.suc n ∸ m ≡ ℕ.suc (n ∸ m)
+  n∸m-suc ℕ.z≤n = ≡.refl
+  n∸m-suc (ℕ.s≤s n≥m) = n∸m-suc n≥m
+
+
 rPivs : (xs : Vector (Fin n) m) → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
 rPivs {ℕ.zero} {ℕ.zero} _ _ = []
 rPivs {ℕ.zero} {ℕ.suc m} _ _ ()
 rPivs {ℕ.suc n} {ℕ.zero} _ _ = 0F ∷ F.suc ∘ rPivs {n} _ (allRowsNormed[] n)
-rPivs {ℕ.suc n} {ℕ.suc m} xs normed
+rPivs {ℕ.suc n} {ℕ.suc m} xs normed i
   with xs 0F F.≟ 0F
-... | yes eqXs = F.suc ∘ rPivs (ysPiv eqXs normed) (allRowsNormed eqXs normed)
+... | yes eqXs = F.suc (rPivs (ysPiv eqXs normed) (allRowsNormed eqXs normed) i)
   where open EqXs
-... | no xs0F≢0F = F.suc ∘ rPivs (ysPiv xs0F≢0F normed) (allRowsNormed xs0F≢0F normed)
-  where open NEqXs
+... | no xs0F≢0F = {!!}
+  -- help (F.cast {!n∸m-suc (normed≥ normed)!} i)
+-- F.suc ∘ rPivs (ysPiv xs0F≢0F normed) (allRowsNormed xs0F≢0F normed)
+  where
+  open NEqXs
+
+  help : Fin (ℕ.suc (n ∸ m)) → Fin (ℕ.suc (ℕ.suc n))
+  help = {!!}
 
 ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
 ∑-rPivs {ℕ.zero} g = refl
