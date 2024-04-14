@@ -218,12 +218,12 @@ sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
 allRowsNormed[] : ∀ n → AllRowsNormalized≁0 {n} []
 allRowsNormed[] n {()}
 
-rPivs : {xs : Vector (Fin n) m} → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
-rPivs {ℕ.zero} {ℕ.zero} _ = []
-rPivs {ℕ.zero} {ℕ.suc m} _ ()
-rPivs {ℕ.suc n} {ℕ.zero} _ = 0F ∷ F.suc ∘ rPivs {n} (allRowsNormed[] n)
-rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F F.≟ 0F
-... | yes eqXs = F.suc ∘ rPivs {n} {xs = ys} (allRowsNormed normed)
+rPivs : (xs : Vector (Fin n) m) → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
+rPivs {ℕ.zero} {ℕ.zero} _ _ = []
+rPivs {ℕ.zero} {ℕ.suc m} _ _ ()
+rPivs {ℕ.suc n} {ℕ.zero} _ _ = 0F ∷ F.suc ∘ rPivs {n} _ (allRowsNormed[] n)
+rPivs {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F F.≟ 0F
+... | yes eqXs = F.suc ∘ rPivs {n} ys (allRowsNormed normed)
   where
 
   tailXs>0 : ∀ (normed : AllRowsNormalized≁0 xs) i → toℕ (tail xs i) ℕ.> 0
@@ -245,7 +245,7 @@ rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F F.≟ 0F
     where module < = ≤-Reasoning
 
 
-... | no xs0F≢0F = F.suc ∘ rPivs {xs = ys} (allRowsNormed normed)
+... | no xs0F≢0F = F.suc ∘ rPivs ys (allRowsNormed normed)
   where
 
   tailXs>0 : ∀ (normed : AllRowsNormalized≁0 xs) i → toℕ (tail xs i) ℕ.> 0
@@ -266,22 +266,22 @@ rPivs {ℕ.suc n} {ℕ.suc m} {xs} normed with xs 0F F.≟ 0F
       toℕ (xs (suc y)) ∸ 1 <.∎
     where module < = ≤-Reasoning
 
-∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs (allRowsNormed[] _) x)) ≈ ∑ g
+∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
 ∑-rPivs {ℕ.zero} g = refl
 ∑-rPivs {ℕ.suc n} g = +-congˡ (∑-rPivs (g ∘ F.suc))
 
 ∑-pivs-same : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
-  (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs normed) ≈ ∑ g
+  (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs normed) ≈ ∑ g
 ∑-pivs-same {ℕ.zero} {ℕ.zero} {xs} normed g = +-identityˡ _
 ∑-pivs-same {ℕ.zero} {ℕ.suc m} {xs} normed g with () ← xs 0F
 ∑-pivs-same {ℕ.suc n} {ℕ.zero} {xs} normed g = begin
   0# + _                                    ≈⟨ +-identityˡ _ ⟩
-  ∑ (λ x → g (rPivs (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
+  ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
   ∑ g ∎
 ∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
 ... | yes xs0≡0 = begin
   g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ +-assoc _ _ _ ⟩
-  g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (g ∘ _)) ≈⟨ +-cong (reflexive (cong g xs0≡0))
+  g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (g ∘ suc ∘ rPivs {_} {m} {!xs!} {!!})) ≈⟨ +-cong (reflexive (cong g xs0≡0))
     {!!} ⟩
   -- {!!} ≈⟨ {!!} ⟩
   g 0F + ∑ (tail g) ∎
@@ -298,7 +298,7 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
   vBool = vecIn→vecBool pivs
 
   pivRes : Vector (Fin m) (m ∸ n)
-  pivRes = rPivs pivsCrescent
+  pivRes = rPivs _ pivsCrescent
 
   vSplit : Vector (Fin (m ∸ n) ⊎ Fin n) m
   vSplit i = [ pivs ∙ pivRes ] {!splitAt n {!i!}!}
