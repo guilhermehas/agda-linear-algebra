@@ -298,7 +298,6 @@ private
   n∸m-suc ℕ.z≤n = ≡.refl
   n∸m-suc (ℕ.s≤s n≥m) = n∸m-suc n≥m
 
-
 rPivs : (xs : Vector (Fin n) m) → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
 rPivs {ℕ.zero} {ℕ.zero} _ _ = []
 rPivs {ℕ.zero} {ℕ.suc m} _ _ ()
@@ -307,14 +306,15 @@ rPivs {ℕ.suc n} {ℕ.suc m} xs normed i
   with xs 0F F.≟ 0F
 ... | yes eqXs = F.suc (rPivs (ysPiv eqXs normed) (allRowsNormed eqXs normed) i)
   where open EqXs
-... | no xs0F≢0F = {!i!}
-  -- help (F.cast {!n∸m-suc (normed≥ normed)!} i)
--- F.suc ∘ rPivs (ysPiv xs0F≢0F normed) (allRowsNormed xs0F≢0F normed)
-  where
-  open NEqXs
+rPivs {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed i | no xs0≢0 = 0F
+rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed i | no xs0≢0 =
+  {!rPivs≢ (F.cast (n∸m-suc (normed> normed xs0≢0)) i)!}
 
-  help : Fin (ℕ.suc (n ∸ m)) → Fin (ℕ.suc (ℕ.suc n))
-  help = {!!}
+  where
+  rPivs≢ : Vector (Fin (ℕ.suc (ℕ.suc n))) (ℕ.suc (n ∸ m))
+  rPivs≢ 0F = 0F
+  rPivs≢ (suc j) = rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} {!!} {!!} {!j!}
+
 
 ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
 ∑-rPivs {ℕ.zero} g = refl
