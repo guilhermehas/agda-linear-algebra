@@ -274,10 +274,24 @@ normed> : {xs : Vector (Fin $ ℕ.suc n) (ℕ.suc m)} (normed : AllRowsNormalize
 normed> {ℕ.zero} {xs = xs} normed xs≢0F with xs 0F in eqn
 ... | 0F with () ← xs≢0F ≡.refl
 normed> {ℕ.suc n} {ℕ.zero} normed xs≢0F = ℕ.s≤s ℕ.z≤n
-normed> {ℕ.suc n} {ℕ.suc m} {xs} normed xs≢0F with xs 1F | normed {0F} {1F} (ℕ.s≤s ℕ.z≤n)
+normed> {ℕ.suc n} {ℕ.suc m} {xs} normed xs≢0F with xs 1F in eq1F | normed {0F} {1F} (ℕ.s≤s ℕ.z≤n)
 ... | 0F | ()
-... | 1F | d = {!!}
-... | suc (suc c) | d = {!!}
+... | 1F | ℕ.s≤s m≤n = contradiction (toℕ-injective (ℕ.≤-antisym m≤n ℕ.z≤n)) xs≢0F
+... | suc (suc c) | _ = ℕ.s≤s norm
+  where
+  open NEqXs
+
+  tNormed = tailXs>0 {xs = xs} xs≢0F normed 0F
+
+  ysPiv≢0 : F.reduce≥ {m = 1} (xs 1F) tNormed ≢ 0F
+  ysPiv≢0 ysPiv≡0 = ℕ.0≢1+n $ N.begin-equality
+    0                               N.≡˘⟨ cong toℕ ysPiv≡0 ⟩
+    toℕ (F.reduce≥ (xs 1F) tNormed) N.≡⟨ toℕ-reduce≥ (xs 1F) tNormed ⟩
+    toℕ (xs 1F) ∸ 1                 N.≡⟨ cong (λ x → toℕ x ∸ 1) eq1F ⟩
+    ℕ.suc (toℕ c)                   N.∎
+    where module N = ≤-Reasoning
+
+  norm = normed> {xs = ysPiv xs≢0F normed} (allRowsNormed xs≢0F normed) ysPiv≢0
 
 private
   n∸m-suc : n ℕ.≥ m → ℕ.suc n ∸ m ≡ ℕ.suc (n ∸ m)
@@ -293,7 +307,7 @@ rPivs {ℕ.suc n} {ℕ.suc m} xs normed i
   with xs 0F F.≟ 0F
 ... | yes eqXs = F.suc (rPivs (ysPiv eqXs normed) (allRowsNormed eqXs normed) i)
   where open EqXs
-... | no xs0F≢0F = {!!}
+... | no xs0F≢0F = {!i!}
   -- help (F.cast {!n∸m-suc (normed≥ normed)!} i)
 -- F.suc ∘ rPivs (ysPiv xs0F≢0F normed) (allRowsNormed xs0F≢0F normed)
   where
