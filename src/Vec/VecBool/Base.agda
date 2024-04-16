@@ -12,10 +12,11 @@ open import Data.Fin as F using (Fin)
 open import Data.Fin.Properties
 open import Data.Fin.Patterns
 open import Relation.Binary.PropositionalEquality hiding ([_])
+import Relation.Binary.Reasoning.Setoid as RSetoid
+
 
 private
   open module EProp′ {n} = EProp {A = Fin n}
-open ≡-Reasoning
 
 private variable
   ℓ : Level
@@ -122,7 +123,7 @@ vBoolFalse+m≡n [] = refl
 vBoolFalse+m≡n (consF {m} {n} xs) = begin
   m + suc (vBoolFalse xs) ≡⟨ +-comm m _ ⟩
   suc (vBoolFalse xs + m) ≡⟨ cong suc (trans (+-comm _ m) (vBoolFalse+m≡n xs)) ⟩
-  suc n ∎
+  suc n ∎ where open ≡-Reasoning
 vBoolFalse+m≡n (consT xs) = cong suc (vBoolFalse+m≡n xs)
 
 VecBoolBoth : (m p n : ℕ) → Set
@@ -132,3 +133,22 @@ VecBool→Vecs : (xs : Vec A n) (vBool : VecBoolBoth m p n) → Vec A p × Vec A
 VecBool→Vecs [] ([] , refl) = [] , []
 VecBool→Vecs (x ∷ xs) (consF ys , refl) = let ws , zs = VecBool→Vecs xs (ys , refl) in x ∷ ws , zs
 VecBool→Vecs (x ∷ xs) (consT ys , refl) = let ws , zs = VecBool→Vecs xs (ys , refl) in ws , x ∷ zs
+
+vBoolToPivs : (vBool : VecBoolBoth m p n) → Vec (Fin n) p × Vec (Fin n) m
+vBoolToPivs = VecBool→Vecs (allFin _)
+
+sameTabulate : (vBool : VecBoolBoth m p n) → VecBool→Vecs (tabulate F.suc) vBool .proj₂ ≋
+  V.map F.suc (VecBool→Vecs (tabulate id) vBool .proj₂)
+sameTabulate {n = n} ([] , refl) = [] {n}
+sameTabulate (consF vB , refl) = {!!}
+sameTabulate (consT {n = n} vB , refl) = _∷_ {n} refl {!!}
+
+vBoolPivs≡vec : (vBool@(vB , _) : VecBoolBoth m p n) → vBoolToPivs vBool .proj₂ ≋ vBool→vec vB
+vBoolPivs≡vec {n = n} vBool@([] , refl) = [] {n}
+vBoolPivs≡vec vBool@(consF vB , refl) = begin
+  VecBool→Vecs (tabulate F.suc) (vB , refl) .proj₂ ≈⟨ sameTabulate (vB , refl) ⟩
+  -- {!!} ≡⟨ {!!} ⟩
+  V.map F.suc (VecBool→Vecs (tabulate id) (vB , refl) .proj₂) ≡⟨ cong (V.map F.suc) (≋⇒≡ (vBoolPivs≡vec (vB , refl))) ⟩
+  V.map F.suc (vBool→vec vB) ∎
+  where open RSetoid (≋-setoid {_} _)
+vBoolPivs≡vec {n = n} vBool@(consT vB , refl) = _∷_ {n} refl {!!}

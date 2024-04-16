@@ -191,6 +191,9 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
   pivs≁0 : PivsOne≁0 A pivsR
   pivs≁0 i = trans (sym (reflexive (A++b≡piv _))) (pivsOne i)
 
+allRowsNormed[] : ∀ n → AllRowsNormalized≁0 {n} []
+allRowsNormed[] n {()}
+
 vecIn→vecBool : Vector (Fin n) m → Vector Bool n
 vecIn→vecBool {m = ℕ.zero} xs i = false
 vecIn→vecBool {m = ℕ.suc m} xs 0F with xs 0F
@@ -221,15 +224,20 @@ vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
 ... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
 ... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
 
-vecIn→vecBool-qtTrue : (xs : Vector (Fin n) m) → qtTrue (vecIn→vecBool xs) ≡ m
-vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.zero} xs = ≡.refl
-vecIn→vecBool-qtTrue {ℕ.suc n} {ℕ.zero} xs = vecIn→vecBool-qtTrue {n} []
-vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.suc m} xs with () ← xs 0F
-vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs with xs 0F
+vecIn→vecBool-qtTrue : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs) → qtTrue (vecIn→vecBool xs) ≡ m
+vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.zero} _ _ = ≡.refl
+vecIn→vecBool-qtTrue {ℕ.suc n} {ℕ.zero} _ _ = vecIn→vecBool-qtTrue {n} [] (allRowsNormed[] n)
+vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.suc m} xs _ with () ← xs 0F
+vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs _ with xs 0F
 ... | 0F = ≡.refl
-vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc (ℕ.suc m)} xs = {!!}
-vecIn→vecBool-qtTrue {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs with vecIn→vecBool-qtTrue (predFin ∘ xs) | xs 0F
-... | q | 0F rewrite vecIn→vecBool-qtTrue (predFin ∘ xs ∘ suc) = ≡.refl
+vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc (ℕ.suc m)} xs normed = ⊥-elim (help (normed (ℕ.s≤s ℕ.z≤n)))
+  where
+  help : .(v : xs 0F F.< xs 1F) → ⊥
+  help v with xs 0F | xs 1F
+  help () | 0F | 0F
+  ... | 0F | suc ()
+vecIn→vecBool-qtTrue {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with vecIn→vecBool-qtTrue (predFin ∘ xs) {!!} | xs 0F
+... | q | 0F rewrite vecIn→vecBool-qtTrue (predFin ∘ xs ∘ suc) {!!} = ≡.refl
 ... | q | suc c rewrite q = ≡.refl
 
 
@@ -240,9 +248,6 @@ sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
 sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
 ... | 0F = cong ℕ.suc {!!}
 ... | suc c = {!!}
-
-allRowsNormed[] : ∀ n → AllRowsNormalized≁0 {n} []
-allRowsNormed[] n {()}
 
 
 module _ {xs : Vector (Fin $ ℕ.suc n) $ ℕ.suc m} where
