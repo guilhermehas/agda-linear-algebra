@@ -6,7 +6,7 @@ open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
 open import Function
-open import Data.Bool using (Bool; true; false)
+open import Data.Bool using (Bool; true; false; if_then_else_)
 open import Data.Product
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum renaming ([_,_] to [_∙_])
@@ -19,6 +19,7 @@ open import Data.Fin.Patterns
 open import Data.Vec.Functional
 open import Relation.Nullary
 
+open import Fin.Base
 open import Fin.Properties
 open import Vector.Structures
 open import Vector.Properties
@@ -192,19 +193,45 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
 
 vecIn→vecBool : Vector (Fin n) m → Vector Bool n
 vecIn→vecBool {m = ℕ.zero} xs i = false
-vecIn→vecBool {m = ℕ.suc m} xs i with isYes (xs 0F F.≟ i)
-... | true = true
-... | false = vecIn→vecBool (tail xs) i
+vecIn→vecBool {m = ℕ.suc m} xs 0F with xs 0F
+... | 0F = true
+... | suc c = false
+vecIn→vecBool {m = ℕ.suc m} xs (suc {ℕ.suc n} i) with xs 0F
+... | 0F = vecIn→vecBool (λ j → predFin (xs (suc j))) i
+... | suc c = vecIn→vecBool (λ j → predFin (xs j)) i
+
+private
+  testV : Vector (Fin 5) 2
+  testV 0F = 1F
+  testV 1F = 3F
+
+  vResult = vecIn→vecBool testV
 
 +-right : ∀ m p → m ℕ.+ ℕ.suc p ≡ ℕ.suc (m ℕ.+ p)
 +-right ℕ.zero p = ≡.refl
 +-right (ℕ.suc m) p rewrite +-right m p = ≡.refl
+
+qtTrue : Vector Bool n → ℕ
+qtTrue {ℕ.zero} xs = ℕ.zero
+qtTrue {ℕ.suc n} xs = let v = (qtTrue (tail xs)) in if xs 0F then ℕ.suc v else v
 
 vecBool→×Vec : Vector Bool n → Σ[ m ∈ ℕ ] (Σ[ p ∈ ℕ ] (m ℕ.+ p ≡ n × Vector (Fin n) m × Vector (Fin n) p))
 vecBool→×Vec {ℕ.zero} _ = _ , _ , ≡.refl , [] , []
 vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
 ... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
 ... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
+
+vecIn→vecBool-qtTrue : (xs : Vector (Fin n) m) → qtTrue (vecIn→vecBool xs) ≡ m
+vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.zero} xs = ≡.refl
+vecIn→vecBool-qtTrue {ℕ.suc n} {ℕ.zero} xs = vecIn→vecBool-qtTrue {n} []
+vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.suc m} xs with () ← xs 0F
+vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs with xs 0F
+... | 0F = ≡.refl
+vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc (ℕ.suc m)} xs = {!!}
+vecIn→vecBool-qtTrue {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs with vecIn→vecBool-qtTrue (predFin ∘ xs) | xs 0F
+... | q | 0F rewrite vecIn→vecBool-qtTrue (predFin ∘ xs ∘ suc) = ≡.refl
+... | q | suc c rewrite q = ≡.refl
+
 
 sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → proj₁ (vecBool→×Vec (vecIn→vecBool xs)) ≡ m
 sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
@@ -213,7 +240,6 @@ sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
 sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
 ... | 0F = cong ℕ.suc {!!}
 ... | suc c = {!!}
-
 
 allRowsNormed[] : ∀ n → AllRowsNormalized≁0 {n} []
 allRowsNormed[] n {()}
