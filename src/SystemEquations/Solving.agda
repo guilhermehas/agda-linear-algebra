@@ -349,8 +349,19 @@ proj₁ (rPivs′ {ℕ.suc n} {ℕ.zero} xs) = _
 proj₂ (rPivs′ {ℕ.suc n} {ℕ.zero} xs) i = i
 rPivs′ {ℕ.suc ℕ.zero} {ℕ.suc m} xs = ℕ.zero , const 0F
 rPivs′ {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs with xs 0F | rPivs′ (predFin ∘ xs)
-... | 0F | _ = _ , suc ∘ (proj₂ (rPivs′ λ j → predFin (xs (suc j))))
+... | 0F | _ = _ , suc ∘ (proj₂ (rPivs′ $ predFin ∘ (tail xs)))
 ... | suc _ | _ , ys = _ , 0F ∷ suc ∘ ys
+
+rPivs′-n∸m : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) → rPivs′ xs .proj₁ ≡ n ∸ m
+rPivs′-n∸m {ℕ.zero} {ℕ.zero} xs _ = ≡.refl
+rPivs′-n∸m {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
+rPivs′-n∸m {ℕ.suc n} {ℕ.zero} xs normed = ≡.refl
+rPivs′-n∸m {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed = ≡.sym (ℕ.m≤n⇒m∸n≡0 {n = m} ℕ.z≤n)
+rPivs′-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rPivs′-n∸m (predFin ∘ xs)
+... | 0F | _ rewrite rPivs′-n∸m (predFin ∘ tail xs) {!!} = ≡.refl
+... | suc c | f-normed rewrite f-normed {!!} = ≡.sym (n∸m-suc {n = n} {m = m}
+  (ℕ.≤-pred (normed> {xs = xs} normed λ eqXs → contradiction (≡.trans (≡.sym eqXs) eqXs0) 0≢1+n)))
+
 
 ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
 ∑-rPivs {ℕ.zero} g = refl
