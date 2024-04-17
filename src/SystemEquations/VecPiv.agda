@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 open import Algebra.DecidableField
 
 module SystemEquations.VecPiv {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
@@ -47,7 +49,8 @@ open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
 
 open import lbry
 
-open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
+private
+  open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
 open SumRing ring using (∑Ext; ∑0r; δ; ∑Mul1r; ∑Split)
 open MDef′
 
@@ -247,7 +250,6 @@ rPivs′-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 |
   where
   sc≡xs0 : suc c ≡ suc (predFin (xs 0F))
   sc≡xs0 rewrite eqXs = ≡.refl
-
 
 
 ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
