@@ -255,17 +255,12 @@ vSplitFirst<n∸m : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁
 vSplitFirst<n∸m {ℕ.suc n} {ℕ.zero} xs i normed is₁ = ℕ.s≤s ℕ.z≤n
 vSplitFirst<n∸m {ℕ.suc n} {ℕ.suc m} xs 0F normed is₁ with xs 0F
 ... | suc c = {!!}
-vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed is₁ with xs 0F in eqXs
-  | vSplit (λ j → predFin (xs j)) i in eqPred
-  | vSplit xs (suc i) in eqSplit
+vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with xs 0F in eqXs
+  | vSplit (predFin ∘ xs) i in eqPred
+  | vSplitFirst<n∸m (predFin ∘ xs) i
 
-... | 0F | _ | inj₁ p = {!!}
-... | suc a | inj₁ p | inj₁ d = ⊥-elim $ help eqSplit
-  where
-  help : _ → ⊥
-  help = {!!}
-
-... | suc a | inj₂ p | inj₁ d = ⊥-elim (impossible-case-vSplit {n} {m} xs i eqXs eqPred (help $ eqSplit))
-  where
-  help : {!!} → {!!}
-  help eq = {!!}
+... | 0F | _ | f = {!!}
+... | suc a | inj₁ p | f rewrite eqPred = λ _ → ℕ.≤-trans (ℕ.s≤s (f {!!} _))
+  (ℕ.≤-reflexive (≡.sym (n∸m-suc {n} {m}
+    (ℕ.≤-pred $ normed> normed λ xs0≡0 → 0≢1+n (≡.trans (≡.sym xs0≡0) eqXs)))))
+... | suc a | inj₂ p | f rewrite eqPred = λ ()
