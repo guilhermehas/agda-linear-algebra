@@ -228,16 +228,8 @@ vSplit {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
 ... | 0F = inj₂ 0F
 ... | suc c = inj₁ ℕ.zero
 vSplit {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
-... | 0F = help
-  where
-  help : _
-  help with vSplit (predFin ∘ tail xs) i
-  ... | inj₁ j = inj₁ $ ℕ.suc j
-  ... | inj₂ j = inj₂ $ suc j
-
-... | suc c with vSplit (predFin ∘ xs) i
-... | inj₁ j = inj₁ $ ℕ.suc j
-... | inj₂ j = inj₂ j
+... | 0F = [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (predFin ∘ tail xs) i)
+... | suc c = [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (predFin ∘ xs) i)
 
 private
   vSplitTest = vSplit testV
@@ -266,12 +258,23 @@ vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs (suc i) normed = {!!}
 vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs 0F normed with xs 0F in eq0 | vSplit-same (predFin ∘ xs) 0F
 ... | 0F | b rewrite eq0 = ≡.refl
 ... | suc c | f rewrite eq0 | f {!!} = ≡.refl
-vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with vSplit-same (predFin ∘ xs)
-... | d = help $ d (suc i) {!!}
+vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
+  xs 0F in eq0 |
+  vSplit-same (predFin ∘ xs) |
+  vSplit-same (predFin ∘ tail xs) |
+  xs (suc i) in eqS
+... | 0F | f | g | 0F = {!!}
+... | 0F | f | g | suc p rewrite eq0 = help2
+
   where
-  help : vSplit (predFin ∘ xs) (predFin (xs (suc i))) ≡ inj₂ (suc i) → {!!}
-  help with xs 0F in eq0 | xs (suc i) in eqS
-  ... | 0F | 0F rewrite eq0 = λ ()
-  ... | suc a | 0F = {!id!}
-  ... | 0F | suc c rewrite eqS = {!!}
-  ... | suc a | suc c = {!!}
+  gi : vSplit (λ x → predFin (xs (suc x))) (predFin (xs (suc i))) ≡ inj₂ i
+  gi  = g i {!!}
+
+  help : vSplit (λ x → predFin (xs (suc x))) (predFin (xs (suc i))) ≡ inj₂ i
+    → vSplit (λ x → predFin (xs (suc x))) p ≡ inj₂ i
+  help rewrite eqS = id
+
+  help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (predFin ∘ tail xs) p) ≡ inj₂ (suc i)
+  help2 rewrite help gi = ≡.refl
+
+... | suc c | f | g | p = {!!}
