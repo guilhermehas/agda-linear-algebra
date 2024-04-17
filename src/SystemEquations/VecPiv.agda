@@ -242,14 +242,6 @@ vSplit {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
 private
   vSplitTest = vSplit testV
 
-
-impossible-case-vSplit : ∀ (xs : Vector (Fin $ ℕ.suc $ ℕ.suc n) $ ℕ.suc m) i {a b c}
-  → xs 0F ≡ suc c
-  → vSplit (λ j → predFin (xs j)) i ≡ inj₂ b
-  → vSplit xs (suc i) ≡ inj₁ a → ⊥
-impossible-case-vSplit xs i eq1 eq2 rewrite eq1 | eq2 = λ ()
-
-
 vSplitFirst<n∸m : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) (is₁ : IsInj₁ (vSplit xs i))
   → fromIsInj₁ is₁ ℕ.< n ∸ m
 vSplitFirst<n∸m {ℕ.suc n} {ℕ.zero} xs i normed is₁ = ℕ.s≤s ℕ.z≤n
@@ -264,3 +256,22 @@ vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with xs 0F
   (ℕ.≤-reflexive (≡.sym (n∸m-suc {n} {m}
     (ℕ.≤-pred $ normed> normed λ xs0≡0 → 0≢1+n (≡.trans (≡.sym xs0≡0) eqXs)))))
 ... | suc a | inj₂ p | f rewrite eqPred = λ ()
+
+vSplit-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
+  vSplit {n} {m} xs (xs i) ≡ inj₂ i
+vSplit-same {ℕ.zero} {ℕ.suc m} xs i normed with () ← xs 0F
+vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs 0F normed with xs 0F in eq0
+... | 0F rewrite eq0 = ≡.refl
+vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs (suc i) normed = {!!}
+vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs 0F normed with xs 0F in eq0 | vSplit-same (predFin ∘ xs) 0F
+... | 0F | b rewrite eq0 = ≡.refl
+... | suc c | f rewrite eq0 | f {!!} = ≡.refl
+vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with vSplit-same (predFin ∘ xs)
+... | d = help $ d (suc i) {!!}
+  where
+  help : vSplit (predFin ∘ xs) (predFin (xs (suc i))) ≡ inj₂ (suc i) → {!!}
+  help with xs 0F in eq0 | xs (suc i) in eqS
+  ... | 0F | 0F rewrite eq0 = λ ()
+  ... | suc a | 0F = {!id!}
+  ... | 0F | suc c rewrite eqS = {!!}
+  ... | suc a | suc c = {!!}
