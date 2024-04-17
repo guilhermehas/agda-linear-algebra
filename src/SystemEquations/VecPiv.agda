@@ -84,12 +84,6 @@ qtTrue : Vector Bool n → ℕ
 qtTrue {ℕ.zero} xs = ℕ.zero
 qtTrue {ℕ.suc n} xs = let v = (qtTrue (tail xs)) in if xs 0F then ℕ.suc v else v
 
--- vecBool→×Vec : Vector Bool n → Σ[ m ∈ ℕ ] (Σ[ p ∈ ℕ ] (m ℕ.+ p ≡ n × Vector (Fin n) m × Vector (Fin n) p))
--- vecBool→×Vec {ℕ.zero} _ = _ , _ , ≡.refl , [] , []
--- vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
--- ... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
--- ... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
-
 vecIn→vecBool-qtTrue : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) → qtTrue (vecIn→vecBool xs) ≡ m
 vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.zero} _ _ = ≡.refl
 vecIn→vecBool-qtTrue {ℕ.suc n} {ℕ.zero} _ _ = vecIn→vecBool-qtTrue {n} [] (allRowsNormed[] n)
@@ -101,14 +95,6 @@ vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc (ℕ.suc m)} xs normed with x
 vecIn→vecBool-qtTrue {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with vecIn→vecBool-qtTrue (predFin ∘ xs) | xs 0F in eqx
 ... | _ | 0F rewrite vecIn→vecBool-qtTrue (predFin ∘ xs ∘ suc) {!!} = ≡.refl
 ... | vBefore | suc c rewrite vBefore {!!} = ≡.refl
-
--- sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → proj₁ (vecBool→×Vec (vecIn→vecBool xs)) ≡ m
--- sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
--- sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
--- sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
--- sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
--- ... | 0F = cong ℕ.suc {!!}
--- ... | suc c = {!!}
 
 module _ {xs : Vector (Fin $ ℕ.suc n) $ ℕ.suc m} where
 
@@ -189,113 +175,68 @@ private
   n∸m-suc ℕ.z≤n = ≡.refl
   n∸m-suc (ℕ.s≤s n≥m) = n∸m-suc n≥m
 
-rPivs : (xs : Vector (Fin n) m) → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
-rPivs {ℕ.zero} {ℕ.zero} _ _ = []
-rPivs {ℕ.zero} {ℕ.suc m} _ _ ()
-rPivs {ℕ.suc n} {ℕ.zero} _ _ = 0F ∷ F.suc ∘ rPivs {n} _ (allRowsNormed[] n)
-rPivs {ℕ.suc n} {ℕ.suc m} xs normed i
-  with xs 0F F.≟ 0F
-... | yes eqXs = F.suc (rPivs (ysPiv eqXs normed) (allRowsNormed eqXs normed) i)
-  where open EqXs
-rPivs {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed i | no xs0≢0 = 0F
-rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed i | no xs0≢0 =
-  {!rPivs≢ (F.cast (n∸m-suc (normed> normed xs0≢0)) i)!}
-
-  where
-  rPivs≢ : Vector (Fin (ℕ.suc (ℕ.suc n))) (ℕ.suc (n ∸ m))
-  rPivs≢ 0F = 0F
-  rPivs≢ (suc j) = rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} {!!} {!!} {!j!}
-
-rPivs′ : (xs : Vector (Fin n) m) → ∃ (Vector (Fin n))
-rPivs′ {ℕ.zero} {ℕ.zero} xs = ℕ.zero , []
-rPivs′ {ℕ.zero} {ℕ.suc m} xs with () ← xs 0F
-proj₁ (rPivs′ {ℕ.suc n} {ℕ.zero} xs) = _
-proj₂ (rPivs′ {ℕ.suc n} {ℕ.zero} xs) i = i
-rPivs′ {ℕ.suc ℕ.zero} {ℕ.suc m} xs = ℕ.zero , const 0F
-rPivs′ {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs with xs 0F | rPivs′ (predFin ∘ xs)
-... | 0F | _ = _ , suc ∘ (proj₂ (rPivs′ $ predFin ∘ (tail xs)))
+rPivs : (xs : Vector (Fin n) m) → ∃ (Vector (Fin n))
+rPivs {ℕ.zero} {ℕ.zero} xs = ℕ.zero , []
+rPivs {ℕ.zero} {ℕ.suc m} xs with () ← xs 0F
+proj₁ (rPivs {ℕ.suc n} {ℕ.zero} xs) = _
+proj₂ (rPivs {ℕ.suc n} {ℕ.zero} xs) i = i
+rPivs {ℕ.suc ℕ.zero} {ℕ.suc m} xs = ℕ.zero , const 0F
+rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs with xs 0F | rPivs (predFin ∘ xs)
+... | 0F | _ = _ , suc ∘ (proj₂ (rPivs $ predFin ∘ (tail xs)))
 ... | suc _ | _ , ys = _ , 0F ∷ suc ∘ ys
 
-rPivs′-n∸m : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) → rPivs′ xs .proj₁ ≡ n ∸ m
-rPivs′-n∸m {ℕ.zero} {ℕ.zero} xs _ = ≡.refl
-rPivs′-n∸m {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
-rPivs′-n∸m {ℕ.suc n} {ℕ.zero} xs normed = ≡.refl
-rPivs′-n∸m {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed = ≡.sym (ℕ.m≤n⇒m∸n≡0 {n = m} ℕ.z≤n)
-rPivs′-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rPivs′-n∸m (predFin ∘ xs)
-... | 0F | _ rewrite rPivs′-n∸m (predFin ∘ tail xs) {!!} = ≡.refl
+rPivs-n∸m : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) → rPivs xs .proj₁ ≡ n ∸ m
+rPivs-n∸m {ℕ.zero} {ℕ.zero} xs _ = ≡.refl
+rPivs-n∸m {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
+rPivs-n∸m {ℕ.suc n} {ℕ.zero} xs normed = ≡.refl
+rPivs-n∸m {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed = ≡.sym (ℕ.m≤n⇒m∸n≡0 {n = m} ℕ.z≤n)
+rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rPivs-n∸m (predFin ∘ xs)
+... | 0F | _ rewrite rPivs-n∸m (predFin ∘ tail xs) {!!} = ≡.refl
 ... | suc c | f-normed rewrite f-normed {!!} = ≡.sym (n∸m-suc {n = n} {m = m}
   (ℕ.≤-pred (normed> {xs = xs} normed λ eqXs → contradiction (≡.trans (≡.sym eqXs) eqXs0) 0≢1+n)))
 
-∑-pivs′-same : (xs : Vector (Fin n) m) (g : Fin n → F) (normed : AllRowsNormalized≁0 xs)
-   → ∑ (g ∘ xs) + ∑ (g ∘ rPivs′ xs .proj₂) ≈ ∑ g
-∑-pivs′-same {ℕ.zero} {ℕ.zero} xs g normed = +-identityˡ _
-∑-pivs′-same {ℕ.zero} {ℕ.suc m} xs g normed with () ← xs 0F
-∑-pivs′-same {ℕ.suc n} {ℕ.zero} xs g normed = +-identityˡ _
-∑-pivs′-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs g normed = {!!}
-∑-pivs′-same {ℕ.suc n@(ℕ.suc n′)} {ℕ.suc m} xs g normed with ∑-pivs′-same {n} {ℕ.suc m} (predFin ∘ xs) (tail g) | xs 0F in eqXs
+∑-pivs-same : (xs : Vector (Fin n) m) (g : Fin n → F) (normed : AllRowsNormalized≁0 xs)
+   → ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs .proj₂) ≈ ∑ g
+∑-pivs-same {ℕ.zero} {ℕ.zero} xs g normed = +-identityˡ _
+∑-pivs-same {ℕ.zero} {ℕ.suc m} xs g normed with () ← xs 0F
+∑-pivs-same {ℕ.suc n} {ℕ.zero} xs g normed = +-identityˡ _
+∑-pivs-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs g normed = {!!}
+∑-pivs-same {ℕ.suc n@(ℕ.suc n′)} {ℕ.suc m} xs g normed with ∑-pivs-same {n} {ℕ.suc m} (predFin ∘ xs) (tail g) | xs 0F in eqXs
 ... | _ | 0F = begin
   _ + _ + _ ≈⟨ +-assoc _ _ _ ⟩
   g 0F + (∑ (g ∘ tail xs) + _) ≈⟨ {!!} ⟩
-  g 0F + (∑ (g ∘ suc ∘ predFin ∘ tail xs) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ tail xs) .proj₂))
-    ≈⟨ +-congˡ (∑-pivs′-same {n} {m} (predFin ∘ xs ∘ suc) (g ∘ suc) {!!} ) ⟩
+  g 0F + (∑ (g ∘ suc ∘ predFin ∘ tail xs) + ∑ (g ∘ suc ∘ rPivs (predFin ∘ tail xs) .proj₂))
+    ≈⟨ +-congˡ (∑-pivs-same {n} {m} (predFin ∘ xs ∘ suc) (g ∘ suc) {!!} ) ⟩
   g 0F + ∑ (tail g) ∎
 
 ... | peq | suc c = begin
   _ + (g 0F + _) ≈⟨ solve 3 (λ a b c → a ⊕ b ⊕ c , b ⊕ a ⊕ c) refl _ (g 0F) _ ⟩
-  g 0F + (g (suc c) + ∑ (g ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ xs) .proj₂) ) ≈⟨ +-congˡ (+-congʳ
+  g 0F + (g (suc c) + ∑ (g ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs (predFin ∘ xs) .proj₂) ) ≈⟨ +-congˡ (+-congʳ
     (+-cong (reflexive (cong g sc≡xs0)) {!!})) ⟩
   -- {!!} ≈⟨ {!!} ⟩
-  g 0F + (g (suc (predFin (xs 0F))) + ∑ (g ∘ suc ∘ predFin ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ xs) .proj₂))
+  g 0F + (g (suc (predFin (xs 0F))) + ∑ (g ∘ suc ∘ predFin ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs (predFin ∘ xs) .proj₂))
     ≈⟨ +-congˡ (peq {!!}) ⟩
   g 0F + ∑ (tail g) ∎
   where
   sc≡xs0 : suc c ≡ suc (predFin (xs 0F))
   sc≡xs0 rewrite eqXs = ≡.refl
 
-vSplit′ : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
-vSplit′ {ℕ.suc n} {m = ℕ.zero} xs i = inj₁ ℕ.zero
-vSplit′ {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
+vSplit : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
+vSplit {ℕ.suc n} {m = ℕ.zero} xs i = inj₁ ℕ.zero
+vSplit {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
 ... | 0F = inj₂ 0F
 ... | suc c = inj₁ ℕ.zero
-vSplit′ {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
+vSplit {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
 ... | 0F = help
   where
   help : _
-  help with vSplit′ (predFin ∘ tail xs) i
+  help with vSplit (predFin ∘ tail xs) i
   ... | inj₁ j = inj₁ $ ℕ.suc j
   ... | inj₂ j = inj₂ (suc j)
 
-... | suc c with vSplit′ (predFin ∘ xs) i
+... | suc c with vSplit (predFin ∘ xs) i
 ... | inj₁ j = inj₁ $ ℕ.suc j
 ... | inj₂ j = inj₂ j
 
 private
-  vSplitTest = vSplit′ testV
-
-
-∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
-∑-rPivs {ℕ.zero} g = refl
-∑-rPivs {ℕ.suc n} g = +-congˡ (∑-rPivs (g ∘ F.suc))
-
-∑-pivs-same : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
-  (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs normed) ≈ ∑ g
-∑-pivs-same {ℕ.zero} {ℕ.zero} {xs} normed g = +-identityˡ _
-∑-pivs-same {ℕ.zero} {ℕ.suc m} {xs} normed g with () ← xs 0F
-∑-pivs-same {ℕ.suc n} {ℕ.zero} {xs} normed g = begin
-  0# + _                                    ≈⟨ +-identityˡ _ ⟩
-  ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
-  ∑ g ∎
-∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
-... | yes xs0≡0 = begin
-  g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ +-assoc _ _ _ ⟩
-  g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (tail g ∘ rPivs {_} {m} _ (allRowsNormed xs0≡0 normed)))
-    ≈⟨ +-cong (reflexive (cong g xs0≡0)) (+-congʳ (∑Ext {m}
-      (λ i → reflexive (≡.sym (cong g (suc-reduce _ (tailXs>0 xs0≡0 normed  _)))))))⟩
-  g 0F + (∑ {m} (tail g ∘ _) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ
-    (∑-pivs-same {n} {m} (allRowsNormed xs0≡0 normed) (tail g)) ⟩
-  g 0F + ∑ (tail g) ∎ where open EqXs
-... | no xs0≢0 = begin
-  g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ {!!} ⟩
-  -- {!!} ≈⟨ {!!} ⟩
-  -- g 0F + (∑ {m} (tail g ∘ _) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ (∑-pivs-same (allRowsNormed xs0≢0 normed) (tail g)) ⟩
-  g 0F + ∑ (tail g) ∎ where open NEqXs
+  vSplitTest = vSplit testV

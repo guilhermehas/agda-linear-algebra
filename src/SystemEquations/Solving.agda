@@ -44,7 +44,7 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; su
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
-open import SystemEquations.VecPiv dField
+open import SystemEquations.VecPiv dField using (+-right; vecIn→vecBool; allRowsNormed[]; module EqXs; module NEqXs)
 
 open import lbry
 
@@ -191,6 +191,67 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
 
   pivs≁0 : PivsOne≁0 A pivsR
   pivs≁0 i = trans (sym (reflexive (A++b≡piv _))) (pivsOne i)
+
+
+module _ where
+  vecBool→×Vec : Vector Bool n → Σ[ m ∈ ℕ ] (Σ[ p ∈ ℕ ] (m ℕ.+ p ≡ n × Vector (Fin n) m × Vector (Fin n) p))
+  vecBool→×Vec {ℕ.zero} _ = _ , _ , ≡.refl , [] , []
+  vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
+  ... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
+  ... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
+
+  sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → proj₁ (vecBool→×Vec (vecIn→vecBool xs)) ≡ m
+  sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
+  sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
+  sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
+  sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
+  ... | 0F = cong ℕ.suc {!!}
+  ... | suc c = {!!}
+
+  rPivs : (xs : Vector (Fin n) m) → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
+  rPivs {ℕ.zero} {ℕ.zero} _ _ = []
+  rPivs {ℕ.zero} {ℕ.suc m} _ _ ()
+  rPivs {ℕ.suc n} {ℕ.zero} _ _ = 0F ∷ F.suc ∘ rPivs {n} _ (allRowsNormed[] n)
+  rPivs {ℕ.suc n} {ℕ.suc m} xs normed i
+    with xs 0F F.≟ 0F
+  ... | yes eqXs = F.suc (rPivs (ysPiv eqXs normed) (allRowsNormed eqXs normed) i)
+    where open EqXs
+  rPivs {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed i | no xs0≢0 = 0F
+  rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed i | no xs0≢0 =
+    {!rPivs≢ (F.cast (n∸m-suc (normed> normed xs0≢0)) i)!}
+
+    where
+    rPivs≢ : Vector (Fin (ℕ.suc (ℕ.suc n))) (ℕ.suc (n ∸ m))
+    rPivs≢ 0F = 0F
+    rPivs≢ (suc j) = rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} {!!} {!!} {!j!}
+
+  ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
+  ∑-rPivs {ℕ.zero} g = refl
+  ∑-rPivs {ℕ.suc n} g = +-congˡ (∑-rPivs (g ∘ F.suc))
+
+  ∑-pivs-same : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
+    (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs normed) ≈ ∑ g
+  ∑-pivs-same {ℕ.zero} {ℕ.zero} {xs} normed g = +-identityˡ _
+  ∑-pivs-same {ℕ.zero} {ℕ.suc m} {xs} normed g with () ← xs 0F
+  ∑-pivs-same {ℕ.suc n} {ℕ.zero} {xs} normed g = begin
+    0# + _                                    ≈⟨ +-identityˡ _ ⟩
+    ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
+    ∑ g ∎
+  ∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
+  ... | yes xs0≡0 = begin
+    g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ +-assoc _ _ _ ⟩
+    g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (tail g ∘ rPivs {_} {m} _ (allRowsNormed xs0≡0 normed)))
+      ≈⟨ +-cong (reflexive (cong g xs0≡0)) (+-congʳ (∑Ext {m}
+        (λ i → reflexive (≡.sym (cong g (suc-reduce _ (tailXs>0 xs0≡0 normed  _)))))))⟩
+    g 0F + (∑ {m} (tail g ∘ _) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ
+      (∑-pivs-same {n} {m} (allRowsNormed xs0≡0 normed) (tail g)) ⟩
+    g 0F + ∑ (tail g) ∎ where open EqXs
+  ... | no xs0≢0 = begin
+    g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ {!!} ⟩
+    -- {!!} ≈⟨ {!!} ⟩
+    -- g 0F + (∑ {m} (tail g ∘ _) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ (∑-pivs-same (allRowsNormed xs0≢0 normed) (tail g)) ⟩
+    g 0F + ∑ (tail g) ∎ where open NEqXs
+
 
 solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
   ∃ λ p → ∃ (IsFamilySolution {p = p})
