@@ -362,6 +362,31 @@ rPivs′-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 |
 ... | suc c | f-normed rewrite f-normed {!!} = ≡.sym (n∸m-suc {n = n} {m = m}
   (ℕ.≤-pred (normed> {xs = xs} normed λ eqXs → contradiction (≡.trans (≡.sym eqXs) eqXs0) 0≢1+n)))
 
+∑-pivs′-same : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs)
+  (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs′ xs .proj₂) ≈ ∑ g
+∑-pivs′-same {ℕ.zero} {ℕ.zero} xs normed g = +-identityˡ _
+∑-pivs′-same {ℕ.zero} {ℕ.suc m} xs normed g with () ← xs 0F
+∑-pivs′-same {ℕ.suc n} {ℕ.zero} xs normed g = +-identityˡ _
+∑-pivs′-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed g = {!!}
+∑-pivs′-same {ℕ.suc n@(ℕ.suc n′)} {ℕ.suc m} xs normed g with ∑-pivs′-same {n} {ℕ.suc m} (predFin ∘ xs) {!!} (tail g) | xs 0F in eqXs
+... | _ | 0F = begin
+  _ + _ + _ ≈⟨ +-assoc _ _ _ ⟩
+  g 0F + (∑ (g ∘ tail xs) + _) ≈⟨ {!!} ⟩
+  g 0F + (∑ (g ∘ suc ∘ predFin ∘ tail xs) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ tail xs) .proj₂))
+    ≈⟨ +-congˡ (∑-pivs′-same {n} {m} (predFin ∘ xs ∘ suc) {!!} (g ∘ suc)) ⟩
+  g 0F + ∑ (tail g) ∎
+
+... | peq | suc c = begin
+  _ + (g 0F + _) ≈⟨ solve 3 (λ a b c → a ⊕ b ⊕ c , b ⊕ a ⊕ c) refl _ (g 0F) _ ⟩
+  g 0F + (g (suc c) + ∑ (g ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ xs) .proj₂) ) ≈⟨ +-congˡ (+-congʳ
+    (+-cong (reflexive (cong g sc≡xs0)) {!!})) ⟩
+  -- {!!} ≈⟨ {!!} ⟩
+  g 0F + (g (suc (predFin (xs 0F))) + ∑ (g ∘ suc ∘ predFin ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ xs) .proj₂)) ≈⟨ +-congˡ peq ⟩
+  g 0F + ∑ (tail g) ∎
+  where
+  sc≡xs0 : suc c ≡ suc (predFin (xs 0F))
+  sc≡xs0 rewrite eqXs = ≡.refl
+
 
 ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
 ∑-rPivs {ℕ.zero} g = refl
