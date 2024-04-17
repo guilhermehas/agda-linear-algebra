@@ -84,11 +84,11 @@ qtTrue : Vector Bool n → ℕ
 qtTrue {ℕ.zero} xs = ℕ.zero
 qtTrue {ℕ.suc n} xs = let v = (qtTrue (tail xs)) in if xs 0F then ℕ.suc v else v
 
-vecBool→×Vec : Vector Bool n → Σ[ m ∈ ℕ ] (Σ[ p ∈ ℕ ] (m ℕ.+ p ≡ n × Vector (Fin n) m × Vector (Fin n) p))
-vecBool→×Vec {ℕ.zero} _ = _ , _ , ≡.refl , [] , []
-vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
-... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
-... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
+-- vecBool→×Vec : Vector Bool n → Σ[ m ∈ ℕ ] (Σ[ p ∈ ℕ ] (m ℕ.+ p ≡ n × Vector (Fin n) m × Vector (Fin n) p))
+-- vecBool→×Vec {ℕ.zero} _ = _ , _ , ≡.refl , [] , []
+-- vecBool→×Vec {ℕ.suc n} xs with xs 0F | vecBool→×Vec {n} (tail xs)
+-- ... | true  | m , p , m+p≡n , ys , zs = _ , _ , cong ℕ.suc m+p≡n , 0F ∷ F.suc ∘ ys , F.suc ∘ zs
+-- ... | false | m , p , m+p≡n , ys , zs = m , ℕ.suc p , ≡.trans (+-right _ _) (cong ℕ.suc m+p≡n) , F.suc ∘ ys , 0F ∷ F.suc ∘ zs
 
 vecIn→vecBool-qtTrue : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) → qtTrue (vecIn→vecBool xs) ≡ m
 vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.zero} _ _ = ≡.refl
@@ -102,13 +102,13 @@ vecIn→vecBool-qtTrue {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with vecIn→
 ... | _ | 0F rewrite vecIn→vecBool-qtTrue (predFin ∘ xs ∘ suc) {!!} = ≡.refl
 ... | vBefore | suc c rewrite vBefore {!!} = ≡.refl
 
-sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → proj₁ (vecBool→×Vec (vecIn→vecBool xs)) ≡ m
-sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
-sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
-sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
-sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
-... | 0F = cong ℕ.suc {!!}
-... | suc c = {!!}
+-- sameSizeVecBool : (xs : Vector (Fin n) m) → AllRowsNormalized≁0 xs → proj₁ (vecBool→×Vec (vecIn→vecBool xs)) ≡ m
+-- sameSizeVecBool {ℕ.zero} {ℕ.zero} xs normed = ≡.refl
+-- sameSizeVecBool {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
+-- sameSizeVecBool {ℕ.suc n} {ℕ.zero} xs normed = sameSizeVecBool {n} [] λ {}
+-- sameSizeVecBool {ℕ.suc n} {ℕ.suc m} xs normed with xs 0F
+-- ... | 0F = cong ℕ.suc {!!}
+-- ... | suc c = {!!}
 
 module _ {xs : Vector (Fin $ ℕ.suc n) $ ℕ.suc m} where
 
@@ -245,11 +245,32 @@ rPivs′-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 |
   g 0F + (g (suc c) + ∑ (g ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ xs) .proj₂) ) ≈⟨ +-congˡ (+-congʳ
     (+-cong (reflexive (cong g sc≡xs0)) {!!})) ⟩
   -- {!!} ≈⟨ {!!} ⟩
-  g 0F + (g (suc (predFin (xs 0F))) + ∑ (g ∘ suc ∘ predFin ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ xs) .proj₂)) ≈⟨ +-congˡ (peq {!!}) ⟩
+  g 0F + (g (suc (predFin (xs 0F))) + ∑ (g ∘ suc ∘ predFin ∘ xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs′ (predFin ∘ xs) .proj₂))
+    ≈⟨ +-congˡ (peq {!!}) ⟩
   g 0F + ∑ (tail g) ∎
   where
   sc≡xs0 : suc c ≡ suc (predFin (xs 0F))
   sc≡xs0 rewrite eqXs = ≡.refl
+
+vSplit′ : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
+vSplit′ {ℕ.suc n} {m = ℕ.zero} xs i = inj₁ ℕ.zero
+vSplit′ {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
+... | 0F = inj₂ 0F
+... | suc c = inj₁ ℕ.zero
+vSplit′ {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
+... | 0F = help
+  where
+  help : _
+  help with vSplit′ (predFin ∘ tail xs) i
+  ... | inj₁ j = inj₁ $ ℕ.suc j
+  ... | inj₂ j = inj₂ (suc j)
+
+... | suc c with vSplit′ (predFin ∘ xs) i
+... | inj₁ j = inj₁ $ ℕ.suc j
+... | inj₂ j = inj₂ j
+
+private
+  vSplitTest = vSplit′ testV
 
 
 ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
