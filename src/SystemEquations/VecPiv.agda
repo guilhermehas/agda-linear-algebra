@@ -9,6 +9,7 @@ open import Algebra.Apartness
 open import Algebra.Module
 open import Function
 open import Data.Bool using (Bool; true; false; if_then_else_)
+open import Data.Unit
 open import Data.Product
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum renaming ([_,_] to [_∙_])
@@ -222,7 +223,7 @@ rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rP
   sc≡xs0 rewrite eqXs = ≡.refl
 
 vSplit : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
-vSplit {ℕ.suc n} {m = ℕ.zero} xs i = inj₁ ℕ.zero
+vSplit {ℕ.suc n} {ℕ.zero} xs i = inj₁ ℕ.zero
 vSplit {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
 ... | 0F = inj₂ 0F
 ... | suc c = inj₁ ℕ.zero
@@ -232,7 +233,7 @@ vSplit {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
   help : _
   help with vSplit (predFin ∘ tail xs) i
   ... | inj₁ j = inj₁ $ ℕ.suc j
-  ... | inj₂ j = inj₂ (suc j)
+  ... | inj₂ j = inj₂ $ suc j
 
 ... | suc c with vSplit (predFin ∘ xs) i
 ... | inj₁ j = inj₁ $ ℕ.suc j
@@ -240,3 +241,31 @@ vSplit {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
 
 private
   vSplitTest = vSplit testV
+
+
+impossible-case-vSplit : ∀ (xs : Vector (Fin $ ℕ.suc $ ℕ.suc n) $ ℕ.suc m) i {a b c}
+  → xs 0F ≡ suc c
+  → vSplit (λ j → predFin (xs j)) i ≡ inj₂ b
+  → vSplit xs (suc i) ≡ inj₁ a → ⊥
+impossible-case-vSplit xs i eq1 eq2 rewrite eq1 | eq2 = λ ()
+
+
+vSplitFirst<n∸m : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) (is₁ : IsInj₁ (vSplit xs i))
+  → fromIsInj₁ is₁ ℕ.< n ∸ m
+vSplitFirst<n∸m {ℕ.suc n} {ℕ.zero} xs i normed is₁ = ℕ.s≤s ℕ.z≤n
+vSplitFirst<n∸m {ℕ.suc n} {ℕ.suc m} xs 0F normed is₁ with xs 0F
+... | suc c = {!!}
+vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed is₁ with xs 0F in eqXs
+  | vSplit (λ j → predFin (xs j)) i in eqPred
+  | vSplit xs (suc i) in eqSplit
+
+... | 0F | _ | inj₁ p = {!!}
+... | suc a | inj₁ p | inj₁ d = ⊥-elim $ help eqSplit
+  where
+  help : _ → ⊥
+  help = {!!}
+
+... | suc a | inj₂ p | inj₁ d = ⊥-elim (impossible-case-vSplit {n} {m} xs i eqXs eqPred (help $ eqSplit))
+  where
+  help : {!!} → {!!}
+  help eq = {!!}
