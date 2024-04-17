@@ -267,14 +267,19 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
 ... | 0F | f | g | suc p rewrite eq0 = help2
 
   where
-  gi : vSplit (λ x → predFin (xs (suc x))) (predFin (xs (suc i))) ≡ inj₂ i
-  gi  = g i {!!}
-
   help : vSplit (λ x → predFin (xs (suc x))) (predFin (xs (suc i))) ≡ inj₂ i
     → vSplit (λ x → predFin (xs (suc x))) p ≡ inj₂ i
   help rewrite eqS = id
 
   help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (predFin ∘ tail xs) p) ≡ inj₂ (suc i)
-  help2 rewrite help gi = ≡.refl
+  help2 rewrite help (g i {!!}) = ≡.refl
 
-... | suc c | f | g | p = {!!}
+... | suc c | f | g | 0F rewrite eq0 = {!!}
+... | suc c | f | g | suc p rewrite eq0 = help2
+  where
+  help : vSplit (predFin ∘ xs) (predFin (xs (suc i))) ≡ inj₂ (suc i)
+    → vSplit (predFin ∘ xs) p ≡ inj₂ (suc i)
+  help rewrite eqS = id
+
+  help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (predFin ∘ xs) p) ≡ inj₂ (suc i)
+  help2 rewrite help (f (suc i) {!!}) = ≡.refl
