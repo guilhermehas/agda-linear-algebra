@@ -228,13 +228,13 @@ pred-tail xs = predFin ∘ (tail xs)
 pred-vec : Vector (Fin $ ℕ.suc $ ℕ.suc n) m → Vector (Fin $ ℕ.suc n) m
 pred-vec = predFin ∘_
 
-pred-tail-normed : (xs : Vector (Fin $ 2+ n) $ ℕ.suc m) (normed : AllRowsNormalized≁0 xs)
-  → AllRowsNormalized≁0 xs
-pred-tail-normed xs normed {i} {j} i<j with xs i | xs j | normed i<j
-... | 0F | 0F | ()
-... | 0F | suc _ | _ = ℕ.s≤s ℕ.z≤n
-... | suc _ | 0F | ()
-... | suc _ | suc _ | isNormed = isNormed
+pred-tail-normed : { xs : Vector (Fin $ 2+ n) $ ℕ.suc m } (normed : AllRowsNormalized≁0 xs)
+  → AllRowsNormalized≁0 (pred-tail xs)
+pred-tail-normed {xs = xs} normed {i} {j} i<j with xs (suc i) | xs (suc j) | normed {y = suc i} (ℕ.s≤s ℕ.z≤n) | normed (ℕ.s≤s i<j)
+... | 0F | 0F | _ | ()
+... | 0F | suc k | () | ℕ.s≤s q
+... | suc _ | 0F | _ | ()
+... | suc _ | suc _ | _ | ℕ.s≤s isNormed = isNormed
 
 vSplit : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
 vSplit {ℕ.suc n} {ℕ.zero} xs i = inj₁ ℕ.zero
@@ -275,7 +275,7 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs 0F normed with xs 0F in eq0 | v
 vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   xs 0F in eq0 |
   vSplit-same (predFin ∘ xs) |
-  vSplit-same (predFin ∘ tail xs) |
+  vSplit-same (predFin ∘ tail xs) i (pred-tail-normed normed) |
   xs (suc i) in eqS
 ... | 0F | f | g | 0F = {!!}
 ... | 0F | f | g | suc p rewrite eq0 = help2
@@ -286,7 +286,7 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   help rewrite eqS = id
 
   help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (predFin ∘ tail xs) p) ≡ inj₂ (suc i)
-  help2 rewrite help (g i {!normed!}) = ≡.refl
+  help2 rewrite help {!g i {!!}!} = ≡.refl
 
 ... | suc c | f | g | 0F rewrite eq0 = {!!}
 ... | suc c | f | g | suc p rewrite eq0 = help2
