@@ -234,7 +234,7 @@ rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rP
   _ + _ + _ ≈⟨ +-assoc _ _ _ ⟩
   g 0F + (∑ (g ∘ tail xs) + _) ≈⟨ {!!} ⟩
   g 0F + (∑ (g ∘ suc ∘ pred-tail xs) + ∑ (g ∘ suc ∘ rPivs (pred-tail xs) .proj₂))
-    ≈⟨ +-congˡ (∑-pivs-same {n} {m} (pred-vec xs ∘ suc) (g ∘ suc) {!!} ) ⟩
+    ≈⟨ +-congˡ (∑-pivs-same {n} {m} (pred-vec xs ∘ suc) (g ∘ suc) (pred-tail-normed normed) ) ⟩
   g 0F + ∑ (tail g) ∎
 
 ... | peq | suc c = begin
@@ -243,7 +243,7 @@ rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rP
     (+-cong (reflexive (cong g sc≡xs0)) {!!})) ⟩
   -- {!!} ≈⟨ {!!} ⟩
   g 0F + (g (suc (predFin (xs 0F))) + ∑ (g ∘ suc ∘ pred-vec xs ∘ suc) + ∑ (g ∘ suc ∘ rPivs (pred-vec xs) .proj₂))
-    ≈⟨ +-congˡ (peq {!!}) ⟩
+    ≈⟨ +-congˡ (peq (pred-normed normed eqXs)) ⟩
   g 0F + ∑ (tail g) ∎
   where
   sc≡xs0 : suc c ≡ suc (predFin (xs 0F))
