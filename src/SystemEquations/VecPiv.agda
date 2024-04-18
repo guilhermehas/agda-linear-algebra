@@ -219,12 +219,16 @@ rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rP
 ... | suc c | f-normed rewrite f-normed (pred-normed normed eqXs0) = ≡.sym (n∸m-suc {n = n} {m = m}
   (ℕ.≤-pred (normed> {xs = xs} normed λ eqXs → contradiction (≡.trans (≡.sym eqXs) eqXs0) 0≢1+n)))
 
-∑-pivs-same : (xs : Vector (Fin n) m) (g : Fin n → F) (normed : AllRowsNormalized≁0 xs)
+∑-pivs-same : (xs : Vector (Fin n) m) (g : Vector F n) (normed : AllRowsNormalized≁0 xs)
    → ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs .proj₂) ≈ ∑ g
 ∑-pivs-same {ℕ.zero} {ℕ.zero} xs g normed = +-identityˡ _
 ∑-pivs-same {ℕ.zero} {ℕ.suc m} xs g normed with () ← xs 0F
 ∑-pivs-same {ℕ.suc n} {ℕ.zero} xs g normed = +-identityˡ _
-∑-pivs-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs g normed = {!!}
+∑-pivs-same {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs g normed with xs 0F
+... | 0F = trans (+-assoc _ _ _) (+-congˡ (+-identityˡ _))
+∑-pivs-same {ℕ.suc ℕ.zero} {2+ m} xs g normed with xs 0F | xs 1F | normed {x = 0F} {y = 1F} (s≤s z≤n)
+... | 0F | 0F | ()
+... | 0F | suc () | _
 ∑-pivs-same {ℕ.suc n@(ℕ.suc n′)} {ℕ.suc m} xs g normed with ∑-pivs-same {n} {ℕ.suc m} (pred-vec xs) (tail g) | xs 0F in eqXs
 ... | _ | 0F = begin
   _ + _ + _ ≈⟨ +-assoc _ _ _ ⟩
@@ -278,7 +282,9 @@ vSplit-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) 
 vSplit-same {ℕ.zero} {ℕ.suc m} xs i normed with () ← xs 0F
 vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs 0F normed with xs 0F in eq0
 ... | 0F rewrite eq0 = ≡.refl
-vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs (suc i) normed = {!!}
+vSplit-same {ℕ.suc ℕ.zero} {2+ m} xs (suc i) normed with xs 0F | xs 1F | normed {x = 0F} {y = 1F} (s≤s z≤n)
+... | 0F | 0F | ()
+... | 0F | suc () | _
 vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs 0F normed with xs 0F in eq0 | vSplit-same (pred-vec xs) 0F
 ... | 0F | b rewrite eq0 = ≡.refl
 ... | suc c | f rewrite eq0 | f (pred-normed normed eq0) = ≡.refl
@@ -286,9 +292,10 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   xs 0F in eq0 |
   vSplit-same (pred-vec xs) |
   vSplit-same (pred-tail xs) i (pred-tail-normed normed) |
-  xs (suc i) in eqS
-... | 0F | f | g | 0F = {!!}
-... | 0F | f | g | suc p rewrite eq0 = help2
+  xs (suc i) in eqS |
+  normed {x = 0F} {y = suc i} (s≤s z≤n)
+... | 0F | f | g | 0F | ()
+... | 0F | f | g | suc p | _ rewrite eq0 = help2
 
   where
   help : vSplit (λ x → predFin (xs (suc x))) (predFin (xs (suc i))) ≡ inj₂ i
@@ -298,8 +305,8 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   help2 : [ inj₁ ∙ inj₂ ∘ suc ] (vSplit (pred-tail xs) p) ≡ inj₂ (suc i)
   help2 rewrite help g = ≡.refl
 
-... | suc c | f | g | 0F rewrite eq0 = {!!}
-... | suc c | f | g | suc p rewrite eq0 = help2
+... | suc c | f | g | 0F | ()
+... | suc c | f | g | suc p | _ rewrite eq0 = help2
   where
   help : vSplit (pred-vec xs) (predFin (xs (suc i))) ≡ inj₂ (suc i)
     → vSplit (pred-vec xs) p ≡ inj₂ (suc i)
