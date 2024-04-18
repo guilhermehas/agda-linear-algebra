@@ -14,7 +14,7 @@ open import Data.Product
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum renaming ([_,_] to [_∙_])
 open import Data.Empty
-open import Data.Nat as ℕ using (ℕ; _∸_)
+open import Data.Nat as ℕ using (ℕ; _∸_; 2+)
 open import Data.Nat.Properties as ℕ using (module ≤-Reasoning)
 open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; toℕ; inject₁)
 open import Data.Fin.Properties as F
@@ -222,14 +222,28 @@ rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rP
   sc≡xs0 : suc c ≡ suc (predFin (xs 0F))
   sc≡xs0 rewrite eqXs = ≡.refl
 
+pred-tail : Vector (Fin $ 2+ n) $ ℕ.suc m → Vector (Fin $ ℕ.suc n) m
+pred-tail xs = predFin ∘ (tail xs)
+
+pred-vec : Vector (Fin $ ℕ.suc $ ℕ.suc n) m → Vector (Fin $ ℕ.suc n) m
+pred-vec = predFin ∘_
+
+pred-tail-normed : (xs : Vector (Fin $ 2+ n) $ ℕ.suc m) (normed : AllRowsNormalized≁0 xs)
+  → AllRowsNormalized≁0 xs
+pred-tail-normed xs normed {i} {j} i<j with xs i | xs j | normed i<j
+... | 0F | 0F | ()
+... | 0F | suc _ | _ = ℕ.s≤s ℕ.z≤n
+... | suc _ | 0F | ()
+... | suc _ | suc _ | isNormed = isNormed
+
 vSplit : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
 vSplit {ℕ.suc n} {ℕ.zero} xs i = inj₁ ℕ.zero
 vSplit {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
 ... | 0F = inj₂ 0F
 ... | suc c = inj₁ ℕ.zero
 vSplit {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
-... | 0F = [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (predFin ∘ tail xs) i)
-... | suc c = [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (predFin ∘ xs) i)
+... | 0F = [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (pred-tail xs) i)
+... | suc c = [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (pred-vec xs) i)
 
 private
   vSplitTest = vSplit testV
@@ -250,7 +264,7 @@ vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with xs 0F
 ... | suc a | inj₂ p | f rewrite eqPred = λ ()
 
 vSplit-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
-  vSplit {n} {m} xs (xs i) ≡ inj₂ i
+  vSplit xs (xs i) ≡ inj₂ i
 vSplit-same {ℕ.zero} {ℕ.suc m} xs i normed with () ← xs 0F
 vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs 0F normed with xs 0F in eq0
 ... | 0F rewrite eq0 = ≡.refl
@@ -272,7 +286,7 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   help rewrite eqS = id
 
   help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (predFin ∘ tail xs) p) ≡ inj₂ (suc i)
-  help2 rewrite help (g i {!!}) = ≡.refl
+  help2 rewrite help (g i {!normed!}) = ≡.refl
 
 ... | suc c | f | g | 0F rewrite eq0 = {!!}
 ... | suc c | f | g | suc p rewrite eq0 = help2
