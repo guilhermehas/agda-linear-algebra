@@ -246,20 +246,21 @@ rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rP
   sc≡xs0 rewrite eqXs = ≡.refl
 
 vSplit : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
-vSplit {ℕ.suc n} {ℕ.zero} xs i = inj₁ ℕ.zero
+vSplit {ℕ.suc n} {ℕ.zero} xs i = inj₁ $ toℕ i
 vSplit {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
 ... | 0F = inj₂ 0F
 ... | suc c = inj₁ ℕ.zero
 vSplit {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) with xs 0F
-... | 0F = [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (pred-tail xs) i)
+... | 0F = [ inj₁ ∙ inj₂ ∘ suc ] (vSplit (pred-tail xs) i)
 ... | suc c = [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (pred-vec xs) i)
 
 private
   vSplitTest = vSplit testV
+  vSplitTest2 = vSplit {n = 5} []
 
 vSplitFirst<n∸m : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) (is₁ : IsInj₁ (vSplit xs i))
   → fromIsInj₁ is₁ ℕ.< n ∸ m
-vSplitFirst<n∸m {ℕ.suc n} {ℕ.zero} xs i normed is₁ = s≤s z≤n
+vSplitFirst<n∸m {ℕ.suc n} {ℕ.zero} xs i normed is₁ = toℕ<n i
 vSplitFirst<n∸m {ℕ.suc n} {ℕ.suc m} xs 0F normed is₁ with xs 0F
 ... | suc c = {!!}
 vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with xs 0F in eqXs
@@ -294,7 +295,7 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
     → vSplit (λ x → predFin (xs (suc x))) p ≡ inj₂ i
   help rewrite eqS = id
 
-  help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (pred-tail xs) p) ≡ inj₂ (suc i)
+  help2 : [ inj₁ ∙ inj₂ ∘ suc ] (vSplit (pred-tail xs) p) ≡ inj₂ (suc i)
   help2 rewrite help g = ≡.refl
 
 ... | suc c | f | g | 0F rewrite eq0 = {!!}
@@ -306,3 +307,14 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
 
   help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (pred-vec xs) p) ≡ inj₂ (suc i)
   help2 rewrite help (f (suc i) (pred-normed normed eq0)) = ≡.refl
+
+vSplit-rPivs : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs)
+  → vSplit xs (rPivs xs .proj₂ i) ≡ inj₁ (toℕ i)
+vSplit-rPivs {ℕ.zero} {ℕ.suc m} xs i normed with () ← xs 0F
+vSplit-rPivs {ℕ.suc n} {ℕ.zero} xs i normed = ≡.refl
+vSplit-rPivs {2+ n} {ℕ.suc m} xs i normed with xs 0F in eq0
+vSplit-rPivs {2+ n} {ℕ.suc m} xs i normed | 0F
+  rewrite eq0 | vSplit-rPivs (pred-tail xs) i (pred-tail-normed normed) = ≡.refl
+vSplit-rPivs {2+ n} {ℕ.suc m} xs 0F normed | suc c rewrite eq0 = ≡.refl
+vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
+  rewrite eq0 | vSplit-rPivs (pred-vec xs) i (pred-normed normed eq0) = ≡.refl
