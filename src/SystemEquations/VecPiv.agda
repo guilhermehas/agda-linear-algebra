@@ -14,7 +14,7 @@ open import Data.Product
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum renaming ([_,_] to [_∙_])
 open import Data.Empty
-open import Data.Nat as ℕ using (ℕ; _∸_; 2+)
+open import Data.Nat as ℕ using (ℕ; _∸_; 2+; z≤n; s≤s)
 open import Data.Nat.Properties as ℕ using (module ≤-Reasoning)
 open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; toℕ; inject₁)
 open import Data.Fin.Properties as F
@@ -85,6 +85,29 @@ qtTrue : Vector Bool n → ℕ
 qtTrue {ℕ.zero} xs = ℕ.zero
 qtTrue {ℕ.suc n} xs = let v = (qtTrue (tail xs)) in if xs 0F then ℕ.suc v else v
 
+pred-tail : Vector (Fin $ 2+ n) $ ℕ.suc m → Vector (Fin $ ℕ.suc n) m
+pred-tail xs = predFin ∘ tail xs
+
+pred-vec : Vector (Fin $ 2+ n) m → Vector (Fin $ ℕ.suc n) m
+pred-vec = predFin ∘_
+
+pred-tail-normed : {xs : Vector (Fin $ 2+ n) $ ℕ.suc m} (normed : AllRowsNormalized≁0 xs)
+  → AllRowsNormalized≁0 (pred-tail xs)
+pred-tail-normed {xs = xs} normed {i} {j} i<j with xs (suc i) | xs (suc j) | normed {y = suc i} (ℕ.s≤s ℕ.z≤n) | normed (ℕ.s≤s i<j)
+... | 0F | 0F | _ | ()
+... | 0F | suc k | () | ℕ.s≤s q
+... | suc _ | 0F | _ | ()
+... | suc _ | suc _ | _ | ℕ.s≤s isNormed = isNormed
+
+pred-normed : ∀ {xs : Vector (Fin $ 2+ n) $ ℕ.suc m} (normed : AllRowsNormalized≁0 xs) {c}
+  → xs 0F ≡ suc c → AllRowsNormalized≁0 (pred-vec xs)
+pred-normed {xs = xs} normed eq0 {0F} {suc j} i<j with xs 0F | xs (suc j) | normed i<j
+... | suc _ | suc _ | s≤s isNormed = isNormed
+pred-normed {xs = xs} normed eq0 {suc i} {suc j} i<j with xs 0F | xs (suc i) | xs (suc j)
+  | normed {y = suc i} (s≤s z≤n) | normed {y = suc j} (s≤s z≤n) | normed i<j
+... | suc _ | suc _ | suc _ | _ | _ | s≤s isNormed = isNormed
+
+
 vecIn→vecBool-qtTrue : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) → qtTrue (vecIn→vecBool xs) ≡ m
 vecIn→vecBool-qtTrue {ℕ.zero} {ℕ.zero} _ _ = ≡.refl
 vecIn→vecBool-qtTrue {ℕ.suc n} {ℕ.zero} _ _ = vecIn→vecBool-qtTrue {n} [] (allRowsNormed[] n)
@@ -94,8 +117,8 @@ vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs _ with xs 0F
 vecIn→vecBool-qtTrue {ℕ.suc ℕ.zero} {ℕ.suc (ℕ.suc m)} xs normed with xs 0F | xs 1F | normed {y = 1F} (ℕ.s≤s ℕ.z≤n)
 ... | 0F | 0F | ()
 vecIn→vecBool-qtTrue {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with vecIn→vecBool-qtTrue (predFin ∘ xs) | xs 0F in eqx
-... | _ | 0F rewrite vecIn→vecBool-qtTrue (predFin ∘ xs ∘ suc) {!!} = ≡.refl
-... | vBefore | suc c rewrite vBefore {!!} = ≡.refl
+... | _ | 0F rewrite vecIn→vecBool-qtTrue (pred-tail xs) (pred-tail-normed normed) = ≡.refl
+... | vBefore | suc c rewrite vBefore (pred-normed normed eqx) = ≡.refl
 
 module _ {xs : Vector (Fin $ ℕ.suc n) $ ℕ.suc m} where
 
@@ -192,8 +215,8 @@ rPivs-n∸m {ℕ.zero} {ℕ.suc m} xs normed with () ← xs 0F
 rPivs-n∸m {ℕ.suc n} {ℕ.zero} xs normed = ≡.refl
 rPivs-n∸m {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed = ≡.sym (ℕ.m≤n⇒m∸n≡0 {n = m} ℕ.z≤n)
 rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rPivs-n∸m (predFin ∘ xs)
-... | 0F | _ rewrite rPivs-n∸m (predFin ∘ tail xs) {!!} = ≡.refl
-... | suc c | f-normed rewrite f-normed {!!} = ≡.sym (n∸m-suc {n = n} {m = m}
+... | 0F | _ rewrite rPivs-n∸m (pred-tail xs) (pred-tail-normed normed) = ≡.refl
+... | suc c | f-normed rewrite f-normed (pred-normed normed eqXs0) = ≡.sym (n∸m-suc {n = n} {m = m}
   (ℕ.≤-pred (normed> {xs = xs} normed λ eqXs → contradiction (≡.trans (≡.sym eqXs) eqXs0) 0≢1+n)))
 
 ∑-pivs-same : (xs : Vector (Fin n) m) (g : Fin n → F) (normed : AllRowsNormalized≁0 xs)
@@ -222,20 +245,6 @@ rPivs-n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed with xs 0F in eqXs0 | rP
   sc≡xs0 : suc c ≡ suc (predFin (xs 0F))
   sc≡xs0 rewrite eqXs = ≡.refl
 
-pred-tail : Vector (Fin $ 2+ n) $ ℕ.suc m → Vector (Fin $ ℕ.suc n) m
-pred-tail xs = predFin ∘ (tail xs)
-
-pred-vec : Vector (Fin $ ℕ.suc $ ℕ.suc n) m → Vector (Fin $ ℕ.suc n) m
-pred-vec = predFin ∘_
-
-pred-tail-normed : { xs : Vector (Fin $ 2+ n) $ ℕ.suc m } (normed : AllRowsNormalized≁0 xs)
-  → AllRowsNormalized≁0 (pred-tail xs)
-pred-tail-normed {xs = xs} normed {i} {j} i<j with xs (suc i) | xs (suc j) | normed {y = suc i} (ℕ.s≤s ℕ.z≤n) | normed (ℕ.s≤s i<j)
-... | 0F | 0F | _ | ()
-... | 0F | suc k | () | ℕ.s≤s q
-... | suc _ | 0F | _ | ()
-... | suc _ | suc _ | _ | ℕ.s≤s isNormed = isNormed
-
 vSplit : (xs : Vector (Fin n) m) → Vector (ℕ ⊎ Fin m) n
 vSplit {ℕ.suc n} {ℕ.zero} xs i = inj₁ ℕ.zero
 vSplit {ℕ.suc n} {ℕ.suc m} xs 0F with xs 0F
@@ -258,7 +267,7 @@ vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with xs 0F
   | vSplitFirst<n∸m (predFin ∘ xs) i
 
 ... | 0F | _ | f = {!!}
-... | suc a | inj₁ p | f rewrite eqPred = λ _ → ℕ.≤-trans (ℕ.s≤s (f {!!} _))
+... | suc a | inj₁ p | f rewrite eqPred = λ _ → ℕ.≤-trans (ℕ.s≤s (f (pred-normed normed eqXs) _))
   (ℕ.≤-reflexive (≡.sym (n∸m-suc {n} {m}
     (ℕ.≤-pred $ normed> normed λ xs0≡0 → 0≢1+n (≡.trans (≡.sym xs0≡0) eqXs)))))
 ... | suc a | inj₂ p | f rewrite eqPred = λ ()
@@ -271,7 +280,7 @@ vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs 0F normed with xs 0F in eq0
 vSplit-same {ℕ.suc ℕ.zero} {ℕ.suc m} xs (suc i) normed = {!!}
 vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs 0F normed with xs 0F in eq0 | vSplit-same (predFin ∘ xs) 0F
 ... | 0F | b rewrite eq0 = ≡.refl
-... | suc c | f rewrite eq0 | f {!!} = ≡.refl
+... | suc c | f rewrite eq0 | f (pred-normed normed eq0) = ≡.refl
 vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   xs 0F in eq0 |
   vSplit-same (predFin ∘ xs) |
@@ -286,7 +295,7 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   help rewrite eqS = id
 
   help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ∘ suc ] (vSplit (predFin ∘ tail xs) p) ≡ inj₂ (suc i)
-  help2 rewrite help {!g i {!!}!} = ≡.refl
+  help2 rewrite help g = ≡.refl
 
 ... | suc c | f | g | 0F rewrite eq0 = {!!}
 ... | suc c | f | g | suc p rewrite eq0 = help2
@@ -296,4 +305,4 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   help rewrite eqS = id
 
   help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (predFin ∘ xs) p) ≡ inj₂ (suc i)
-  help2 rewrite help (f (suc i) {!!}) = ≡.refl
+  help2 rewrite help (f (suc i) (pred-normed normed eq0)) = ≡.refl
