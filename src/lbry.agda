@@ -1,10 +1,11 @@
-open import Level using (Level)
+open import Level using (Level; _⊔_)
 open import Function
 open import Data.Empty
 open import Data.Unit.Polymorphic
-open import Data.Nat as ℕ
+open import Data.Nat as ℕ hiding (_⊔_)
 open import Data.Nat.Properties using (<⇒≤; ≤⇒≯)
 open import Data.Product
+open import Data.Irrelevant
 open import Data.Sum
 open import Data.Fin as F
 open import Data.Fin.Properties as F
@@ -13,7 +14,7 @@ open import Induction.WellFounded
 open import Relation.Binary.Definitions using (Tri; tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
-open import Relation.Nullary
+open import Relation.Nullary hiding (Irrelevant)
 open import Relation.Unary using (Pred; Recomputable)
 open import Relation.Unary.Consequences
 open import Algebra hiding (Invertible)
@@ -23,7 +24,7 @@ import Algebra.Definitions as ADefs
 
 private variable
   c ℓ ℓ₁ ℓ₂ : Level
-  A : Set ℓ
+  A B : Set ℓ
   m n : ℕ
   i j k : Fin n
 
@@ -36,6 +37,24 @@ IsInj₁ (inj₂ _) = ⊥
 
 fromIsInj₁ : ∀ {a b} {A : Set a} {B : Set b} {a⊎b : A ⊎ B} → IsInj₁ a⊎b → A
 fromIsInj₁ {a⊎b = inj₁ x} _ = x
+
+record Σ′ (A : Set ℓ) (B : A → Set ℓ₁) : Set (ℓ ⊔ ℓ₁) where
+  constructor _∙∙_
+  field
+    fst′′ : A
+    .snd′′ : B fst′′
+open Σ′ public
+
+IsInj₂ : ∀ {a b} {A : Set a} {B : Set b} → A ⊎ B → Set _
+IsInj₂ (inj₁ _) = ⊥
+IsInj₂ (inj₂ _) = ⊤
+
+fromIsInj₂ : ∀ {a b} {A : Set a} {B : Set b} {a⊎b : A ⊎ B} → IsInj₂ a⊎b → B
+fromIsInj₂ {a⊎b = inj₂ x} _ = x
+
+split : (a⊎b : A ⊎ B) → Σ′ A (λ a → inj₁ a ≡ a⊎b) ⊎ Σ′ B λ b → inj₂ b ≡ a⊎b
+split (inj₁ x) = inj₁ (x ∙∙ refl)
+split (inj₂ y) = inj₂ (y ∙∙ refl)
 
 inj< : {i j : Fin n} → i F.< j → inject₁ i F.< inject₁ j
 inj< {_} {zero} {suc j} (s≤s i<j) = s≤s z≤n
