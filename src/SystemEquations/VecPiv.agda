@@ -11,6 +11,7 @@ open import Function
 open import Data.Bool using (Bool; true; false; if_then_else_)
 open import Data.Unit
 open import Data.Product
+open import Data.Irrelevant
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum renaming ([_,_] to [_∙_])
 open import Data.Empty
@@ -372,3 +373,27 @@ vSplit′ {n} {m} xs normed i = [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ<
 
     help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
     help2 rewrite ≡.sym eqn = id
+
+
+vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
+  vSplit′ xs normed (xs i) ≡ inj₂ i
+vSplit′-same xs i normed = help3
+  where
+  help3 : [ _ ∙ (inj₂ ∘ fst′′)] (split (vSplit xs (xs i))) ≡ {!!}
+  help3 = cong (λ x → [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} {!!})) ∙ (inj₂ ∘ fst′′)] (split x)) (vSplit-same xs i normed)
+    where
+
+    help : ∀ {a x} → inj₁ a ≡ x
+      → (normed : AllRowsNormalized≁0 xs)
+      → a ℕ.< n ∸ m
+    help {a} {x} eqn normed  = {!help2 is≤!}
+      -- where
+
+      -- is₁ : IsInj₁ ?
+      -- is₁ rewrite ≡.sym eqn = {!!}
+
+      -- is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
+      -- is≤ = {!vSplitFirst<n∸m _ i normed is₁!}
+
+      -- help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
+      -- help2 rewrite ≡.sym eqn = {!id!}
