@@ -44,7 +44,7 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; su
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
-open import SystemEquations.VecPiv dField using (+-right; vecIn→vecBool; allRowsNormed[]; module EqXs; module NEqXs)
+open import SystemEquations.VecPiv dField
 
 open import lbry
 
@@ -208,48 +208,48 @@ module _ where
   ... | 0F = cong ℕ.suc {!!}
   ... | suc c = {!!}
 
-  rPivs : (xs : Vector (Fin n) m) → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
-  rPivs {ℕ.zero} {ℕ.zero} _ _ = []
-  rPivs {ℕ.zero} {ℕ.suc m} _ _ ()
-  rPivs {ℕ.suc n} {ℕ.zero} _ _ = 0F ∷ F.suc ∘ rPivs {n} _ (allRowsNormed[] n)
-  rPivs {ℕ.suc n} {ℕ.suc m} xs normed i
+  rPivs′ : (xs : Vector (Fin n) m) → .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
+  rPivs′ {ℕ.zero} {ℕ.zero} _ _ = []
+  rPivs′ {ℕ.zero} {ℕ.suc m} _ _ ()
+  rPivs′ {ℕ.suc n} {ℕ.zero} _ _ = 0F ∷ F.suc ∘ rPivs′ {n} _ (allRowsNormed[] n)
+  rPivs′ {ℕ.suc n} {ℕ.suc m} xs normed i
     with xs 0F F.≟ 0F
-  ... | yes eqXs = F.suc (rPivs (ysPiv eqXs normed) (allRowsNormed eqXs normed) i)
+  ... | yes eqXs = F.suc (rPivs′ (ysPiv eqXs normed) (allRowsNormed eqXs normed) i)
     where open EqXs
-  rPivs {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed i | no xs0≢0 = 0F
-  rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed i | no xs0≢0 =
-    {!rPivs≢ (F.cast (n∸m-suc (normed> normed xs0≢0)) i)!}
+  rPivs′ {ℕ.suc ℕ.zero} {ℕ.suc m} xs normed i | no xs0≢0 = 0F
+  rPivs′ {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs normed i | no xs0≢0 =
+    {!rPivs′≢ (F.cast (n∸m-suc (normed> normed xs0≢0)) i)!}
 
     where
-    rPivs≢ : Vector (Fin (ℕ.suc (ℕ.suc n))) (ℕ.suc (n ∸ m))
-    rPivs≢ 0F = 0F
-    rPivs≢ (suc j) = rPivs {ℕ.suc (ℕ.suc n)} {ℕ.suc m} {!!} {!!} {!j!}
+    rPivs′≢ : Vector (Fin (ℕ.suc (ℕ.suc n))) (ℕ.suc (n ∸ m))
+    rPivs′≢ 0F = 0F
+    rPivs′≢ (suc j) = rPivs′ {ℕ.suc (ℕ.suc n)} {ℕ.suc m} {!!} {!!} {!j!}
 
-  ∑-rPivs : (g : Fin n → F) → ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈ ∑ g
-  ∑-rPivs {ℕ.zero} g = refl
-  ∑-rPivs {ℕ.suc n} g = +-congˡ (∑-rPivs (g ∘ F.suc))
+  ∑-rPivs′ : (g : Fin n → F) → ∑ (λ x → g (rPivs′ _ (allRowsNormed[] _) x)) ≈ ∑ g
+  ∑-rPivs′ {ℕ.zero} g = refl
+  ∑-rPivs′ {ℕ.suc n} g = +-congˡ (∑-rPivs′ (g ∘ F.suc))
 
-  ∑-pivs-same : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
-    (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs normed) ≈ ∑ g
-  ∑-pivs-same {ℕ.zero} {ℕ.zero} {xs} normed g = +-identityˡ _
-  ∑-pivs-same {ℕ.zero} {ℕ.suc m} {xs} normed g with () ← xs 0F
-  ∑-pivs-same {ℕ.suc n} {ℕ.zero} {xs} normed g = begin
+  ∑-pivs-same′ : {xs : Vector (Fin n) m} (normed : AllRowsNormalized≁0 xs)
+    (g : Fin n → F) → ∑ (g ∘ xs) + ∑ (g ∘ rPivs′ xs normed) ≈ ∑ g
+  ∑-pivs-same′ {ℕ.zero} {ℕ.zero} {xs} normed g = +-identityˡ _
+  ∑-pivs-same′ {ℕ.zero} {ℕ.suc m} {xs} normed g with () ← xs 0F
+  ∑-pivs-same′ {ℕ.suc n} {ℕ.zero} {xs} normed g = begin
     0# + _                                    ≈⟨ +-identityˡ _ ⟩
-    ∑ (λ x → g (rPivs _ (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs g ⟩
+    ∑ (λ x → g (rPivs′ _ (allRowsNormed[] _) x)) ≈⟨ ∑-rPivs′ g ⟩
     ∑ g ∎
-  ∑-pivs-same {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
+  ∑-pivs-same′ {ℕ.suc n} {ℕ.suc m} {xs} normed g with xs 0F F.≟ 0F
   ... | yes xs0≡0 = begin
     g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ +-assoc _ _ _ ⟩
-    g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (tail g ∘ rPivs {_} {m} _ (allRowsNormed xs0≡0 normed)))
+    g (xs 0F) + (∑ {m} (tail (g ∘ xs)) + ∑ {n ∸ m} (tail g ∘ rPivs′ {_} {m} _ (allRowsNormed xs0≡0 normed)))
       ≈⟨ +-cong (reflexive (cong g xs0≡0)) (+-congʳ (∑Ext {m}
         (λ i → reflexive (≡.sym (cong g (suc-reduce _ (tailXs>0 xs0≡0 normed  _)))))))⟩
     g 0F + (∑ {m} (tail g ∘ _) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ
-      (∑-pivs-same {n} {m} (allRowsNormed xs0≡0 normed) (tail g)) ⟩
+      (∑-pivs-same′ {n} {m} (allRowsNormed xs0≡0 normed) (tail g)) ⟩
     g 0F + ∑ (tail g) ∎ where open EqXs
   ... | no xs0≢0 = begin
     g (xs 0F) + ∑ {m} _ + ∑ {n ∸ m} _ ≈⟨ {!!} ⟩
     -- {!!} ≈⟨ {!!} ⟩
-    -- g 0F + (∑ {m} (tail g ∘ _) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ (∑-pivs-same (allRowsNormed xs0≢0 normed) (tail g)) ⟩
+    -- g 0F + (∑ {m} (tail g ∘ _) + ∑ {n ∸ m} (tail g ∘ _)) ≈⟨ +-congˡ (∑-pivs-same′ (allRowsNormed xs0≢0 normed) (tail g)) ⟩
     g 0F + ∑ (tail g) ∎ where open NEqXs
 
 
@@ -264,25 +264,29 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
   vBool = vecIn→vecBool pivs
 
   pivRes : Vector (Fin m) (m ∸ n)
-  pivRes = rPivs _ pivsCrescent
+  pivRes = rPivs′ _ pivsCrescent
 
-  vSplit : Vector (Fin (m ∸ n) ⊎ Fin n) m
-  vSplit i = [ pivs ∙ pivRes ] {!splitAt n {!i!}!}
+  vSplit' : Vector (Fin (m ∸ n) ⊎ Fin n) m
+  vSplit' = vSplit′ _ pivsCrescent
+
+  vAffRPiv : Vector (Affine $ m ∸ n) $ m ∸ n
+  vAffRPiv j = vAff (δ j) 0#
+
+  vAffPiv : Vector (Affine $ m ∸ n) n
+  vAffPiv j = vAff (λ k → - A j (pivRes k)) (b j)
 
   vAffine : VecAffine m (m ∸ n)
-  vAffine i with vSplit i
-  ... | inj₁ j = vAff (δ j) 0#
-  ... | inj₂ j  = vAff (λ k → - A j (pivRes k)) (b j)
+  vAffine = [ vAffRPiv ∙ vAffPiv ] ∘ vSplit'
 
   open Affine
 
 
   vAffFamily : IsFamilySolution vAffine
   vAffFamily vecs i = begin
-    ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈˘⟨ ∑-pivs-same pivsCrescent
+    ∑ (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ≈˘⟨ ∑-pivs-same′ pivsCrescent
       (λ j → A i j * (∑ (λ k → vecs k * coeff (vAffine j) k) + constant (vAffine j))) ⟩
-    ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j)))) +
-    ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine (pivRes j)) k) + constant (vAffine (pivRes j))))
+    ∑ (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine $ pivs j) k) + constant (vAffine $ pivs j))) +
+    ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * coeff (vAffine $ pivRes j) k) + constant (vAffine $ pivRes j)))
       ≈⟨ +-cong ∑Piv ∑NPiv ⟩
     b i + ∑ (λ k → - (A i (pivRes k) * vecs k)) + ∑ (λ k → A i (pivRes k) * vecs k) ≈⟨ +-assoc (b i) _ _ ⟩
     b i + (∑ {m ∸ n} (λ k → - (A i (pivRes k) * vecs k)) + ∑ λ k → A i (pivRes k) * vecs k) ≈⟨ +-congˡ
@@ -300,8 +304,11 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
     ... | yes ≡.refl = pivsOne _
     ... | no i≢j = columnsZero _ _ (i≢j ∘ ≡.sym)
 
+    constVAffine≈′ : constant ([ vAffRPiv ∙ vAffPiv ] (vSplit' (pivs i))) ≈ b i
+    constVAffine≈′ = {!c!}
 
-    constVAffine≈ = {!!}
+    constVAffine≈ : constant (vAffine (pivs i)) ≈ b i
+    constVAffine≈ = {!c!}
 
     ∑Piv = begin
       ∑ {n} (λ j → A i (pivs j) * (∑ (λ k → vecs k * coeff (vAffine (pivs j)) k) + constant (vAffine (pivs j))))

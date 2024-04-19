@@ -43,7 +43,7 @@ open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
 open MRing rawRing using (Matrix)
 open import Algebra.Module.Instances.CommutativeRing commutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; subst; subst₂; cong)
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; subst; subst₂; cong; module ≡-Reasoning)
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
@@ -351,3 +351,15 @@ vSplit-rPivs {2+ n} {ℕ.suc m} xs i normed | 0F
 vSplit-rPivs {2+ n} {ℕ.suc m} xs 0F normed | suc c rewrite eq0 = ≡.refl
 vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
   rewrite eq0 | vSplit-rPivs (pred-vec xs) i (pred-normed normed eq0) = ≡.refl
+
+vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
+vSplit′ {n} {m} xs normed i with vSplit xs i in eqn
+... | inj₁ x = inj₁ (F.fromℕ< {m = x} (help (vSplitFirst<n∸m _ i normed)))
+  where
+  help : ((is₁ : IsInj₁ (vSplit xs i)) → fromIsInj₁ is₁ ℕ.< n ∸ m) → x ℕ.< n ∸ m
+  help rewrite eqn = λ f → f _
+
+... | inj₂ y = inj₂ y
+
+vSplit′-piv-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) → vSplit′ xs normed (xs i) ≡ inj₂ i
+vSplit′-piv-same xs i normed = {!!}
