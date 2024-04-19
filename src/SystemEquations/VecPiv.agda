@@ -353,13 +353,22 @@ vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
   rewrite eq0 | vSplit-rPivs (pred-vec xs) i (pred-normed normed eq0) = ≡.refl
 
 vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
-vSplit′ {n} {m} xs normed i with vSplit xs i in eqn
-... | inj₁ x = inj₁ (F.fromℕ< {m = x} (help (vSplitFirst<n∸m _ i normed)))
+vSplit′ {n} {m} xs normed i = [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} (help isInj₁ normed))) ∙
+  inj₂ ∘ fst′′ ]
+  (split $ vSplit xs i)
   where
-  help : ((is₁ : IsInj₁ (vSplit xs i)) → fromIsInj₁ is₁ ℕ.< n ∸ m) → x ℕ.< n ∸ m
-  help rewrite eqn = λ f → f _
 
-... | inj₂ y = inj₂ y
+  help : ∀ {a} → inj₁ a ≡ vSplit xs i
+    → (normed : AllRowsNormalized≁0 xs)
+    → a ℕ.< n ∸ m
+  help {a} eqn normed  = help2 is≤
+    where
 
-vSplit′-piv-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) → vSplit′ xs normed (xs i) ≡ inj₂ i
-vSplit′-piv-same xs i normed = {!!}
+    is₁ : IsInj₁ (vSplit xs i)
+    is₁ rewrite ≡.sym eqn = _
+
+    is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
+    is≤ = vSplitFirst<n∸m _ i normed is₁
+
+    help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
+    help2 rewrite ≡.sym eqn = id
