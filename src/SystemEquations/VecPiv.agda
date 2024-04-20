@@ -4,7 +4,7 @@ open import Algebra.DecidableField
 
 module SystemEquations.VecPiv {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
-open import Level using (_⊔_)
+open import Level using (Level; _⊔_)
 open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
@@ -376,7 +376,6 @@ vSplit′-same xs i normed with vSplit xs (xs i)
 rPivs′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
 rPivs′ xs normed i = rPivs xs .proj₂ (F.cast (≡.sym $ rPivs-n∸m xs normed) i)
 
-
 vSplit′-rPivs : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs)
   → vSplit′ xs normed (rPivs′ xs normed i) ≡ inj₁ i
 vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
@@ -384,3 +383,16 @@ vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
   | vSplit-rPivs xs (F.cast (≡.sym $ rPivs-n∸m xs normed) i) normed
 ... | inj₁ x | b | f rewrite inj-same' f = cong inj₁ $
   toℕ-injective $ ≡.trans (toℕ-fromℕ< (b _)) $ toℕ-cast (≡.sym $ rPivs-n∸m xs normed) i
+
+≋-cast : m ≡ n → Vector F m → Vector F n → Set _
+≋-cast m≡n xs ys = ∀ i → xs i ≈ ys (F.cast m≡n i)
+
+∑Ext′ : {U : Vector F m} {V : Vector F n} → (m≡n : m ≡ n) → ≋-cast m≡n U V → ∑ U ≈ ∑ V
+∑Ext′ {m} {V = V} ≡.refl eq = trans (∑Ext eq) (∑Ext {m} (λ i → reflexive (cong V (cast-is-id ≡.refl _))))
+
+∑-pivs′-same : (xs : Vector (Fin n) m) (g : Vector F n) (normed : AllRowsNormalized≁0 xs)
+   → ∑ (g ∘ xs) + ∑ (g ∘ rPivs′ xs normed) ≈ ∑ g
+∑-pivs′-same xs g normed = begin
+  ∑ (g ∘ xs) + ∑ (g ∘ rPivs′ xs normed) ≈⟨ +-congˡ (∑Ext′ (≡.sym $ rPivs-n∸m xs normed) λ _ → refl) ⟩
+  ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs .proj₂)  ≈⟨ ∑-pivs-same xs g normed ⟩
+  ∑ g ∎
