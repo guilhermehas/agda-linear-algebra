@@ -15,6 +15,7 @@ open import Data.Product
 open import Data.Irrelevant
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
 open import Data.Sum renaming ([_,_] to [_∙_])
+open import Data.Sum.Properties
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ; _∸_; 2+; z≤n; s≤s)
 open import Data.Nat.Properties as ℕ using (module ≤-Reasoning)
@@ -356,31 +357,18 @@ vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
 
 split⊎ : (union : ℕ ⊎ Fin m) .(norm : (inj : IsInj₁ union) → fromIsInj₁ inj ℕ.< n ∸ m)
   → Fin (n ∸ m) ⊎ Fin m
-split⊎ (inj₁ x) norm = inj₁ (fromℕ< (norm _))
+split⊎ (inj₁ x) norm = inj₁ $ fromℕ< (norm _)
 split⊎ (inj₂ y) norm = inj₂ y
 
-
-vSplit′′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
-vSplit′′ xs normed i = split⊎ (vSplit xs i) (vSplitFirst<n∸m xs i normed)
-
-vSplit′ : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
-vSplit′ xs normed i with vSplit xs i | vSplitFirst<n∸m xs i normed
-... | inj₂ y | b = inj₂ y
-... | inj₁ x | f = inj₁ $ fromℕ< (f _)
-
-private
-  inj-same : ∀ {aa bb} {A : Set aa} {B : Set bb} {x y : B} → inj₂ {A = A} x ≡ inj₂ {A = A} y → x ≡ y
-  inj-same ≡.refl = ≡.refl
-
-  inj-same' : ∀ {aa bb} {A : Set aa} {B : Set bb} {x y : A} → inj₁ {B = B} x ≡ inj₁ {B = B} y → x ≡ y
-  inj-same' ≡.refl = ≡.refl
+vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs) → Vector (Fin (n ∸ m) ⊎ Fin m) n
+vSplit′ xs normed i = split⊎ (vSplit xs i) (vSplitFirst<n∸m xs i normed)
 
 vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
   vSplit′ xs normed (xs i) ≡ inj₂ i
 vSplit′-same xs i normed with vSplit xs (xs i)
   | vSplitFirst<n∸m xs (xs i) normed
   | vSplit-same xs i normed
-... | inj₂ _ | _ | eq rewrite inj-same eq = ≡.refl
+... | inj₂ _ | _ | eq rewrite inj₂-injective eq = ≡.refl
 
 rPivs′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
 rPivs′ xs normed i = rPivs xs .proj₂ (F.cast (≡.sym $ rPivs-n∸m xs normed) i)
@@ -390,7 +378,7 @@ vSplit′-rPivs : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 
 vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
   | vSplitFirst<n∸m xs (rPivs′ xs normed i) normed
   | vSplit-rPivs xs (F.cast (≡.sym $ rPivs-n∸m xs normed) i) normed
-... | inj₁ x | b | f rewrite inj-same' f = cong inj₁ $
+... | inj₁ x | b | f rewrite inj₁-injective f = cong inj₁ $
   toℕ-injective $ ≡.trans (toℕ-fromℕ< (b _)) $ toℕ-cast (≡.sym $ rPivs-n∸m xs normed) i
 
 ≋-cast : m ≡ n → Vector F m → Vector F n → Set _
