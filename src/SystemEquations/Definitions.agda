@@ -58,7 +58,6 @@ open Affine
 getRow : (r : Fin rows) → Matrix F rows cols → Vector F cols
 getRow r m = m r
 
-
 record SystemEquations (rows cols : ℕ) : Set c where
   constructor system
   field

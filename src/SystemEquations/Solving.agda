@@ -37,7 +37,7 @@ open CommutativeRing commutativeRing using (rawRing; ring; sym; +-commutativeMon
 open import Algebra.Properties.Ring ring
 open VRing rawRing
 open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
-open MRing rawRing using (Matrix)
+open MRing rawRing using (Matrix; _++v_)
 open import Algebra.Module.Instances.CommutativeRing commutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; subst; subst₂; cong)
@@ -67,6 +67,12 @@ private
 
   add-1 : Vector F n → Vector F (ℕ.suc n)
   add-1 xs = appendLast xs (- 1#)
+
+  same-take : ∀ (xs : Matrix F n (ℕ.suc m)) i j
+    → ((λ i j → xs i (inject₁ j)) ++v λ w → xs w (lastFin _)) i j ≡ xs i j
+  same-take {n} {ℕ.zero} xs i 0F = ≡.refl
+  same-take {n} {ℕ.suc m} xs i 0F = ≡.refl
+  same-take {n} {ℕ.suc m} xs i (suc j) rewrite same-take (λ i j → xs i (suc j)) i j = ≡.refl
 
 A++b⇒systemEquations : Matrix F n (ℕ.suc m) → SystemEquations n m
 A++b⇒systemEquations xs = record { A = λ i j → xs i (inject₁ j) ; b = λ i → xs i (lastFin _) }
@@ -322,10 +328,11 @@ solveSystemEquations sx = _ , sameSolutions≈ A++b≋ⱽs sol-prob
   open SystemEquations sYs using ()
     renaming (Solution to SYs; A++b to A++b-ys)
 
-  ys≋A++b-ys = {!!}
+  ys≋A++b-ys : ∀ i j → ys i j ≈ A++b-ys i j
+  ys≋A++b-ys i j = reflexive (≡.sym (same-take ys i j))
 
   A++b≋ⱽs : A++b ≋ⱽ A++b-ys
   A++b≋ⱽs = ≋ⱽ-trans xs≋ⱽys $ ≋ⱽ-reflexive ys≋A++b-ys
 
   sol-prob : SYs _
-  sol-prob = solveNormedEquationNorm sYs {!!}
+  sol-prob = solveNormedEquationNorm sYs $ ≈-norm ys≋A++b-ys ysNormed

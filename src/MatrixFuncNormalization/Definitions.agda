@@ -17,16 +17,17 @@ open import Data.Vec.Functional
 open import Relation.Nullary.Construct.Add.Supremum
 open import Relation.Nullary
 open import Relation.Binary.Definitions
-open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 import Algebra.Module.Definition as MDefinition
 import Algebra.Module.Props as MProps
 
 open import Algebra.Matrix.Structures
 
-open DecidableField dField renaming (Carrier to F; heytingField to hField)
+open DecidableField dField renaming (Carrier to F; heytingField to hField) hiding (sym)
 open HeytingField hField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
-open CommutativeRing commutativeRing using (rawRing; ring)
+open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
+open CommutativeRing commutativeRing using (rawRing; ring; sym)
 
 open import MatrixFuncNormalization.normBef dField
 open import MatrixFuncNormalization.NormAfter.PropsFlip dField
@@ -197,3 +198,22 @@ record FromNormalization≁0≈1 (xs : Matrix F n m) (p : ℕ) : Set (c ⊔ ℓ�
     xs≋ⱽys   : xs ≋ⱽ ys
 
   open MatrixIsNormed≁0≈1 ysNormed public
+
+≈-norm : {xs ys : Matrix F n m} → (∀ i j → xs i j ≈ ys i j) → MatrixIsNormed≁0≈1 xs → MatrixIsNormed≁0≈1 ys
+≈-norm {xs = xs} {ys} xs≈ys (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots pivsCrescent columnsZero) pivsOne) =
+  cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivsYs pivsCrescent colsYs) pivsYsOne
+
+  where
+
+  ys≈xs : ∀ i j → ys i j ≈ xs i j
+  ys≈xs i j = sym (xs≈ys i j)
+
+  mPivsYs : MatrixPivots≁0 ys pivs
+  proj₁ (mPivsYs i) = #-congʳ (xs≈ys i _) (mPivots i .proj₁)
+  proj₂ (mPivsYs i) j ineq = trans (ys≈xs i j) $ mPivots i .proj₂ j ineq
+
+  colsYs : ColumnsZero≁0 ys pivs
+  colsYs i j i≢j = trans (ys≈xs _ _) $ columnsZero i j i≢j
+
+  pivsYsOne : PivsOne≁0 ys pivs
+  pivsYsOne i = trans (ys≈xs _ _) (pivsOne _)

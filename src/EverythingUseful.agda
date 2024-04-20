@@ -10,3 +10,5 @@ open import MatrixNormalization.normLinesField
 open import Examples
 
 open import MatrixFuncNormalization.MainTheo
+
+open import SystemEquations.Solving
