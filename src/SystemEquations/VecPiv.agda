@@ -4,6 +4,7 @@ open import Algebra.DecidableField
 
 module SystemEquations.VecPiv {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
+open import Level using (_⊔_)
 open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
@@ -353,47 +354,109 @@ vSplit-rPivs {2+ n} {ℕ.suc m} xs 0F normed | suc c rewrite eq0 = ≡.refl
 vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
   rewrite eq0 | vSplit-rPivs (pred-vec xs) i (pred-normed normed eq0) = ≡.refl
 
-vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
-vSplit′ {n} {m} xs normed i = [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} (help isInj₁ normed))) ∙
-  inj₂ ∘ fst′′ ]
-  (split $ vSplit xs i)
-  where
+record Fin′ (n : ℕ) : Set where
+  constructor _[[_]]
+  field
+    p : ℕ
+    .p<n : p ℕ.< n
 
-  help : ∀ {a} → inj₁ a ≡ vSplit xs i
-    → (normed : AllRowsNormalized≁0 xs)
-    → a ℕ.< n ∸ m
-  help {a} eqn normed  = help2 is≤
-    where
+open Fin′
 
-    is₁ : IsInj₁ (vSplit xs i)
-    is₁ rewrite ≡.sym eqn = _
+-- data _⊎′_ {aa bb} (A : Set aa) (B : Set bb) : Set (aa ⊔ bb) where
+--   from₁ : ∀ (a : A) .(isInj₁ : IsInj₁ {B = B} (inj₁ a)) → A ⊎′ B
+--   from₂ : ∀ (b : B) .(isInj₂ : IsInj₂ {A = A} (inj₂ b)) → A ⊎′ B
 
-    is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
-    is≤ = vSplitFirst<n∸m _ i normed is₁
+-- split⊎ : ∀ {aa bb} {A : Set aa} {B : Set bb} → A ⊎ B → A ⊎′ B
+-- split⊎ (inj₁ x) = from₁ x _
+-- split⊎ (inj₂ y) = from₂ y _
 
-    help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
-    help2 rewrite ≡.sym eqn = id
+vSplit′ : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs)  → Vector (Fin′ (n ∸ m) ⊎ Fin m) n
+vSplit′ xs normed i with vSplit xs i | vSplitFirst<n∸m xs i normed
+... | inj₁ x | f = inj₁ (x [[ (f _) ]])
+... | inj₂ y | b = inj₂ y
 
+inj-same : ∀ {aa bb} {A : Set aa} {B : Set bb} {x y : B} → inj₂ {A = A} x ≡ inj₂ {A = A} y → x ≡ y
+inj-same ≡.refl = ≡.refl
 
 vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
   vSplit′ xs normed (xs i) ≡ inj₂ i
-vSplit′-same xs i normed = help3
-  where
-  help3 : [ _ ∙ (inj₂ ∘ fst′′)] (split (vSplit xs (xs i))) ≡ {!!}
-  help3 = cong (λ x → [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} {!!})) ∙ (inj₂ ∘ fst′′)] (split x)) (vSplit-same xs i normed)
-    where
+vSplit′-same xs i normed with vSplit xs (xs i)
+  | vSplitFirst<n∸m xs (xs i) normed
+  | vSplit-same xs i normed
+... | inj₂ y | b | c rewrite inj-same c = ≡.refl
 
-    help : ∀ {a x} → inj₁ a ≡ x
-      → (normed : AllRowsNormalized≁0 xs)
-      → a ℕ.< n ∸ m
-    help {a} {x} eqn normed  = {!help2 is≤!}
-      -- where
+-- vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin′ (n ∸ m) ⊎ Fin m) n
+-- vSplit′ xs normed i with vSplit xs i in eq
+-- vSplit′ {n} {m} xs normed i | inj₁ x = inj₁ (x [[ help normed ]])
+--   where
+--   help : AllRowsNormalized≁0 xs → x ℕ.< n ∸ m
+--   help normed = help2 $ vSplitFirst<n∸m _ i normed is₁
+--     where
+--     is₁ : IsInj₁ (vSplit xs i)
+--     is₁ = subst IsInj₁ (≡.sym eq) _
 
-      -- is₁ : IsInj₁ ?
-      -- is₁ rewrite ≡.sym eqn = {!!}
+--     help2 : fromIsInj₁ {a⊎b = vSplit xs i} is₁ ℕ.< n ∸ m → x ℕ.< n ∸ m
+--     help2 rewrite eq = id
+-- vSplit′ xs normed i | inj₂ y = inj₂ y
 
-      -- is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
-      -- is≤ = {!vSplitFirst<n∸m _ i normed is₁!}
+-- vSplit′-same' : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) c
+--   → vSplit xs (xs i) ≡ c
+--   → vSplit′ xs normed (xs i) ≡ inj₂ i
+-- vSplit′-same' xs i normed (inj₁ x) eqn = {!!}
+-- vSplit′-same' xs i normed (inj₂ y) eqn = {!!}
 
-      -- help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
-      -- help2 rewrite ≡.sym eqn = {!id!}
+
+-- vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
+--   vSplit′ xs normed (xs i) ≡ inj₂ i
+-- vSplit′-same xs i normed = vSplit′-same' xs i normed _ ≡.refl
+
+
+  -- where
+
+  -- help : vSplit xs (xs i) ≡ inj₂ i → ⊥
+  -- help rewrite eq = {!!}
+
+-- vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
+-- vSplit′ {n} {m} xs normed i = [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} (help isInj₁ normed))) ∙
+--   inj₂ ∘ fst′′ ]
+--   (split $ vSplit xs i)
+--   where
+
+--   help : ∀ {a} → inj₁ a ≡ vSplit xs i
+--     → (normed : AllRowsNormalized≁0 xs)
+--     → a ℕ.< n ∸ m
+--   help {a} eqn normed  = help2 is≤
+--     where
+
+--     is₁ : IsInj₁ (vSplit xs i)
+--     is₁ rewrite ≡.sym eqn = _
+
+--     is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
+--     is≤ = vSplitFirst<n∸m _ i normed is₁
+
+--     help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
+--     help2 rewrite ≡.sym eqn = id
+
+
+-- vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
+--   vSplit′ xs normed (xs i) ≡ inj₂ i
+-- vSplit′-same xs i normed = help3
+--   where
+--   help3 : [ _ ∙ (inj₂ ∘ fst′′)] (split (vSplit xs (xs i))) ≡ {!!}
+--   help3 = cong (λ x → [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} {!!})) ∙ (inj₂ ∘ fst′′)] (split x)) (vSplit-same xs i normed)
+--     where
+
+--     help : ∀ {a x} → inj₁ a ≡ x
+--       → (normed : AllRowsNormalized≁0 xs)
+--       → a ℕ.< n ∸ m
+--     help {a} {x} eqn normed  = {!help2 is≤!}
+--       -- where
+
+--       -- is₁ : IsInj₁ ?
+--       -- is₁ rewrite ≡.sym eqn = {!!}
+
+--       -- is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
+--       -- is≤ = {!vSplitFirst<n∸m _ i normed is₁!}
+
+--       -- help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
+--       -- help2 rewrite ≡.sym eqn = {!id!}
