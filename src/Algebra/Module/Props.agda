@@ -90,8 +90,19 @@ xsReachesItself xs i = record { ys = δ i ; xs*ys≈x = δ*ᵣ-refl xs i }
 0∷≈ⱽ : (xs : Vector M n) → (0ᴹ ∷ xs) ≋ⱽ xs
 0∷≈ⱽ xs = record { fwd = 0∷⊆ⱽ xs ; bwd = ⊆ⱽ0∷ xs }
 
+⊆ⱽ-reflexive : xs ≋ ys → xs ⊆ⱽ ys
+⊆ⱽ-reflexive {xs = xs} {ys} xs≋ys {x} (ws by ws*xs≈x) = ws by ∑ws≈x
+  where
+  ∑ws≈x = begin
+    ∑ (ws *ᵣ ys) ≈˘⟨ ∑Ext (λ i → *ₗ-congˡ (xs≋ys i)) ⟩
+    ∑ (ws *ᵣ xs)  ≈⟨ ws*xs≈x ⟩
+    x ∎
+
 ≋ⱽ-refl : Reflexive (_≋ⱽ_ {n})
 ≋ⱽ-refl = record { fwd = id ; bwd = id }
+
+≋ⱽ-reflexive : xs ≋ ys → xs ≋ⱽ ys
+≋ⱽ-reflexive xs≋ys = record { fwd = ⊆ⱽ-reflexive xs≋ys ; bwd = ⊆ⱽ-reflexive (≋-sym xs≋ys) }
 
 ≋ⱽ-sym : Symmetric (_≋ⱽ_ {n})
 ≋ⱽ-sym record { fwd = fwd ; bwd = bwd } = record { fwd = bwd ; bwd = fwd }

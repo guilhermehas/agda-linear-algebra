@@ -43,20 +43,21 @@ open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_; subst; subst₂; cong)
 open import Relation.Binary.Reasoning.Setoid setoid
 open import Algebra.Solver.CommutativeMonoid +-commutativeMonoid hiding (id)
-open import Algebra.Module.PropsVec commutativeRing hiding (module MProps)
+open import Algebra.Module.PropsVec commutativeRing
 open import SystemEquations.VecPiv dField
+open import MatrixFuncNormalization.MainTheo dField
 
 open import lbry
 
-open module MProps {n} = MProps′ (*ⱽ-commutativeRing n) (leftModule n)
 open SumRing ring using (∑Ext; ∑0r; δ; ∑Mul1r; ∑Split)
 open MDef′
+open MProps
 
 private variable
-  m n : ℕ
+  m n p q : ℕ
 
 private
-  lastFin : (n : ℕ) → Fin (n ℕ.+ 1)
+  lastFin : (n : ℕ) → Fin (ℕ.suc n)
   lastFin ℕ.zero = 0F
   lastFin (ℕ.suc n) = suc (lastFin n)
 
@@ -67,13 +68,13 @@ private
   add-1 : Vector F n → Vector F (ℕ.suc n)
   add-1 xs = appendLast xs (- 1#)
 
-A++b⇒systemEquations : Matrix F n (m ℕ.+ 1) → SystemEquations n m
-A++b⇒systemEquations xs = record { A = λ i j → xs i (injF j) ; b = λ i → xs i (lastFin _) }
+A++b⇒systemEquations : Matrix F n (ℕ.suc m) → SystemEquations n m
+A++b⇒systemEquations xs = record { A = λ i j → xs i (inject₁ j) ; b = λ i → xs i (lastFin _) }
 
 module _ where
   open SystemEquations
 
-  sameSolutionsSE : {sx sy : SystemEquations n m}  → A++b sy ⊆ⱽ A++b sx
+  sameSolutionsSE : {sx : SystemEquations n m} {sy : SystemEquations p m} → A++b sy ⊆ⱽ A++b sx
     → ∀ v → IsSolutionA++b sx v → IsSolutionA++b sy v
   sameSolutionsSE sy⊆ⱽsx i = sameSolutions {α = i} sy⊆ⱽsx
 
@@ -116,10 +117,18 @@ sameSolutionsA++b-inv {m = m} {system A b} {v} sv i = begin
 module _ where
   open SystemEquations
 
-  sameSolutionsS : {sx sy : SystemEquations n m}  → A++b sy ⊆ⱽ A++b sx
+  sameSolutionsS : {sx : SystemEquations n m} {sy : SystemEquations p m}  → A++b sy ⊆ⱽ A++b sx
     → ∀ v → IsSolution sx v → IsSolution sy v
   sameSolutionsS {sx = sx} {sy} sy⊆ⱽsx v isSol = sameSolutionsA++b {sx = sy}
-    (sameSolutionsSE {sx = sx} {sy} sy⊆ⱽsx (add-1 v) (sameSolutionsA++b-inv {sx = sx} isSol))
+    (sameSolutionsSE {sx = sx} {sy = sy} sy⊆ⱽsx (add-1 v) (sameSolutionsA++b-inv {sx = sx} isSol))
+
+  open _≋ⱽ_
+
+  sameSolutions≈ : {sx : SystemEquations n m} {sy : SystemEquations p m}
+    → A++b sy ≋ⱽ A++b sx → Solution sx q → Solution sy q
+  sameSolutions≈ sy≋ⱽsx (sol f) = sol $ sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f
+  sameSolutions≈ sy≋ⱽsx (noSol f) = noSol (f ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
+
 
 systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) → A≈0∧b#0 → ∀ {v} → IsSolution v → ⊥
 systemUnsolvable {n = n} {m} {system A b} (i , A0 , b#0) {v} sv = tight _ _ .proj₂
@@ -299,13 +308,24 @@ solveNormedEquationNorm sx norm with
   systemNormedSplit sx norm |
   systemUnsolvable {sx = sx} |
   solveNormedEquation sx
-... | inj₁ x | b | c = SystemEquations.noSol (λ _ → b x)
+... | inj₁ x | b | c = SystemEquations.noSol $ b x
 ... | inj₂ y | b | c = SystemEquations.sol (c y .proj₂)
 
-solveSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → Solution (m ∸ n)
-solveSystemEquations sx = {!!}
+solveSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → ∃ Solution
+solveSystemEquations sx = _ , sameSolutions≈ A++b≋ⱽs sol-prob
   where
   open SystemEquations sx
+  open FromNormalization≁0≈1 (normalize≈1≁0 A++b)
 
-  anotherSolution : {!!}
-  anotherSolution = sameSolutionsS {!!} {!!} {!!}
+  sYs = A++b⇒systemEquations ys
+
+  open SystemEquations sYs using ()
+    renaming (Solution to SYs; A++b to A++b-ys)
+
+  ys≋A++b-ys = {!!}
+
+  A++b≋ⱽs : A++b ≋ⱽ A++b-ys
+  A++b≋ⱽs = ≋ⱽ-trans xs≋ⱽys $ ≋ⱽ-reflexive ys≋A++b-ys
+
+  sol-prob : SYs _
+  sol-prob = solveNormedEquationNorm sYs {!!}

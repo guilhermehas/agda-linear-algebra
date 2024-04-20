@@ -85,7 +85,7 @@ record SystemEquations (rows cols : ℕ) : Set c where
 
   data Solution (p : ℕ) : Set (c ⊔ ℓ₁) where
     sol : ∀ {affine} → IsFamilySolution {p = p} affine → Solution p
-    noSol : (∀ v → ¬ IsSolution v) → Solution p
+    noSol : (∀ {v} → ¬ IsSolution v) → Solution p
 
   open Solution public
 
