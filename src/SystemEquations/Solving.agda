@@ -113,6 +113,14 @@ sameSolutionsA++b-inv {m = m} {system A b} {v} sv i = begin
   b i - b i                         ≈⟨ -‿inverseʳ (b i) ⟩
   0# ∎
 
+module _ where
+  open SystemEquations
+
+  sameSolutionsS : {sx sy : SystemEquations n m}  → A++b sy ⊆ⱽ A++b sx
+    → ∀ v → IsSolution sx v → IsSolution sy v
+  sameSolutionsS {sx = sx} {sy} sy⊆ⱽsx v isSol = sameSolutionsA++b {sx = sy}
+    (sameSolutionsSE {sx = sx} {sy} sy⊆ⱽsx (add-1 v) (sameSolutionsA++b-inv {sx = sx} isSol))
+
 systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) → A≈0∧b#0 → ∀ {v} → IsSolution v → ⊥
 systemUnsolvable {n = n} {m} {system A b} (i , A0 , b#0) {v} sv = tight _ _ .proj₂
   (begin
@@ -193,9 +201,9 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
   pivs≁0 i = trans (sym (reflexive (A++b≡piv _))) (pivsOne i)
 
 
-solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A →
-  ∃ λ p → ∃ (IsFamilySolution {p = p})
-solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
+solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
+  → MatrixIsNormed≁0≈1 A → ∃ IsFamilySolution
+solveNormedEquation {n} {m} sx ANormed = vAffine , vAffFamily
   where
   open SystemEquations sx
   open MatrixIsNormed≁0≈1 ANormed
@@ -284,3 +292,20 @@ solveNormedEquation {n} {m} sx ANormed = m ∸ n , vAffine , vAffFamily
         ≈⟨ ∑Ext (λ j → *-congˡ (+-cong (∑Ext (λ k → *-congˡ (∑CoeffConst₁ j k))) (∑CoeffConst₂ j))) ⟩
       ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * δ j k) + 0#)) ≈⟨ ∑Ext (λ j → *-congˡ (∑Eq j)) ⟩
       ∑ (λ j → A i (pivRes j) * vecs j) ∎
+
+solveNormedEquationNorm : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
+  → Solution (m ∸ n)
+solveNormedEquationNorm sx norm with
+  systemNormedSplit sx norm |
+  systemUnsolvable {sx = sx} |
+  solveNormedEquation sx
+... | inj₁ x | b | c = SystemEquations.noSol (λ _ → b x)
+... | inj₂ y | b | c = SystemEquations.sol (c y .proj₂)
+
+solveSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → Solution (m ∸ n)
+solveSystemEquations sx = {!!}
+  where
+  open SystemEquations sx
+
+  anotherSolution : {!!}
+  anotherSolution = sameSolutionsS {!!} {!!} {!!}

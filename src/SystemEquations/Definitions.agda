@@ -11,6 +11,7 @@ open import Data.Nat.Base as ℕ using (ℕ)
 open import Data.Vec.Functional
 open import Data.Fin as F using (Fin)
 open import Relation.Nullary.Construct.Add.Supremum
+open import Relation.Nullary
 import Algebra.Module.Definition as MDef′
 
 open import Algebra.Matrix.Structures
@@ -81,6 +82,12 @@ record SystemEquations (rows cols : ℕ) : Set c where
 
   A≈0∧b#0 : Set _
   A≈0∧b#0 = ∃ A≈0∧b#0I
+
+  data Solution (p : ℕ) : Set (c ⊔ ℓ₁) where
+    sol : ∀ {affine} → IsFamilySolution {p = p} affine → Solution p
+    noSol : (∀ v → ¬ IsSolution v) → Solution p
+
+  open Solution public
 
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
