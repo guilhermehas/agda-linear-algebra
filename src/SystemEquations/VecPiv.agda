@@ -18,7 +18,7 @@ open import Data.Sum renaming ([_,_] to [_∙_])
 open import Data.Empty
 open import Data.Nat as ℕ using (ℕ; _∸_; 2+; z≤n; s≤s)
 open import Data.Nat.Properties as ℕ using (module ≤-Reasoning)
-open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; toℕ; inject₁)
+open import Data.Fin as F using (Fin; suc; splitAt; fromℕ; fromℕ<; toℕ; inject₁)
 open import Data.Fin.Properties as F
 open import Data.Fin.Patterns
 open import Data.Vec.Functional
@@ -354,26 +354,10 @@ vSplit-rPivs {2+ n} {ℕ.suc m} xs 0F normed | suc c rewrite eq0 = ≡.refl
 vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
   rewrite eq0 | vSplit-rPivs (pred-vec xs) i (pred-normed normed eq0) = ≡.refl
 
-record Fin′ (n : ℕ) : Set where
-  constructor _[[_]]
-  field
-    p : ℕ
-    .p<n : p ℕ.< n
-
-open Fin′
-
--- data _⊎′_ {aa bb} (A : Set aa) (B : Set bb) : Set (aa ⊔ bb) where
---   from₁ : ∀ (a : A) .(isInj₁ : IsInj₁ {B = B} (inj₁ a)) → A ⊎′ B
---   from₂ : ∀ (b : B) .(isInj₂ : IsInj₂ {A = A} (inj₂ b)) → A ⊎′ B
-
--- split⊎ : ∀ {aa bb} {A : Set aa} {B : Set bb} → A ⊎ B → A ⊎′ B
--- split⊎ (inj₁ x) = from₁ x _
--- split⊎ (inj₂ y) = from₂ y _
-
-vSplit′ : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs)  → Vector (Fin′ (n ∸ m) ⊎ Fin m) n
+vSplit′ : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
 vSplit′ xs normed i with vSplit xs i | vSplitFirst<n∸m xs i normed
-... | inj₁ x | f = inj₁ (x [[ (f _) ]])
 ... | inj₂ y | b = inj₂ y
+... | inj₁ x | f = inj₁ $ fromℕ< (f _)
 
 inj-same : ∀ {aa bb} {A : Set aa} {B : Set bb} {x y : B} → inj₂ {A = A} x ≡ inj₂ {A = A} y → x ≡ y
 inj-same ≡.refl = ≡.refl
@@ -383,7 +367,18 @@ vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 x
 vSplit′-same xs i normed with vSplit xs (xs i)
   | vSplitFirst<n∸m xs (xs i) normed
   | vSplit-same xs i normed
-... | inj₂ y | b | c rewrite inj-same c = ≡.refl
+... | inj₂ _ | _ | eq rewrite inj-same eq = ≡.refl
+
+rPivs′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs) → Vector (Fin n) (n ∸ m)
+rPivs′ xs normed i = rPivs xs .proj₂ (F.cast (≡.sym $ rPivs-n∸m xs normed) i)
+
+
+vSplit′-rPivs : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs)
+  → vSplit′ xs normed (rPivs′ xs normed i) ≡ inj₁ i
+vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
+  | vSplitFirst<n∸m xs (rPivs′ xs normed i) normed
+... | _ | _ = {!!}
+
 
 -- vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin′ (n ∸ m) ⊎ Fin m) n
 -- vSplit′ xs normed i with vSplit xs i in eq
@@ -411,10 +406,10 @@ vSplit′-same xs i normed with vSplit xs (xs i)
 -- vSplit′-same xs i normed = vSplit′-same' xs i normed _ ≡.refl
 
 
-  -- where
+--   where
 
-  -- help : vSplit xs (xs i) ≡ inj₂ i → ⊥
-  -- help rewrite eq = {!!}
+--   help : vSplit xs (xs i) ≡ inj₂ i → ⊥
+--   help rewrite eq = {!!}
 
 -- vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
 -- vSplit′ {n} {m} xs normed i = [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} (help isInj₁ normed))) ∙
