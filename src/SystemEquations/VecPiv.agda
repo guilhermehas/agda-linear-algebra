@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Algebra.DecidableField
 
 module SystemEquations.VecPiv {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
