@@ -354,6 +354,15 @@ vSplit-rPivs {2+ n} {ℕ.suc m} xs 0F normed | suc c rewrite eq0 = ≡.refl
 vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
   rewrite eq0 | vSplit-rPivs (pred-vec xs) i (pred-normed normed eq0) = ≡.refl
 
+split⊎ : (union : ℕ ⊎ Fin m) .(norm : (inj : IsInj₁ union) → fromIsInj₁ inj ℕ.< n ∸ m)
+  → Fin (n ∸ m) ⊎ Fin m
+split⊎ (inj₁ x) norm = inj₁ (fromℕ< (norm _))
+split⊎ (inj₂ y) norm = inj₂ y
+
+
+vSplit′′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
+vSplit′′ xs normed i = split⊎ (vSplit xs i) (vSplitFirst<n∸m xs i normed)
+
 vSplit′ : (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
 vSplit′ xs normed i with vSplit xs i | vSplitFirst<n∸m xs i normed
 ... | inj₂ y | b = inj₂ y
