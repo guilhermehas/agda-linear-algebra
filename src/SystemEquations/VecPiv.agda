@@ -359,8 +359,12 @@ vSplit′ xs normed i with vSplit xs i | vSplitFirst<n∸m xs i normed
 ... | inj₂ y | b = inj₂ y
 ... | inj₁ x | f = inj₁ $ fromℕ< (f _)
 
-inj-same : ∀ {aa bb} {A : Set aa} {B : Set bb} {x y : B} → inj₂ {A = A} x ≡ inj₂ {A = A} y → x ≡ y
-inj-same ≡.refl = ≡.refl
+private
+  inj-same : ∀ {aa bb} {A : Set aa} {B : Set bb} {x y : B} → inj₂ {A = A} x ≡ inj₂ {A = A} y → x ≡ y
+  inj-same ≡.refl = ≡.refl
+
+  inj-same' : ∀ {aa bb} {A : Set aa} {B : Set bb} {x y : A} → inj₁ {B = B} x ≡ inj₁ {B = B} y → x ≡ y
+  inj-same' ≡.refl = ≡.refl
 
 vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
   vSplit′ xs normed (xs i) ≡ inj₂ i
@@ -377,81 +381,6 @@ vSplit′-rPivs : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 
   → vSplit′ xs normed (rPivs′ xs normed i) ≡ inj₁ i
 vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
   | vSplitFirst<n∸m xs (rPivs′ xs normed i) normed
-... | _ | _ = {!!}
-
-
--- vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin′ (n ∸ m) ⊎ Fin m) n
--- vSplit′ xs normed i with vSplit xs i in eq
--- vSplit′ {n} {m} xs normed i | inj₁ x = inj₁ (x [[ help normed ]])
---   where
---   help : AllRowsNormalized≁0 xs → x ℕ.< n ∸ m
---   help normed = help2 $ vSplitFirst<n∸m _ i normed is₁
---     where
---     is₁ : IsInj₁ (vSplit xs i)
---     is₁ = subst IsInj₁ (≡.sym eq) _
-
---     help2 : fromIsInj₁ {a⊎b = vSplit xs i} is₁ ℕ.< n ∸ m → x ℕ.< n ∸ m
---     help2 rewrite eq = id
--- vSplit′ xs normed i | inj₂ y = inj₂ y
-
--- vSplit′-same' : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) c
---   → vSplit xs (xs i) ≡ c
---   → vSplit′ xs normed (xs i) ≡ inj₂ i
--- vSplit′-same' xs i normed (inj₁ x) eqn = {!!}
--- vSplit′-same' xs i normed (inj₂ y) eqn = {!!}
-
-
--- vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
---   vSplit′ xs normed (xs i) ≡ inj₂ i
--- vSplit′-same xs i normed = vSplit′-same' xs i normed _ ≡.refl
-
-
---   where
-
---   help : vSplit xs (xs i) ≡ inj₂ i → ⊥
---   help rewrite eq = {!!}
-
--- vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs)  → Vector (Fin (n ∸ m) ⊎ Fin m) n
--- vSplit′ {n} {m} xs normed i = [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} (help isInj₁ normed))) ∙
---   inj₂ ∘ fst′′ ]
---   (split $ vSplit xs i)
---   where
-
---   help : ∀ {a} → inj₁ a ≡ vSplit xs i
---     → (normed : AllRowsNormalized≁0 xs)
---     → a ℕ.< n ∸ m
---   help {a} eqn normed  = help2 is≤
---     where
-
---     is₁ : IsInj₁ (vSplit xs i)
---     is₁ rewrite ≡.sym eqn = _
-
---     is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
---     is≤ = vSplitFirst<n∸m _ i normed is₁
-
---     help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
---     help2 rewrite ≡.sym eqn = id
-
-
--- vSplit′-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
---   vSplit′ xs normed (xs i) ≡ inj₂ i
--- vSplit′-same xs i normed = help3
---   where
---   help3 : [ _ ∙ (inj₂ ∘ fst′′)] (split (vSplit xs (xs i))) ≡ {!!}
---   help3 = cong (λ x → [ (λ (a ∙∙ isInj₁) → inj₁ (F.fromℕ< {a} {!!})) ∙ (inj₂ ∘ fst′′)] (split x)) (vSplit-same xs i normed)
---     where
-
---     help : ∀ {a x} → inj₁ a ≡ x
---       → (normed : AllRowsNormalized≁0 xs)
---       → a ℕ.< n ∸ m
---     help {a} {x} eqn normed  = {!help2 is≤!}
---       -- where
-
---       -- is₁ : IsInj₁ ?
---       -- is₁ rewrite ≡.sym eqn = {!!}
-
---       -- is≤ : fromIsInj₁ is₁ ℕ.< n ∸ m
---       -- is≤ = {!vSplitFirst<n∸m _ i normed is₁!}
-
---       -- help2 : fromIsInj₁ is₁ ℕ.< n ∸ m → a ℕ.< n ∸ m
---       -- help2 rewrite ≡.sym eqn = {!id!}
+  | vSplit-rPivs xs (F.cast (≡.sym $ rPivs-n∸m xs normed) i) normed
+... | inj₁ x | b | f rewrite inj-same' f = cong inj₁ $
+  toℕ-injective $ ≡.trans (toℕ-fromℕ< (b _)) $ toℕ-cast (≡.sym $ rPivs-n∸m xs normed) i
