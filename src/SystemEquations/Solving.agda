@@ -218,8 +218,8 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
 module SolvingNormedEquation (sx : SystemEquations n m)
   (ANormed : MatrixIsNormed≁0≈1 (SystemEquations.A sx)) where
 
-  open SystemEquations sx
-  open MatrixIsNormed≁0≈1 ANormed
+  open SystemEquations sx public
+  open MatrixIsNormed≁0≈1 ANormed public
 
   vBool : Vector Bool m
   vBool = vecIn→vecBool pivs

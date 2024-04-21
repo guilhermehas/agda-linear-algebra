@@ -59,6 +59,29 @@ private variable
 
 solveNormedEquationUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
   → MatrixIsNormed≁0≈1 A → ∃ IsUniqueSolution
-solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , {!!}
+solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSolution
   where
   open SolvingNormedEquation sx ANormed
+
+  sameSolution : SameSolution vAffine
+  sameSolution {vSol} isSol = vecSol , vecSol≈vSol
+    where
+
+    vecSol : ∀ i → F
+    vecSol = vSol ∘ pivRes
+
+    vPivSame : ∀ i → Affine.eval (vAffine (pivs i)) vecSol ≈ vSol (pivs i)
+    vPivSame i rewrite vSplit′-same pivs i pivsCrescent = {!!}
+
+    vRPivSame : ∀ i → Affine.eval (vAffine (pivRes i)) vecSol ≈ vSol (pivRes i)
+    vRPivSame i rewrite vSplit′-rPivs pivs i pivsCrescent = begin
+      ∑ {m ∸ n} ((λ j → _ * _)) + 0# ≈⟨ +-identityʳ _ ⟩
+      ∑ {m ∸ n} ((λ j → _ * δ i j))  ≈⟨ ∑Ext (λ j → *-comm _ (δ i j)) ⟩
+      ∑ {m ∸ n} ((λ j → δ i j * _))  ≈⟨ ∑Mul1r _ i ⟩
+      vSol _ ∎
+
+
+    vecSol≈vSol : (i : Fin m) → Affine.eval (vAffine i) vecSol ≈ vSol i
+    vecSol≈vSol i with vSplit' i in eq
+    ... | inj₁ x = {!vPivSame!}
+    ... | inj₂ y = {!!}
