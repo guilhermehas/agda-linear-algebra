@@ -396,27 +396,36 @@ vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
   ∑ (g ∘ xs) + ∑ (g ∘ rPivs xs .proj₂)  ≈⟨ ∑-pivs-same xs g normed ⟩
   ∑ g ∎
 
--- ∃-piv⊎pivRes : ∀ (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) i
---  → ∃ (λ j → xs j ≡ i) ⊎ ∃ (λ j → rPivs xs .proj₂ j ≡ i)
--- ∃-piv⊎pivRes {ℕ.suc n} {ℕ.zero} xs normed i = inj₂ (i , ≡.refl)
--- ∃-piv⊎pivRes {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs normed 0F with xs 0F in eq0
--- ... | 0F = inj₁ (0F , eq0)
--- ∃-piv⊎pivRes {ℕ.suc ℕ.zero} {2+ m} xs normed 0F with xs 0F | xs 1F | normed {x = 0F} {1F} (s≤s z≤n)
--- ... | 0F | 0F | ()
--- ∃-piv⊎pivRes {2+ n} {ℕ.suc m} xs normed 0F with xs 0F in eq0
--- ... | 0F = inj₁ (0F , eq0)
--- ... | suc a = inj₂ (0F , ≡.refl)
--- ∃-piv⊎pivRes {2+ n} {ℕ.suc m} xs normed (suc i) with xs 0F in eq0
---   | rPivs (pred-vec xs)
---   | ∃-piv⊎pivRes (pred-vec xs)
---   | ∃-piv⊎pivRes (pred-tail xs)
--- ... | 0F | b | c | d = help $ d (pred-tail-normed normed) i
---   where
---   help : _ → _
---   help (inj₁ (x , y)) = inj₁ ((suc x) , (≡.trans {!!} (cong suc y)))
---   help (inj₂ (x , y))  = inj₂ (x , cong suc y)
--- ... | suc a | f , g | c | d = help (c (pred-normed normed eq0) i)
---   where
---   help : _ → _
---   help (inj₁ (x , y)) = inj₁ (x , ≡.trans {!!} (cong suc y))
---   help (inj₂ (x , y)) = inj₂ (suc x , cong suc y)
+∃-piv⊎pivRes : ∀ (xs : Vector (Fin n) m) (normed : AllRowsNormalized≁0 xs) i
+ → ∃ (λ j → xs j ≡ i) ⊎ ∃ (λ j → rPivs xs .proj₂ j ≡ i)
+∃-piv⊎pivRes {ℕ.suc n} {ℕ.zero} xs normed i = inj₂ (i , ≡.refl)
+∃-piv⊎pivRes {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs normed 0F with xs 0F in eq0
+... | 0F = inj₁ (0F , eq0)
+∃-piv⊎pivRes {ℕ.suc ℕ.zero} {2+ m} xs normed 0F with xs 0F | xs 1F | normed {x = 0F} {1F} (s≤s z≤n)
+... | 0F | 0F | ()
+∃-piv⊎pivRes {2+ n} {ℕ.suc m} xs normed 0F with xs 0F in eq0
+... | 0F = inj₁ (0F , eq0)
+... | suc a = inj₂ (0F , ≡.refl)
+∃-piv⊎pivRes {2+ n} {ℕ.suc m} xs normed (suc i) with xs 0F in eq0
+  | rPivs (pred-vec xs)
+  | ∃-piv⊎pivRes (pred-vec xs)
+  | ∃-piv⊎pivRes (pred-tail xs)
+  | normed {x = 0F}
+... | 0F | b | c | d | _ = help $ d (pred-tail-normed normed) i
+  where
+  help : _ → _
+  help (inj₁ (x , y)) with xs (suc x) in eqs | normed {x = 0F} {suc x} (s≤s z≤n)
+  ... | suc f | _ = inj₁ ((suc x) , (≡.trans eqs (cong suc y)))
+  help (inj₂ (x , y))  = inj₂ (x , cong suc y)
+... | suc a | f , g | c | d | nn = help (c (pred-normed normed eq0) i)
+  where
+  help : _ → _
+  help (inj₁ (x , y)) with xs x in eqx
+  help (inj₁ (0F , ≡.refl)) | 0F = ⊥-elim (0≢1+n (≡.trans (≡.sym eqx) eq0))
+  help (inj₁ (suc x , ≡.refl)) | 0F = ⊥-elim $ help2 $ subst (λ w → 2+ (toℕ a) ℕ.≤ toℕ w) eqx
+    $ nn {y = suc x} (s≤s z≤n)
+    where
+    help2 : _ → ⊥
+    help2 ()
+  ... | suc a rewrite y = inj₁ (x , eqx)
+  help (inj₂ (x , y)) = inj₂ (suc x , cong suc y)

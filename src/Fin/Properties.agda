@@ -5,6 +5,7 @@ open import Data.Fin.Properties
 open import Data.Fin.Patterns
 open import Data.Nat as ℕ using (ℕ; z≤n; s≤s; _∸_)
 open import Relation.Binary.PropositionalEquality
+open import Fin.Base
 
 private variable
   m n : ℕ
