@@ -34,6 +34,7 @@ open DecidableField dField renaming (Carrier to F) hiding (sym)
 open HeytingField heytingField using (heytingCommutativeRing)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring; sym; +-commutativeMonoid)
+open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Algebra.Properties.Ring ring
 open VRing rawRing
 open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
@@ -57,6 +58,11 @@ open MProps
 private variable
   m n p q : ℕ
 
+private
+  lemma-a : ∀ {a b} → a * (- b) + b * a ≈ 0#
+  lemma-a = trans (+-congʳ (trans (*-comm _ _) (sym (-‿distribˡ-* _ _)))) (-‿inverseˡ _)
+
+
 solveNormedEquationUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
   → MatrixIsNormed≁0≈1 A → ∃ IsUniqueSolution
 solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSolution
@@ -71,13 +77,26 @@ solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSoluti
     vecSol = vSol ∘ pivRes
 
     vPivSame : ∀ i → Affine.eval (vAffine (pivs i)) vecSol ≈ vSol (pivs i)
-    vPivSame i rewrite vSplit′-same pivs i pivsCrescent = {!!}
+    vPivSame i rewrite vSplit′-same pivs i pivsCrescent = begin
+      ∑ {m ∸ n} (λ j → vSol _ * - A i (pivRes j)) + b i ≈˘⟨ +-congˡ (isSol i) ⟩
+      _ + ∑ {m} (λ j → A i j * vSol j) ≈˘⟨ +-congˡ (∑-pivs′-same pivs _ pivsCrescent) ⟩
+      _ + (∑ (λ j → A i (pivs j) * vSol (pivs j)) + ∑ {m ∸ n}  (λ j → A i (pivRes j) * vSol (pivRes j)))
+        ≈⟨ +-congˡ (+-comm _ _) ⟩
+      _ + (_ + _) ≈˘⟨ +-assoc _ _ _ ⟩
+      _ + _ + _ ≈˘⟨ +-congʳ (∑Split {m ∸ n} _ _) ⟩
+      ∑ {m ∸ n} (λ j → vSol (pivRes j) * - A i (pivRes j) + A i (pivRes j) * vSol (pivRes j)) + _
+        ≈⟨ +-congʳ (∑Ext {m ∸ n} λ _ → lemma-a ) ⟩
+      _ + _ ≈⟨ +-congʳ (∑0r (m ∸ n)) ⟩
+      0# + _ ≈⟨ +-identityˡ _ ⟩
+      ∑ (λ j → A i (pivs j) * vSol (pivs j)) ≈⟨ ∑Ext (λ j → *-congʳ (AiPj≈δij i j)) ⟩
+      ∑ (λ j → δ i j * vSol (pivs j)) ≈⟨ ∑Mul1r _ i ⟩
+      vSol _ ∎
 
     vRPivSame : ∀ i → Affine.eval (vAffine (pivRes i)) vecSol ≈ vSol (pivRes i)
     vRPivSame i rewrite vSplit′-rPivs pivs i pivsCrescent = begin
-      ∑ {m ∸ n} ((λ j → _ * _)) + 0# ≈⟨ +-identityʳ _ ⟩
-      ∑ {m ∸ n} ((λ j → _ * δ i j))  ≈⟨ ∑Ext (λ j → *-comm _ (δ i j)) ⟩
-      ∑ {m ∸ n} ((λ j → δ i j * _))  ≈⟨ ∑Mul1r _ i ⟩
+      ∑ {m ∸ n} (λ j → _ * _) + 0# ≈⟨ +-identityʳ _ ⟩
+      ∑ {m ∸ n} (λ j → _ * δ i j)  ≈⟨ ∑Ext (λ j → *-comm _ (δ i j)) ⟩
+      ∑ {m ∸ n} (λ j → δ i j * _)  ≈⟨ ∑Mul1r _ i ⟩
       vSol _ ∎
 
 

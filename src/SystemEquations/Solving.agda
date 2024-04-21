@@ -241,6 +241,10 @@ module SolvingNormedEquation (sx : SystemEquations n m)
 
   open Affine
 
+  AiPj≈δij : (i j : Fin n) → A i (pivs j) ≈ δ i j
+  AiPj≈δij i j with i F.≟ j
+  ... | yes ≡.refl = pivsOne _
+  ... | no i≢j = columnsZero _ _ (i≢j ∘ ≡.sym)
 
   vAffFamily : IsFamilySolution vAffine
   vAffFamily vecs i = begin
@@ -260,10 +264,6 @@ module SolvingNormedEquation (sx : SystemEquations n m)
     b i ∎
     where
 
-    AiPj≈δij : (i j : Fin n) → A i (pivs j) ≈ δ i j
-    AiPj≈δij i j with i F.≟ j
-    ... | yes ≡.refl = pivsOne _
-    ... | no i≢j = columnsZero _ _ (i≢j ∘ ≡.sym)
 
     coeffVAffine≈ : ∀ k → coeff (vAffine (pivs i)) k ≈ - A i (pivRes k)
     coeffVAffine≈ k rewrite vSplit′-same pivs i pivsCrescent = refl
