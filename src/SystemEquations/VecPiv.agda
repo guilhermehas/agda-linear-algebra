@@ -12,6 +12,7 @@ open import Data.Unit
 open import Data.Product
 open import Data.Irrelevant
 open import Data.Maybe using (Is-just; Maybe; just; nothing)
+open import Data.Maybe.Relation.Unary.All
 open import Data.Sum renaming ([_,_] to [_∙_])
 open import Data.Sum.Properties
 open import Data.Empty
@@ -283,26 +284,28 @@ private
   vSplitTest2 = vSplit {n = 5} []
   vSplitTest3 = vSplit {1} {1} λ x → 0F
 
-vSplitFirst<n∸m : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) (is₁ : IsInj₁ (vSplit xs i))
-  → fromIsInj₁ is₁ ℕ.< n ∸ m
-vSplitFirst<n∸m {ℕ.suc n} {ℕ.zero} xs i normed is₁ = toℕ<n i
-vSplitFirst<n∸m {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs 0F normed is₁ with suc () ← xs 0F
-vSplitFirst<n∸m {ℕ.suc ℕ.zero} {2+ m} xs 0F normed is₁ with suc () ← xs 0F
-vSplitFirst<n∸m {2+ n} {ℕ.suc m} xs 0F normed is₁ with xs 0F in eq0
-... | suc c rewrite n∸m-suc $ ℕ.≤-pred $ normed< normed eq0 = s≤s z≤n
-vSplitFirst<n∸m {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with xs 0F in eqXs
+vSplitFirst<n∸m : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs)
+ → All (ℕ._< n ∸ m) (isInj₁ (vSplit xs i))
+vSplitFirst<n∸m {ℕ.suc n} {ℕ.zero} xs i normed = just (toℕ<n i)
+vSplitFirst<n∸m {ℕ.suc ℕ.zero} {ℕ.suc ℕ.zero} xs 0F normed with 0F ← xs 0F = nothing
+vSplitFirst<n∸m {ℕ.suc ℕ.zero} {2+ m} xs 0F normed with 0F ← xs 0F = nothing
+vSplitFirst<n∸m {2+ n} {ℕ.suc m} xs 0F normed with xs 0F in eq0
+... | 0F = nothing
+... | suc _ rewrite n∸m-suc $ ℕ.≤-pred $ normed< normed eq0 = just (s≤s z≤n)
+vSplitFirst<n∸m {2+ n} {ℕ.suc m} xs (suc i) normed with xs 0F in eqXs
   | vSplit (pred-vec xs) i in eqPred
   | vSplit (pred-tail xs) i in eqTail
   | vSplitFirst<n∸m (pred-vec xs) i
   | vSplitFirst<n∸m (pred-tail xs) i
 
-... | 0F | _ | inj₁ a | f | g rewrite eqTail = λ _ → g (pred-tail-normed normed) _
-... | 0F | _ | inj₂ a | f | g rewrite eqTail = λ ()
+... | 0F | _ | inj₁ a | f | g rewrite eqTail = just $ drop-just $ g $ pred-tail-normed normed
+... | 0F | _ | inj₂ a | f | g rewrite eqTail = nothing
 
-... | suc a | inj₁ p | _ | f | _ rewrite eqPred = λ _ → ℕ.≤-trans (s≤s (f (pred-normed normed eqXs) _))
-  (ℕ.≤-reflexive (≡.sym (n∸m-suc {n} {m}
-    (ℕ.≤-pred $ normed> normed λ xs0≡0 → 0≢1+n (≡.trans (≡.sym xs0≡0) eqXs)))))
-... | suc a | inj₂ p | _ | f | _ rewrite eqPred = λ ()
+... | suc a | inj₁ p | _ | f | _ rewrite eqPred = just $ ℕ.≤-trans
+  (s≤s (drop-just $ f (pred-normed normed eqXs)))
+    (ℕ.≤-reflexive (≡.sym (n∸m-suc {n} {m}
+      (ℕ.≤-pred $ normed> normed λ xs0≡0 → 0≢1+n (≡.trans (≡.sym xs0≡0) eqXs)))))
+... | suc a | inj₂ p | _ | f | _ rewrite eqPred = nothing
 
 vSplit-same : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs) →
   vSplit xs (xs i) ≡ inj₂ i
@@ -353,9 +356,9 @@ vSplit-rPivs {2+ n} {ℕ.suc m} xs 0F normed | suc c rewrite eq0 = ≡.refl
 vSplit-rPivs {2+ n} {ℕ.suc m} xs (suc i) normed | suc c
   rewrite eq0 | vSplit-rPivs (pred-vec xs) i (pred-normed normed eq0) = ≡.refl
 
-split⊎ : (union : ℕ ⊎ Fin m) .(norm : (inj : IsInj₁ union) → fromIsInj₁ inj ℕ.< n ∸ m)
+split⊎ : (union : ℕ ⊎ Fin m) .(norm : All (ℕ._< n ∸ m) (isInj₁ union))
   → Fin (n ∸ m) ⊎ Fin m
-split⊎ (inj₁ x) norm = inj₁ $ fromℕ< (norm _)
+split⊎ (inj₁ x) norm = inj₁ $ fromℕ< (drop-just norm)
 split⊎ (inj₂ y) norm = inj₂ y
 
 vSplit′ : (xs : Vector (Fin n) m) .(normed : AllRowsNormalized≁0 xs) → Vector (Fin (n ∸ m) ⊎ Fin m) n
@@ -376,8 +379,8 @@ vSplit′-rPivs : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 
 vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
   | vSplitFirst<n∸m xs (rPivs′ xs normed i) normed
   | vSplit-rPivs xs (F.cast (≡.sym $ rPivs-n∸m xs normed) i) normed
-... | inj₁ x | b | f rewrite inj₁-injective f = cong inj₁ $
-  toℕ-injective $ ≡.trans (toℕ-fromℕ< (b _)) $ toℕ-cast (≡.sym $ rPivs-n∸m xs normed) i
+... | inj₁ x | just b | f rewrite inj₁-injective f = cong inj₁ $
+  toℕ-injective $ ≡.trans (toℕ-fromℕ< b) $ toℕ-cast (≡.sym $ rPivs-n∸m xs normed) i
 
 ≋-cast : m ≡ n → Vector F m → Vector F n → Set _
 ≋-cast m≡n xs ys = ∀ i → xs i ≈ ys (F.cast m≡n i)
