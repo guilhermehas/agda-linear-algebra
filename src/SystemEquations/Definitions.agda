@@ -82,6 +82,12 @@ record SystemEquations (rows cols : ℕ) : Set c where
   A≈0∧b#0 : Set _
   A≈0∧b#0 = ∃ A≈0∧b#0I
 
+  SameSolution : VecAffine cols p → Set (c ⊔ ℓ₁)
+  SameSolution affine = ∀ {sol} → IsSolution sol → ∃ (λ vecs → ∀ i → eval (affine i) vecs ≈ sol i)
+
+  IsUniqueSolution : VecAffine cols p → Set (c ⊔ ℓ₁)
+  IsUniqueSolution affine = IsFamilySolution affine × SameSolution affine
+
   data Solution (p : ℕ) : Set (c ⊔ ℓ₁) where
     sol : ∀ {affine} → IsFamilySolution {p = p} affine → Solution p
     noSol : (∀ {v} → ¬ IsSolution v) → Solution p

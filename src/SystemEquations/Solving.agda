@@ -215,11 +215,9 @@ systemNormedSplit {ℕ.suc n} {m} sx (cIsNorm≁0≈1 (cIsNorm≁0 pivs mPivots 
   pivs≁0 : PivsOne≁0 A pivsR
   pivs≁0 i = trans (sym (reflexive (A++b≡piv _))) (pivsOne i)
 
+module SolvingNormedEquation (sx : SystemEquations n m)
+  (ANormed : MatrixIsNormed≁0≈1 (SystemEquations.A sx)) where
 
-solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
-  → MatrixIsNormed≁0≈1 A → ∃ IsFamilySolution
-solveNormedEquation {n} {m} sx ANormed = vAffine , vAffFamily
-  where
   open SystemEquations sx
   open MatrixIsNormed≁0≈1 ANormed
 
@@ -307,6 +305,11 @@ solveNormedEquation {n} {m} sx ANormed = vAffine , vAffFamily
         ≈⟨ ∑Ext (λ j → *-congˡ (+-cong (∑Ext (λ k → *-congˡ (∑CoeffConst₁ j k))) (∑CoeffConst₂ j))) ⟩
       ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * δ j k) + 0#)) ≈⟨ ∑Ext (λ j → *-congˡ (∑Eq j)) ⟩
       ∑ (λ j → A i (pivRes j) * vecs j) ∎
+
+solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
+  → MatrixIsNormed≁0≈1 A → ∃ IsFamilySolution
+solveNormedEquation {n} {m} sx ANormed = vAffine , vAffFamily
+  where open SolvingNormedEquation sx ANormed
 
 solveNormedEquationNorm : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
   → Solution (m ∸ n)
