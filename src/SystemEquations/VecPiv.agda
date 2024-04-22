@@ -435,4 +435,4 @@ vSplit′-rPivs xs i normed with vSplit xs (rPivs′ xs normed i)
 ∃-piv⊎pivRes′ xs normed i with ∃-piv⊎pivRes xs normed i | rPivs-n∸m xs normed
 ... | inj₁ x | _ = inj₁ x
 ... | inj₂ (a , ≡.refl) | eq = inj₂ (F.cast eq a , cong (rPivs xs .proj₂)
-  (≡.trans (cast-trans eq (≡.sym eq) a) (cast-is-id ≡.refl a)))
+  (≡.trans (cast-trans eq (≡.sym eq) a) $ cast-is-id ≡.refl a))

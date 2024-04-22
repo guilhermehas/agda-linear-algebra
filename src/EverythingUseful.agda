@@ -11,4 +11,4 @@ open import Examples
 
 open import MatrixFuncNormalization.MainTheo
 
-open import SystemEquations.Solving
+open import SystemEquations.UniqueSolution

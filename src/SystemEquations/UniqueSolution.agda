@@ -69,7 +69,8 @@ module _ where
   sameUniqueSolutions≈ : {sx : SystemEquations n m} {sy : SystemEquations p m}
     → A++b sy ≋ⱽ A++b sx → UniqueSolution sx q → UniqueSolution sy q
   sameUniqueSolutions≈ sy≋ⱽsx (uNoSol f) = uNoSol (f ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
-  sameUniqueSolutions≈ sy≋ⱽsx (uSol (f , g)) = uSol (sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f , {!!})
+  sameUniqueSolutions≈ {sx = sx} {sy} sy≋ⱽsx (uSol (f , g)) = uSol
+    (sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f , g ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
 
 solveNormedEquationUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
   → MatrixIsNormed≁0≈1 A → ∃ IsUniqueSolution
