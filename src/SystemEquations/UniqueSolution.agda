@@ -101,6 +101,6 @@ solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSoluti
 
 
     vecSol≈vSol : (i : Fin m) → Affine.eval (vAffine i) vecSol ≈ vSol i
-    vecSol≈vSol i with vSplit' i in eq
-    ... | inj₁ x = {!vPivSame!}
-    ... | inj₂ y = {!!}
+    vecSol≈vSol i with ∃-piv⊎pivRes′ pivs pivsCrescent i
+    ... | inj₁ (x , x≡piv) rewrite ≡.sym x≡piv = vPivSame _
+    ... | inj₂ (x , x≡rPiv) rewrite ≡.sym x≡rPiv = vRPivSame _
