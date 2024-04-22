@@ -62,6 +62,14 @@ private
   lemma-a : ∀ {a b} → a * (- b) + b * a ≈ 0#
   lemma-a = trans (+-congʳ (trans (*-comm _ _) (sym (-‿distribˡ-* _ _)))) (-‿inverseˡ _)
 
+module _ where
+  open SystemEquations
+  open _≋ⱽ_
+
+  sameUniqueSolutions≈ : {sx : SystemEquations n m} {sy : SystemEquations p m}
+    → A++b sy ≋ⱽ A++b sx → UniqueSolution sx q → UniqueSolution sy q
+  sameUniqueSolutions≈ sy≋ⱽsx (uNoSol f) = uNoSol (f ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
+  sameUniqueSolutions≈ sy≋ⱽsx (uSol (f , g)) = uSol (sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f , {!!})
 
 solveNormedEquationUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
   → MatrixIsNormed≁0≈1 A → ∃ IsUniqueSolution
@@ -104,3 +112,32 @@ solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSoluti
     vecSol≈vSol i with ∃-piv⊎pivRes′ pivs pivsCrescent i
     ... | inj₁ (x , x≡piv) rewrite ≡.sym x≡piv = vPivSame _
     ... | inj₂ (x , x≡rPiv) rewrite ≡.sym x≡rPiv = vRPivSame _
+
+solveNormedEquationNormUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
+  → UniqueSolution (m ∸ n)
+solveNormedEquationNormUnique sx norm with
+  systemNormedSplit sx norm |
+  systemUnsolvable {sx = sx} |
+  solveNormedEquationUnique sx
+... | inj₁ x | b | _ = SystemEquations.uNoSol $ b x
+... | inj₂ y | _ | c = SystemEquations.uSol $ proj₂ $ c y
+
+solveUniqueSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → ∃ UniqueSolution
+solveUniqueSystemEquations sx = _ , sameUniqueSolutions≈ A++b≋ⱽs sol-prob
+  where
+  open SystemEquations sx
+  open FromNormalization≁0≈1 (normalize≈1≁0 A++b)
+
+  sYs = A++b⇒systemEquations ys
+
+  open SystemEquations sYs using ()
+    renaming (UniqueSolution to SYs; A++b to A++b-ys)
+
+  ys≋A++b-ys : ∀ i j → ys i j ≈ A++b-ys i j
+  ys≋A++b-ys i j = reflexive (≡.sym (same-take ys i j))
+
+  A++b≋ⱽs : A++b ≋ⱽ A++b-ys
+  A++b≋ⱽs = ≋ⱽ-trans xs≋ⱽys $ ≋ⱽ-reflexive ys≋A++b-ys
+
+  sol-prob : SYs _
+  sol-prob = solveNormedEquationNormUnique sYs $ ≈-norm ys≋A++b-ys ysNormed

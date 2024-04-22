@@ -94,6 +94,12 @@ record SystemEquations (rows cols : ℕ) : Set c where
 
   open Solution public
 
+  data UniqueSolution (p : ℕ) : Set (c ⊔ ℓ₁) where
+    uSol : ∀ {affine} → IsUniqueSolution {p = p} affine → UniqueSolution p
+    uNoSol : (∀ {v} → ¬ IsSolution v) → UniqueSolution p
+
+  open UniqueSolution public
+
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
 -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)

@@ -56,23 +56,22 @@ open MProps
 private variable
   m n p q : ℕ
 
-private
-  lastFin : (n : ℕ) → Fin (ℕ.suc n)
-  lastFin ℕ.zero = 0F
-  lastFin (ℕ.suc n) = suc (lastFin n)
+lastFin : (n : ℕ) → Fin (ℕ.suc n)
+lastFin ℕ.zero = 0F
+lastFin (ℕ.suc n) = suc (lastFin n)
 
-  injF : Fin n → Fin (n ℕ.+ 1)
-  injF 0F = 0F
-  injF (suc i) = suc (injF i)
+injF : Fin n → Fin (n ℕ.+ 1)
+injF 0F = 0F
+injF (suc i) = suc (injF i)
 
-  add-1 : Vector F n → Vector F (ℕ.suc n)
-  add-1 xs = appendLast xs (- 1#)
+add-1 : Vector F n → Vector F (ℕ.suc n)
+add-1 xs = appendLast xs (- 1#)
 
-  same-take : ∀ (xs : Matrix F n (ℕ.suc m)) i j
-    → ((λ i j → xs i (inject₁ j)) ++v λ w → xs w (lastFin _)) i j ≡ xs i j
-  same-take {n} {ℕ.zero} xs i 0F = ≡.refl
-  same-take {n} {ℕ.suc m} xs i 0F = ≡.refl
-  same-take {n} {ℕ.suc m} xs i (suc j) rewrite same-take (λ i j → xs i (suc j)) i j = ≡.refl
+same-take : ∀ (xs : Matrix F n (ℕ.suc m)) i j
+  → ((λ i j → xs i (inject₁ j)) ++v λ w → xs w (lastFin _)) i j ≡ xs i j
+same-take {n} {ℕ.zero} xs i 0F = ≡.refl
+same-take {n} {ℕ.suc m} xs i 0F = ≡.refl
+same-take {n} {ℕ.suc m} xs i (suc j) rewrite same-take (λ i j → xs i (suc j)) i j = ≡.refl
 
 A++b⇒systemEquations : Matrix F n (ℕ.suc m) → SystemEquations n m
 A++b⇒systemEquations xs = record { A = λ i j → xs i (inject₁ j) ; b = λ i → xs i (lastFin _) }
