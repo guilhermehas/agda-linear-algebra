@@ -66,10 +66,10 @@ module _ where
   open SystemEquations
   open _≋ⱽ_
 
-  sameUniqueSolutions≈ : {sx : SystemEquations n m} {sy : SystemEquations p m}
-    → A++b sy ≋ⱽ A++b sx → UniqueSolution sx → UniqueSolution sy
-  sameUniqueSolutions≈ sy≋ⱽsx (uNoSol f) = uNoSol (f ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
-  sameUniqueSolutions≈ {sx = sx} {sy} sy≋ⱽsx (uSol _ _ (f , g)) = uSol
+  sameSolutions≈ : {sx : SystemEquations n m} {sy : SystemEquations p m}
+    → A++b sy ≋ⱽ A++b sx → Solution sx → Solution sy
+  sameSolutions≈ sy≋ⱽsx (noSol f) = noSol (f ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
+  sameSolutions≈ {sx = sx} {sy} sy≋ⱽsx (sol _ _ (f , g)) = sol
     _ _ (sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f , g ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
 
 solveNormedEquationUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
@@ -115,16 +115,16 @@ solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSoluti
     ... | inj₂ (x , x≡rPiv) rewrite ≡.sym x≡rPiv = vRPivSame _
 
 solveNormedEquationNormUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
-  → UniqueSolution
+  → Solution
 solveNormedEquationNormUnique sx norm with
   systemNormedSplit sx norm |
   systemUnsolvable {sx = sx} |
   solveNormedEquationUnique sx
-... | inj₁ x | b | _ = SystemEquations.uNoSol $ b x
-... | inj₂ y | _ | c = SystemEquations.uSol _ _ $ proj₂ $ c y
+... | inj₁ x | b | _ = SystemEquations.noSol $ b x
+... | inj₂ y | _ | c = SystemEquations.sol _ _ $ proj₂ $ c y
 
-solveUniqueSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → UniqueSolution
-solveUniqueSystemEquations sx = sameUniqueSolutions≈ A++b≋ⱽs sol-prob
+solveUniqueSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → Solution
+solveUniqueSystemEquations sx = sameSolutions≈ A++b≋ⱽs sol-prob
   where
   open SystemEquations sx
   open FromNormalization≁0≈1 (normalize≈1≁0 A++b)
@@ -132,7 +132,7 @@ solveUniqueSystemEquations sx = sameUniqueSolutions≈ A++b≋ⱽs sol-prob
   sYs = A++b⇒systemEquations ys
 
   open SystemEquations sYs using ()
-    renaming (UniqueSolution to SYs; A++b to A++b-ys)
+    renaming (Solution to SYs; A++b to A++b-ys)
 
   ys≋A++b-ys : ∀ i j → ys i j ≈ A++b-ys i j
   ys≋A++b-ys i j = reflexive (≡.sym (same-take ys i j))
