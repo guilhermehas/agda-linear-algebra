@@ -85,8 +85,8 @@ record SystemEquations (rows cols : ℕ) : Set c where
   SameSolution : VecAffine cols p → Set (c ⊔ ℓ₁)
   SameSolution affine = ∀ {sol} → IsSolution sol → ∃ (λ vecs → ∀ i → eval (affine i) vecs ≈ sol i)
 
-  IsUniqueSolution : VecAffine cols p → Set (c ⊔ ℓ₁)
-  IsUniqueSolution affine = IsFamilySolution affine × SameSolution affine
+  HasUniqueSolution : VecAffine cols p → Set (c ⊔ ℓ₁)
+  HasUniqueSolution affine = IsFamilySolution affine × SameSolution affine
 
   data Solution (p : ℕ) : Set (c ⊔ ℓ₁) where
     sol : ∀ {affine} → IsFamilySolution {p = p} affine → Solution p
@@ -94,12 +94,17 @@ record SystemEquations (rows cols : ℕ) : Set c where
 
   open Solution public
 
-  data UniqueSolution (p : ℕ) : Set (c ⊔ ℓ₁) where
-    uSol : ∀ {affine} → IsUniqueSolution {p = p} affine → UniqueSolution p
-    uNoSol : (∀ {v} → ¬ IsSolution v) → UniqueSolution p
+  -- remove p from the type
+  -- Unique Solution to Solution
+  data Solution′ : Set (c ⊔ ℓ₁) where
+    uSol : ∀ p affine → HasUniqueSolution {p = p} affine → Solution′
+    uNoSol : (∀ {v} → ¬ IsSolution v) → Solution′
 
-  open UniqueSolution public
+  open Solution′ public
 
+  -- data Solution′' : Set (c ⊔ ℓ₁) where
+  --   uSol′ : ∀ p affine → Solution′
+  --   uNoSol′ : Solution′
 
 -- findSolutions : x ≡ 0 × x ≡ 1 → ⊥
 -- AllSolutionsInVec : (vecAffine : VecAffine m p) → IsSolution x → ∃ v such (vecAffine.eval v ≡ x)
