@@ -3,6 +3,7 @@ module Examples.NormRational where
 open import Data.Nat as ℕ hiding (_/_; _≟_)
 import Data.Integer as ℤ
 open import Data.List using (List)
+open import Data.Product
 open import Data.Vec
 import Data.Vec.Relation.Binary.Pointwise.Inductive as PI
 import Data.Vec.Relation.Binary.Equality.Setoid as ≈
@@ -13,6 +14,7 @@ open import Relation.Nullary.Decidable
 open import Algebra
 open import Algebra.MatrixData
 open import Algebra.Apartness
+open import Relation.Binary.PropositionalEquality using (refl; _≡_)
 import MatrixDataNormalization.NormBef as NormField
 import MatrixDataNormalization.Base as NormAll
 
@@ -20,6 +22,7 @@ import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Algebra.DecidableField
 open import Rational.Properties
 open import Rational.Unnormalized.Literals
+open import SystemEquations.Data +-*-decidableField
 
 open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
 open ≈ setoid renaming (_≋_ to _≋v_)
@@ -27,9 +30,6 @@ open MSetoid setoid
 
 private variable
   m n p : ℕ
-
-+-*-decidableField : DecidableField _ _ _
-+-*-decidableField = record { isDecidableField = record { isHeytingField = isHeytingField ; decidableInequality = _≠?_ }}
 
 open NormField +-*-decidableField
 open NormAll +-*-decidableField
@@ -68,3 +68,20 @@ normed22≡resEnd : normedMatrix22End ≋ normedMatrix22ResEnd
 normed22≡resEnd = from-yes (normedMatrix22End ≟ normedMatrix22ResEnd)
 
 coeffs = getCoeff matrix22
+
+-- Testing Solving equations
+
+b : Vec ℚᵘ 2
+b = 3ℚᵘ ∷ 5ℚᵘ ∷ []
+
+systemEquations : SystemEquations _ _
+systemEquations = system matrix22 b
+
+solution : Solution _
+solution = solve systemEquations
+
+_ : sizeSolution solution ≡ 0
+_ = refl
+
+_ : vecSolution solution .proj₂ ≡ vAff [] 1ℚᵘ ∷ vAff [] 2ℚᵘ ∷ []
+_ = refl

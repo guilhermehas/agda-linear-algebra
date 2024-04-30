@@ -5,6 +5,8 @@ module SystemEquations.Data {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ 
 open import Level
 open import Function
 open import Data.Nat hiding (_⊔_)
+open import Data.Maybe
+open import Data.Product
 open import Data.Vec
 open import Data.Vec.Functional using (fromVec; toVec)
 
@@ -53,3 +55,17 @@ solve se = help solF
     help2 : _ → _
     help2 (SE.vAff coeff constant) = vAff (toVec coeff) constant
   help (SE.SystemEquations.noSol x) = noSol
+
+sizeSolutionJust : Solution n → Maybe ℕ
+sizeSolutionJust (sol p affine) = just p
+sizeSolutionJust noSol = nothing
+
+sizeSolution : (solution : Solution n) → From-just $ sizeSolutionJust solution
+sizeSolution = from-just ∘ sizeSolutionJust
+
+vecSolutionJust : Solution n → Maybe $ ∃ $ VecAffine n
+vecSolutionJust (sol p affine) = just $ p , affine
+vecSolutionJust noSol          = nothing
+
+vecSolution : (solution : Solution n) → From-just $ vecSolutionJust solution
+vecSolution = from-just ∘ vecSolutionJust
