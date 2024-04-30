@@ -129,12 +129,6 @@ module _ where
 
   open _≋ⱽ_
 
-  sameSolutions≈ : {sx : SystemEquations n m} {sy : SystemEquations p m}
-    → A++b sy ≋ⱽ A++b sx → Solution sx q → Solution sy q
-  sameSolutions≈ sy≋ⱽsx (sol f) = sol $ sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f
-  sameSolutions≈ sy≋ⱽsx (noSol f) = noSol (f ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
-
-
 systemUnsolvable : ∀ {sx : SystemEquations n m} (open SystemEquations sx) → A≈0∧b#0 → ∀ {v} → IsSolution v → ⊥
 systemUnsolvable {n = n} {m} {system A b} (i , A0 , b#0) {v} sv = tight _ _ .proj₂
   (begin
@@ -304,37 +298,3 @@ module SolvingNormedEquation (sx : SystemEquations n m)
         ≈⟨ ∑Ext (λ j → *-congˡ (+-cong (∑Ext (λ k → *-congˡ (∑CoeffConst₁ j k))) (∑CoeffConst₂ j))) ⟩
       ∑ (λ j → A i (pivRes j) * (∑ (λ k → vecs k * δ j k) + 0#)) ≈⟨ ∑Ext (λ j → *-congˡ (∑Eq j)) ⟩
       ∑ (λ j → A i (pivRes j) * vecs j) ∎
-
-solveNormedEquation : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
-  → MatrixIsNormed≁0≈1 A → ∃ IsFamilySolution
-solveNormedEquation {n} {m} sx ANormed = vAffine , vAffFamily
-  where open SolvingNormedEquation sx ANormed
-
-solveNormedEquationNorm : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
-  → Solution (m ∸ n)
-solveNormedEquationNorm sx norm with
-  systemNormedSplit sx norm |
-  systemUnsolvable {sx = sx} |
-  solveNormedEquation sx
-... | inj₁ x | b | c = SystemEquations.noSol $ b x
-... | inj₂ y | b | c = SystemEquations.sol (c y .proj₂)
-
-solveSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → ∃ Solution
-solveSystemEquations sx = _ , sameSolutions≈ A++b≋ⱽs sol-prob
-  where
-  open SystemEquations sx
-  open FromNormalization≁0≈1 (normalize≈1≁0 A++b)
-
-  sYs = A++b⇒systemEquations ys
-
-  open SystemEquations sYs using ()
-    renaming (Solution to SYs; A++b to A++b-ys)
-
-  ys≋A++b-ys : ∀ i j → ys i j ≈ A++b-ys i j
-  ys≋A++b-ys i j = reflexive (≡.sym (same-take ys i j))
-
-  A++b≋ⱽs : A++b ≋ⱽ A++b-ys
-  A++b≋ⱽs = ≋ⱽ-trans xs≋ⱽys $ ≋ⱽ-reflexive ys≋A++b-ys
-
-  sol-prob : SYs _
-  sol-prob = solveNormedEquationNorm sYs $ ≈-norm ys≋A++b-ys ysNormed
