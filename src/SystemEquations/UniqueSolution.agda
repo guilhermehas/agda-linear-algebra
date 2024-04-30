@@ -73,7 +73,7 @@ module _ where
     _ _ (sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f , g ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
 
 solveNormedEquationUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
-  → MatrixIsNormed≁0≈1 A → ∃ IsUniqueSolution
+  → MatrixIsNormed≁0≈1 A → ∃ IsSolutionAndUnique
 solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSolution
   where
   open SolvingNormedEquation sx ANormed
