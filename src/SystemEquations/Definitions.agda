@@ -94,9 +94,9 @@ record SystemEquations (rows cols : ℕ) : Set c where
 
   open Solution public
 
-  data UniqueSolution (p : ℕ) : Set (c ⊔ ℓ₁) where
-    uSol : ∀ {affine} → IsUniqueSolution {p = p} affine → UniqueSolution p
-    uNoSol : (∀ {v} → ¬ IsSolution v) → UniqueSolution p
+  data UniqueSolution : Set (c ⊔ ℓ₁) where
+    uSol : ∀ p affine → IsUniqueSolution {p = p} affine → UniqueSolution
+    uNoSol : (∀ {v} → ¬ IsSolution v) → UniqueSolution
 
   open UniqueSolution public
 

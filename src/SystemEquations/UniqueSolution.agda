@@ -67,10 +67,10 @@ module _ where
   open _≋ⱽ_
 
   sameUniqueSolutions≈ : {sx : SystemEquations n m} {sy : SystemEquations p m}
-    → A++b sy ≋ⱽ A++b sx → UniqueSolution sx q → UniqueSolution sy q
+    → A++b sy ≋ⱽ A++b sx → UniqueSolution sx → UniqueSolution sy
   sameUniqueSolutions≈ sy≋ⱽsx (uNoSol f) = uNoSol (f ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
-  sameUniqueSolutions≈ {sx = sx} {sy} sy≋ⱽsx (uSol (f , g)) = uSol
-    (sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f , g ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
+  sameUniqueSolutions≈ {sx = sx} {sy} sy≋ⱽsx (uSol _ _ (f , g)) = uSol
+    _ _ (sameSolutionsS (sy≋ⱽsx .fwd) _ ∘ f , g ∘ sameSolutionsS (sy≋ⱽsx .bwd) _)
 
 solveNormedEquationUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx)
   → MatrixIsNormed≁0≈1 A → ∃ IsUniqueSolution
@@ -115,16 +115,16 @@ solveNormedEquationUnique {n} {m} sx ANormed = vAffine , vAffFamily , sameSoluti
     ... | inj₂ (x , x≡rPiv) rewrite ≡.sym x≡rPiv = vRPivSame _
 
 solveNormedEquationNormUnique : ∀ (sx : SystemEquations n m) (open SystemEquations sx) → MatrixIsNormed≁0≈1 A++b
-  → UniqueSolution (m ∸ n)
+  → UniqueSolution
 solveNormedEquationNormUnique sx norm with
   systemNormedSplit sx norm |
   systemUnsolvable {sx = sx} |
   solveNormedEquationUnique sx
 ... | inj₁ x | b | _ = SystemEquations.uNoSol $ b x
-... | inj₂ y | _ | c = SystemEquations.uSol $ proj₂ $ c y
+... | inj₂ y | _ | c = SystemEquations.uSol _ _ $ proj₂ $ c y
 
-solveUniqueSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → ∃ UniqueSolution
-solveUniqueSystemEquations sx = _ , sameUniqueSolutions≈ A++b≋ⱽs sol-prob
+solveUniqueSystemEquations : (sx : SystemEquations n m) (open SystemEquations sx) → UniqueSolution
+solveUniqueSystemEquations sx = sameUniqueSolutions≈ A++b≋ⱽs sol-prob
   where
   open SystemEquations sx
   open FromNormalization≁0≈1 (normalize≈1≁0 A++b)
@@ -140,5 +140,4 @@ solveUniqueSystemEquations sx = _ , sameUniqueSolutions≈ A++b≋ⱽs sol-prob
   A++b≋ⱽs : A++b ≋ⱽ A++b-ys
   A++b≋ⱽs = ≋ⱽ-trans xs≋ⱽys $ ≋ⱽ-reflexive ys≋A++b-ys
 
-  sol-prob : SYs _
   sol-prob = solveNormedEquationNormUnique sYs $ ≈-norm ys≋A++b-ys ysNormed
