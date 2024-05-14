@@ -1,10 +1,13 @@
 module Examples.NormRational where
 
+open import Function
 open import Data.Nat as ℕ hiding (_/_; _≟_)
+open import Data.Nat.Literals renaming (number to numberℕ)
 import Data.Integer as ℤ
 open import Data.List using (List)
 open import Data.Product
 open import Data.Vec
+open import Data.Unit hiding (_≟_)
 import Data.Vec.Relation.Binary.Pointwise.Inductive as PI
 import Data.Vec.Relation.Binary.Equality.Setoid as ≈
 open import Data.Rational.Unnormalised hiding (truncate)
@@ -21,7 +24,9 @@ import MatrixDataNormalization.Base as NormAll
 import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Algebra.DecidableField
 open import Rational.Properties
+open import Rational.Literals
 open import Rational.Unnormalized.Literals
+open import Agda.Builtin.FromNat using (fromNat)
 open import SystemEquations.Data +-*-decidableField
 
 open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
@@ -34,19 +39,23 @@ private variable
 open NormField +-*-decidableField
 open NormAll +-*-decidableField
 
+instance
+  _ = number
+  _ = numberℕ
+
 _≟_ : Decidable (_≋_ {m} {n})
 _≟_ = decidable _≃?_
 
 matrix22 : Matrix ℚᵘ 2 2
-matrix22 = (1ℚᵘ ∷ [ 1ℚᵘ ] )
-        ∷ [ 1ℚᵘ ∷ [ 2ℚᵘ ] ]
+matrix22 = (1 ∷ [ 1 ] )
+        ∷ [ 1 ∷ [ 2 ] ]
 
 normedMatrix22 : Matrix ℚᵘ _ _
 normedMatrix22 = normalizeBef matrix22
 
 normedMatrix22Res : Matrix ℚᵘ 2 2
-normedMatrix22Res = (1ℚᵘ ∷ [ 1ℚᵘ ])
-                 ∷ [ 0ℚᵘ ∷ [ 1ℚᵘ ] ]
+normedMatrix22Res = (1 ∷ [ 1 ])
+                 ∷ [ 0 ∷ [ 1 ] ]
 
 normed22≡res : normedMatrix22 ≋ normedMatrix22Res
 normed22≡res = from-yes (normedMatrix22 ≟ normedMatrix22Res)
@@ -61,8 +70,8 @@ normedMatrix22End : Matrix ℚᵘ _ _
 normedMatrix22End = normalize matrix22
 
 normedMatrix22ResEnd : Matrix ℚᵘ 2 2
-normedMatrix22ResEnd = (1ℚᵘ ∷ [ 0ℚᵘ ])
-                    ∷ [ 0ℚᵘ ∷ [ 1ℚᵘ ] ]
+normedMatrix22ResEnd = (1 ∷ [ 0 ])
+                    ∷ [ 0 ∷ [ 1 ] ]
 
 normed22≡resEnd : normedMatrix22End ≋ normedMatrix22ResEnd
 normed22≡resEnd = from-yes (normedMatrix22End ≟ normedMatrix22ResEnd)
@@ -72,7 +81,7 @@ coeffs = getCoeff matrix22
 -- Testing Solving equations
 
 b : Vec ℚᵘ 2
-b = 3ℚᵘ ∷ 5ℚᵘ ∷ []
+b = 3 ∷ 5 ∷ []
 
 systemEquations : SystemEquations _ _
 systemEquations = system matrix22 b
@@ -83,5 +92,5 @@ solution = solve systemEquations
 _ : sizeSolution solution ≡ 0
 _ = refl
 
-_ : vecSolution solution .proj₂ ≡ vAff [] 1ℚᵘ ∷ vAff [] 2ℚᵘ ∷ []
+_ : vecSolution solution .proj₂ ≡ vAff [] 1 ∷ vAff [] 2 ∷ []
 _ = refl

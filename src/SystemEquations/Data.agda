@@ -50,11 +50,11 @@ solve se = help solF
   solF = solveUniqueSystemEquations seF
 
   help : SeF.Solution → Solution _
-  help (SE.SystemEquations.sol p affine x) = sol p (tabulate (help2 ∘ affine))
+  help (SE.SystemEquations.sol p affine x) = sol p $ tabulate $ help2 ∘ affine
     where
     help2 : _ → _
     help2 (SE.vAff coeff constant) = vAff (toVec coeff) constant
-  help (SE.SystemEquations.noSol x) = noSol
+  help (SE.SystemEquations.noSol _) = noSol
 
 sizeSolutionJust : Solution n → Maybe ℕ
 sizeSolutionJust (sol p affine) = just p
