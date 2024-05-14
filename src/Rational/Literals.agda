@@ -1,6 +1,6 @@
 module Rational.Literals where
 
-open import Agda.Builtin.FromNat
+open import Agda.Builtin.FromNat using (Number; fromNat) public
 open import Agda.Builtin.FromNeg
 open import Data.Unit using (⊤)
 open import Data.Nat as ℕ using (ℕ; zero; suc)
@@ -21,10 +21,10 @@ negative = record
   ; fromNeg    = λ n → - ( (+ n) / suc zero)
   }
 
-private instance
-  _ = ℕ.number
-  _ = ℤ.number
-  _ = number
+instance
+  NatNumber = ℕ.number
+  IntNumber = ℤ.number
+  RatNumber = number
 
 1/1000ℚ = 1 / 1000
 2/1000ℚ = 2 / 1000

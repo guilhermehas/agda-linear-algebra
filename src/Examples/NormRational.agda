@@ -2,7 +2,6 @@ module Examples.NormRational where
 
 open import Function
 open import Data.Nat as ℕ hiding (_/_; _≟_)
-open import Data.Nat.Literals renaming (number to numberℕ)
 import Data.Integer as ℤ
 open import Data.List using (List)
 open import Data.Product
@@ -26,7 +25,6 @@ open import Algebra.DecidableField
 open import Rational.Properties
 open import Rational.Literals
 open import Rational.Unnormalized.Literals
-open import Agda.Builtin.FromNat using (fromNat)
 open import SystemEquations.Data +-*-decidableField
 
 open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
@@ -38,10 +36,6 @@ private variable
 
 open NormField +-*-decidableField
 open NormAll +-*-decidableField
-
-instance
-  _ = number
-  _ = numberℕ
 
 _≟_ : Decidable (_≋_ {m} {n})
 _≟_ = decidable _≃?_
