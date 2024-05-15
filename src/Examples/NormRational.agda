@@ -86,5 +86,34 @@ solution = solve systemEquations
 _ : sizeSolution solution ≡ 0
 _ = refl
 
-_ : vecSolution solution .proj₂ ≡ vAff [] 1 ∷ vAff [] 2 ∷ []
+
+{-
+
+A = | 1 1 |
+    | 1 2 |
+
+b = | 3 |
+    | 5 |
+
+Solve: A*x=b
+
+Solution: is
+  x = | 1 |
+      | 2 |
+if it would be a whole subspace:
+  x = v0 + span(v1,v2,...,vk)
+    = {v0 + sum a_i v_i | forall a_i ∈ Real}
+
+-- in contrast, the current "VecAffine" is a transpose of that
+
+-}
+
+simpleSol' : Vec ℚᵘ n -> VecAffine n ℕ.zero
+simpleSol' [] = []
+simpleSol' (x0 ∷ xs) = vAff [] x0  ∷  simpleSol' xs
+
+simpleSol : Vec ℚᵘ n -> Solution n
+simpleSol v = sol ℕ.zero (simpleSol' v)
+
+_ : solution ≡ simpleSol (1 ∷ 2 ∷ [])
 _ = refl
