@@ -108,12 +108,5 @@ if it would be a whole subspace:
 
 -}
 
-simpleSol' : Vec ℚᵘ n -> VecAffine n ℕ.zero
-simpleSol' [] = []
-simpleSol' (x0 ∷ xs) = vAff [] x0  ∷  simpleSol' xs
-
-simpleSol : Vec ℚᵘ n -> Solution n
-simpleSol v = sol ℕ.zero (simpleSol' v)
-
-_ : solution ≡ simpleSol (1 ∷ 2 ∷ [])
+_ : vecSimpleSolution solution ≡ 1 ∷ 2 ∷ []
 _ = refl

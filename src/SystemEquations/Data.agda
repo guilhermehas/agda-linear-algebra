@@ -28,6 +28,10 @@ record Affine (p : ℕ) : Set c where
 VecAffine : (nVars freeVars : ℕ) → Set c
 VecAffine nVars freeVars = Vec (Affine freeVars) nVars
 
+unfoldConstants : VecAffine n m → Vec F n
+unfoldConstants [] = []
+unfoldConstants (vAff coeff constant ∷ xs) = constant ∷ unfoldConstants xs
+
 record SystemEquations (rows cols : ℕ) : Set c where
   constructor system
   field
@@ -63,9 +67,17 @@ sizeSolutionJust noSol = nothing
 sizeSolution : (solution : Solution n) → From-just $ sizeSolutionJust solution
 sizeSolution = from-just ∘ sizeSolutionJust
 
-vecSolutionJust : Solution n → Maybe $ ∃ $ VecAffine n
-vecSolutionJust (sol p affine) = just $ p , affine
-vecSolutionJust noSol          = nothing
+vecAffSolutionJust : Solution n → Maybe $ ∃ $ VecAffine n
+vecAffSolutionJust (sol p affine) = just $ p , affine
+vecAffSolutionJust noSol          = nothing
 
-vecSolution : (solution : Solution n) → From-just $ vecSolutionJust solution
-vecSolution = from-just ∘ vecSolutionJust
+vecAffSolution : (solution : Solution n) → From-just $ vecAffSolutionJust solution
+vecAffSolution = from-just ∘ vecAffSolutionJust
+
+vecSimpleSolutionJust : Solution n → Maybe $ Vec F n
+vecSimpleSolutionJust (sol ℕ.zero affine) = just (unfoldConstants affine)
+vecSimpleSolutionJust (sol (ℕ.suc p) affine) = nothing
+vecSimpleSolutionJust noSol = nothing
+
+vecSimpleSolution : (solution : Solution n) → From-just $ vecSimpleSolutionJust solution
+vecSimpleSolution = from-just ∘ vecSimpleSolutionJust
