@@ -111,3 +111,9 @@ _ = refl
 
 _ : solveComplex [ 1 ∷ [ -2 ] ] [ 3 ] ≡ 3 ∷ [ 0 ] +span [ 2 ∷ [ 1 ] ]
 _ = refl
+
+
+-- Example of the paper: x = -1/2 g*t^2
+
+_ : solveComplex0 ((1 ∷ 0 ∷ [ -2 ]) ∷ [ 0 ∷ 1 ∷ [ 1 ] ]) ≡ [ 2 ∷ -1 ∷ [ 1 ] ]
+_ = refl

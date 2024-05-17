@@ -6,11 +6,12 @@ open import Level
 open import Function
 open import Data.Unit.Polymorphic
 open import Data.Nat hiding (_⊔_)
-open import Data.Maybe
+open import Data.Maybe as Maybe
 open import Data.Product
 open import Data.Vec
 open import Data.Vec.Functional using (fromVec; toVec)
 
+open import Vec.Base
 open import Algebra.MatrixData.Base
 
 open DecidableField dField renaming (Carrier to F)
@@ -44,6 +45,8 @@ record AffineTranspose (nVars freeVars : ℕ) : Set c where
   field
     constants : Vec F nVars
     coeffs    : Matrix F freeVars nVars
+
+open AffineTranspose
 
 vAff→vAffT : VecAffine n m → AffineTranspose n m
 vAff→vAffT xs = unfoldConstants xs +span transpose (unfoldVecs xs)
@@ -102,6 +105,10 @@ vecSpanSolutionJust : Solution n → Maybe $ ∃ $ AffineTranspose n
 vecSpanSolutionJust (sol p affine) = just $ _ , vAff→vAffT affine
 vecSpanSolutionJust noSol = nothing
 
+matrixSolutionJust : Solution n → Maybe $ ∃ $ flip (Matrix F) n
+matrixSolutionJust (sol p affine) = just $ _ , (coeffs $ vAff→vAffT affine)
+matrixSolutionJust noSol = nothing
+
 private
   From-just-vec : Maybe $ ∃ $ AffineTranspose n → Set _
   From-just-vec {n} (just (p , _)) = AffineTranspose n p
@@ -110,6 +117,14 @@ private
   from-just-vec : (x : Maybe (∃ $ AffineTranspose n)) → From-just-vec x
   from-just-vec (just (_ , x)) = x
   from-just-vec nothing  = _
+
+  From-just-matrix : Maybe $ ∃ $ flip (Matrix F) n → Set _
+  From-just-matrix {n} (just (m , _)) = Matrix F m n
+  From-just-matrix nothing = ⊤
+
+  from-just-matrix : (x : Maybe (∃ $ flip (Matrix F) n)) → From-just-matrix x
+  from-just-matrix (just (_ , x)) = x
+  from-just-matrix nothing  = _
 
 
 vecComplexSolution : (solution : Solution n) → From-just-vec $ vecSpanSolutionJust solution
@@ -120,3 +135,6 @@ solveComplexSE = vecComplexSolution ∘ solve
 
 solveComplex : (A : Matrix F n m) (b : Vec F n) → From-just-vec $ vecSpanSolutionJust $ solve $ system A b
 solveComplex A b = solveComplexSE $ system A b
+
+solveComplex0 : (A : Matrix F n m) → From-just-matrix $ matrixSolutionJust $ solve $ system A (repeat 0#)
+solveComplex0 A = from-just-matrix (matrixSolutionJust $ solve $ system A (repeat 0#))

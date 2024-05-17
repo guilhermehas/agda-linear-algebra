@@ -11,6 +11,9 @@ private variable
   A : Set ℓ
   n : ℕ
 
-
 swapV : (xs : Vec A n) (i j : Fin n) → Vec A n
 swapV xs i j = xs [ i ]≔ lookup xs j [ j ]≔ lookup xs i
+
+repeat : A → Vec A n
+repeat {n = ℕ.zero} _ = []
+repeat {n = ℕ.suc n} x = x ∷ repeat x
