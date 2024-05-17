@@ -5,10 +5,8 @@ open import Data.Nat as ℕ hiding (_/_; _≟_)
 import Data.Integer as ℤ
 open import Data.List using (List)
 open import Data.Product
-open import Data.Vec
+open import Data.Vec renaming (_∷_ to infixr 6 _∷_)
 open import Data.Unit hiding (_≟_)
-import Data.Vec.Relation.Binary.Pointwise.Inductive as PI
-import Data.Vec.Relation.Binary.Equality.Setoid as ≈
 open import Data.Rational.Unnormalised hiding (truncate)
 open import Data.Rational.Unnormalised.Properties
 open import Relation.Binary
@@ -27,8 +25,7 @@ open import Rational.Literals
 open import Rational.Unnormalized.Literals
 open import SystemEquations.Data +-*-decidableField
 
-open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
-open ≈ setoid renaming (_≋_ to _≋v_)
+open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl; -_)
 open MSetoid setoid
 
 private variable
@@ -109,4 +106,8 @@ if it would be a whole subspace:
 -}
 
 _ : vecSimpleSolution solution ≡ 1 ∷ 2 ∷ []
+_ = refl
+
+
+_ : solveComplex [ 1 ∷ [ - 2 ] ] [ 3 ] ≡ (3 ∷ [ 0 ]) +span ([ 2 ∷ [ 1 ] ])
 _ = refl

@@ -4,6 +4,7 @@ module SystemEquations.Data {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ 
 
 open import Level
 open import Function
+open import Data.Unit.Polymorphic
 open import Data.Nat hiding (_⊔_)
 open import Data.Maybe
 open import Data.Product
@@ -19,6 +20,8 @@ open import SystemEquations.UniqueSolution dField
 private variable
   m n : ℕ
 
+infix 6 _+span_
+
 record Affine (p : ℕ) : Set c where
   constructor vAff
   field
@@ -31,6 +34,19 @@ VecAffine nVars freeVars = Vec (Affine freeVars) nVars
 unfoldConstants : VecAffine n m → Vec F n
 unfoldConstants [] = []
 unfoldConstants (vAff coeff constant ∷ xs) = constant ∷ unfoldConstants xs
+
+unfoldVecs : VecAffine n m → Matrix F n m
+unfoldVecs [] = []
+unfoldVecs (vAff coeff constant ∷ xs) = coeff ∷ unfoldVecs xs
+
+record AffineTranspose (nVars freeVars : ℕ) : Set c where
+  constructor _+span_
+  field
+    constants : Vec F nVars
+    coeffs    : Matrix F freeVars nVars
+
+vAff→vAffT : VecAffine n m → AffineTranspose n m
+vAff→vAffT xs = unfoldConstants xs +span transpose (unfoldVecs xs)
 
 record SystemEquations (rows cols : ℕ) : Set c where
   constructor system
@@ -75,9 +91,32 @@ vecAffSolution : (solution : Solution n) → From-just $ vecAffSolutionJust solu
 vecAffSolution = from-just ∘ vecAffSolutionJust
 
 vecSimpleSolutionJust : Solution n → Maybe $ Vec F n
-vecSimpleSolutionJust (sol ℕ.zero affine) = just (unfoldConstants affine)
+vecSimpleSolutionJust (sol ℕ.zero affine) =  just (unfoldConstants affine)
 vecSimpleSolutionJust (sol (ℕ.suc p) affine) = nothing
 vecSimpleSolutionJust noSol = nothing
 
 vecSimpleSolution : (solution : Solution n) → From-just $ vecSimpleSolutionJust solution
 vecSimpleSolution = from-just ∘ vecSimpleSolutionJust
+
+vecSpanSolutionJust : Solution n → Maybe $ ∃ $ AffineTranspose n
+vecSpanSolutionJust (sol p affine) = just $ _ , vAff→vAffT affine
+vecSpanSolutionJust noSol = nothing
+
+private
+  From-just-vec : Maybe $ ∃ $ AffineTranspose n → Set _
+  From-just-vec {n} (just (p , _)) = AffineTranspose n p
+  From-just-vec nothing = ⊤
+
+  from-just-vec : (x : Maybe (∃ $ AffineTranspose n)) → From-just-vec x
+  from-just-vec (just (_ , x)) = x
+  from-just-vec nothing  = _
+
+
+vecComplexSolution : (solution : Solution n) → From-just-vec $ vecSpanSolutionJust solution
+vecComplexSolution = from-just-vec ∘ vecSpanSolutionJust
+
+solveComplexSE : (se : SystemEquations n m) → From-just-vec $ vecSpanSolutionJust (solve se)
+solveComplexSE = vecComplexSolution ∘ solve
+
+solveComplex : (A : Matrix F n m) (b : Vec F n) → From-just-vec $ vecSpanSolutionJust $ solve $ system A b
+solveComplex A b = solveComplexSE $ system A b
