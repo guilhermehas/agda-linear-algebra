@@ -5,7 +5,7 @@ open import Data.Nat as ℕ hiding (_/_; _≟_)
 import Data.Integer as ℤ
 open import Data.List using (List)
 open import Data.Product
-open import Data.Vec renaming (_∷_ to infixr 6 _∷_)
+open import Data.Vec renaming (_∷_ to infixr 7 _∷_)
 open import Data.Unit hiding (_≟_)
 open import Data.Rational.Unnormalised hiding (truncate)
 open import Data.Rational.Unnormalised.Properties
@@ -109,5 +109,5 @@ _ : vecSimpleSolution solution ≡ 1 ∷ 2 ∷ []
 _ = refl
 
 
-_ : solveComplex [ 1 ∷ [ - 2 ] ] [ 3 ] ≡ (3 ∷ [ 0 ]) +span ([ 2 ∷ [ 1 ] ])
+_ : solveComplex [ 1 ∷ [ -2 ] ] [ 3 ] ≡ 3 ∷ [ 0 ] +span [ 2 ∷ [ 1 ] ]
 _ = refl

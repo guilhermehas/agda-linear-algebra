@@ -25,6 +25,7 @@ instance
   NatNumber = ℕ.number
   IntNumber = ℤ.number
   RatNumber = number
+  RatNegative = negative
 
 1/1000ℚ = 1 / 1000
 2/1000ℚ = 2 / 1000
