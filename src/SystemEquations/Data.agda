@@ -136,5 +136,5 @@ solveComplexSE = vecComplexSolution ∘ solve
 solveComplex : (A : Matrix F n m) (b : Vec F n) → From-just-vec $ vecSpanSolutionJust $ solve $ system A b
 solveComplex A b = solveComplexSE $ system A b
 
-solveComplex0 : (A : Matrix F n m) → From-just-matrix $ matrixSolutionJust $ solve $ system A (repeat 0#)
-solveComplex0 A = from-just-matrix (matrixSolutionJust $ solve $ system A (repeat 0#))
+solveComplex0 : (A : Matrix F n m) → From-just-matrix $ matrixSolutionJust $ solve $ system A $ repeat 0#
+solveComplex0 A = from-just-matrix (matrixSolutionJust $ solve $ system A $ repeat 0#)

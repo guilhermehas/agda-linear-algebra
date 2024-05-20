@@ -115,5 +115,14 @@ _ = refl
 
 -- Example of the paper: x = -1/2 g*t^2
 
-_ : solveComplex0 ((1 ∷ 0 ∷ [ -2 ]) ∷ [ 0 ∷ 1 ∷ [ 1 ] ]) ≡ [ 2 ∷ -1 ∷ [ 1 ] ]
+_ : solveComplex0 ((1 ∷ 0 ∷ [ -2 ]  ) ∷
+                  [ 0 ∷ 1 ∷ [  1 ] ]) ≡ [ 2 ∷ -1 ∷ [ 1 ] ]
+_ = refl
+
+-- Pendulum Example
+-- https://en.wikipedia.org/wiki/Buckingham_%CF%80_theorem#The_simple_pendulum
+
+_ : solveComplex0 ((1 ∷ 0 ∷ 0 ∷ [ -2 ])
+                ∷  (0 ∷ 1 ∷ 0 ∷ [  0 ])
+                ∷ [ 0 ∷ 0 ∷ 1 ∷ [  1 ] ]) ≡ [ 2 ∷ 0 ∷ -1 ∷ [ 1 ] ]
 _ = refl
