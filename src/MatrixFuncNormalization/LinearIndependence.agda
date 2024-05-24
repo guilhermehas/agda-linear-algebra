@@ -15,6 +15,7 @@ open import Data.Sum
 open import Data.Maybe using (is-just)
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Fin as F using (Fin; fromℕ)
+open import Data.Fin.Properties as F
 open import Relation.Nullary
 
 open import Algebra.BigOps
@@ -24,6 +25,7 @@ import Algebra.Module.PropsField as PField
 
 open DecidableField dField renaming (Carrier to F) hiding (sym)
 open NormBef dField
+open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZero)
 open HeytingField heytingField using (heytingCommutativeRing)
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
@@ -57,10 +59,12 @@ private variable
 open _reaches_
 open ≈ᴹ-Reasoning
 
-normLinearDep : ((xs , pivs , _) : MatrixWithPivots n m) → AllRowsNormalized pivs
+normLinearDep : ((xs , pivs , _) : MatrixWithPivots n m)
+  → AllRowsNormalized pivs
+  → ColumnsZero xs pivs
   → IsLinearDependent xs ⊎ IsLinearIndependent xs
-normLinearDep {ℕ.zero} (xs , pivs , mPivs) normed = inj₂ $ λ _ ()
-normLinearDep {suc n} {m} (xs , pivs , mPivs) normed with pivs $ fromℕ _ | mPivs $ fromℕ _
+normLinearDep {ℕ.zero} (xs , pivs , mPivs) _ _ = inj₂ $ λ _ ()
+normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros with pivs $ fromℕ _ in pivEq | mPivs $ fromℕ _
 ... | nothing | lift allZ = inj₁ help
   where
   help : IsLinearDependent xs
@@ -72,10 +76,15 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed with pivs $ fromℕ _ | mPi
   proj₁ (proj₂ help) = fromℕ _
   proj₂ (proj₂ help)  = #-congʳ (sym $ reflexive $ δii≡1# $ fromℕ n) 1#0
 
-... | just x | xsN#0 , _ = {!!}
-  -- where
-  -- help : _
-  -- help = {!!}
+... | just j | xsN#0 , _ = inj₂ help
+  where
+  help : IsLinearIndependent xs
+  help (ys by xs*ys≈ws) i with pivs i | mPivs i | normed i (fromℕ n) {!toℕ<n!}
+  ... | nothing | lift allZ | inj₂ (_ , q) rewrite pivEq = help2 q
+    where
+    help2 : _ → _
+    help2 ()
+  ... | just piv | xsIP#0 , xsIJ≈0 | inj₁ <-ineq = {!!}
 
 
 toNormLinearDep : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m) → AllRowsNormalized pivs → xs ≋ⱽ ys
