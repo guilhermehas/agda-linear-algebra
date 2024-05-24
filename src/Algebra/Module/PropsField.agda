@@ -85,4 +85,4 @@ private variable
 *#0≈ⱽ xs ys#0 = record { fwd = *#0⊆ⱽ xs ys#0 ; bwd = *ₗ#0⊆ⱽ xs _ }
 
 linInd→¬linDep : IsLinearIndependent xs → ¬ IsLinearDependent xs
-linInd→¬linDep (reach , i , ysI#0) linDep = tight _ _ .proj₂ (linDep reach i) ysI#0
+linInd→¬linDep linIndep (reach , i , ysI#0) = tight _ _ .proj₂ (linIndep reach i) ysI#0

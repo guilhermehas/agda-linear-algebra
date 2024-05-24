@@ -24,7 +24,6 @@ open LeftModule leftModule renaming (Carrierᴹ to M)
 open SumCommMonoid +ᴹ-commutativeMonoid
 open SumRawRing rawRing using (δ; δss≡δ)
 
--- open import Algebra.Definitions _≈ᴹ_
 open import Algebra.Morphism.Definitions M A _≈_
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid ≈ᴹ-setoid
 

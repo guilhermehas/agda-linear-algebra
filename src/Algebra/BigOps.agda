@@ -3,6 +3,7 @@ module Algebra.BigOps where
 open import Level using (Level)
 open import Function
 open import Algebra
+open import Data.Product
 import Data.Sum as Sum
 open import Data.Bool using (true; false)
 open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s)
@@ -43,6 +44,9 @@ module SumRawRing (rawRing : RawRing a ℓ) where
   δ i j with i ≟ j
   ... | true  because _ = 1#
   ... | false because _ = 0#
+
+  δii≡1# : ∀ i → δ {n} i i ≡ 1#
+  δii≡1# i rewrite dec-yes (i F.≟ i) ≡.refl .proj₂ = ≡.refl
 
   δss≡δ : (i j : Fin n) → δ (suc i) (suc j) ≡ δ i j
   δss≡δ i j with i ≟ j
@@ -189,7 +193,7 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
 module SumRing (ring : Ring a ℓ) where
 
   open Ring ring renaming (Carrier to A)
-  open SumRawRing rawRing using (∑; δ; δss≡δ) public
+  open SumRawRing rawRing using (∑; δ; δss≡δ; δii≡1#) public
   open import Relation.Binary.Reasoning.Setoid setoid
   open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
   open import Vector.Setoid.Properties setoid hiding (++-cong)

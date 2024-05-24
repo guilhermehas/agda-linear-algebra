@@ -48,5 +48,5 @@ record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) w
 _isSolutionOf_by_ : A → Vector M n → (M → Set ℓ) → Set _
 α isSolutionOf v by ∑≡  = ∀ k → ∑≡ (α *ₗ v k)
 
-IsLinearDependent : Vector M n → Set _
-IsLinearDependent xs = ((ys by _) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#
+IsLinearIndependent : Vector M n → Set _
+IsLinearIndependent xs = ((ys by _) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#

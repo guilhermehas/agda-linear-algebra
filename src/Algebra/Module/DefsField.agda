@@ -23,5 +23,5 @@ open HeytingField hField renaming (Carrier to A)
 private variable
   n : ℕ
 
-IsLinearIndependent : Vector M n → Set _
-IsLinearIndependent xs = Σ[ (ys by _) ∈ xs reaches 0ᴹ ] (∃ λ i → ys i # 0#)
+IsLinearDependent : Vector M n → Set _
+IsLinearDependent xs = Σ[ (ys by _) ∈ xs reaches 0ᴹ ] ∃ λ i → ys i # 0#
