@@ -42,7 +42,7 @@ open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutati
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.Reasoning.Setoid setoid
 open Units ring
-open module PFieldN {n} = PField heytingCommutativeRing (leftModule n)
+open module PFieldN {n} = PField hField (leftModule n)
 open module MDefN {n} = MDefinition (leftModule n)
 open PNorm
 open module ∑′ {n} = SumCommMonoid (commutativeMonoid n)

@@ -1,33 +1,36 @@
 open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
+open import Function
 
 module Algebra.Module.PropsField
   {c ℓ₁ ℓ₂ mr ℓm}
-  (hField : HeytingCommutativeRing c ℓ₁ ℓ₂)
+  (hField : HeytingField c ℓ₁ ℓ₂)
   (leftModule : LeftModule (CommutativeRing.ring
-    (HeytingCommutativeRing.commutativeRing hField)) mr ℓm)
+    $ HeytingCommutativeRing.commutativeRing
+    $ HeytingField.heytingCommutativeRing hField) mr ℓm)
   where
 
-open import Function
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Fin using (Fin)
 open import Data.Product
 open import Data.Vec.Functional
 open import Relation.Unary.Properties
 
-open import Algebra.Module.Definition leftModule
+open import Algebra.Module.DefsField hField leftModule
 open import Algebra.BigOps
 open import Vector.Structures
 
-open HeytingCommutativeRing hField renaming (Carrier to A)
+open HeytingField hField renaming (Carrier to A)
+open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; *-commutativeMonoid)
 open LeftModule leftModule renaming (Carrierᴹ to M)
 open SumCommMonoid +ᴹ-commutativeMonoid
 open VRing rawRing using (_*ⱽ_)
 open import Algebra.Solver.CommutativeMonoid *-commutativeMonoid
-open import Algebra.HeytingCommutativeRing.Properties hField
+open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
 open import Algebra.Module.Props commutativeRing leftModule public
+open import Relation.Nullary
 
 import Relation.Binary.Reasoning.Setoid as RSetoid
 module ≈ᴹ-Reasoning = RSetoid ≈ᴹ-setoid
@@ -80,3 +83,6 @@ private variable
 
 *#0≈ⱽ : ∀ (xs : Vector M n) {ys : Vector A n} (ys#0 : ∀ i → ys i # 0#) → xs ≋ⱽ (ys *ᵣ xs)
 *#0≈ⱽ xs ys#0 = record { fwd = *#0⊆ⱽ xs ys#0 ; bwd = *ₗ#0⊆ⱽ xs _ }
+
+linInd→¬linDep : IsLinearIndependent xs → ¬ IsLinearDependent xs
+linInd→¬linDep (reach , i , ysI#0) linDep = tight _ _ .proj₂ (linDep reach i) ysI#0
