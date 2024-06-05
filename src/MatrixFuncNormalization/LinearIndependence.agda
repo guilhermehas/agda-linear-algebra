@@ -17,6 +17,7 @@ open import Data.Nat using (ℕ; zero; suc)
 open import Data.Fin as F using (Fin; fromℕ)
 open import Data.Fin.Properties as F
 open import Relation.Nullary
+open import Relation.Binary.PropositionalEquality using (refl)
 
 open import Algebra.BigOps
 import MatrixFuncNormalization.normBef as NormBef
@@ -36,9 +37,10 @@ open PVec hiding (module ≈ᴹ-Reasoning)
 open SumRing ring using (δ; δii≡1#)
 open LeftModule using (+ᴹ-isCommutativeMonoid)
 
-open module ∑CM {n} = SumCommMonoid (record { isCommutativeMonoid = +ᴹ-isCommutativeMonoid (leftModule n)})
+module ∑CM {n} = SumCommMonoid (record { isCommutativeMonoid = +ᴹ-isCommutativeMonoid $ leftModule n})
 open module DFieldN {n} = DField heytingField (leftModule n)
 open module PFieldN {n} = PField heytingField (leftModule n) hiding (module ≈-Reasoning)
+open import Algebra.Module.PropsVec commutativeRing using (∑∑≈∑)
 
 private variable
   m n : ℕ
@@ -57,7 +59,8 @@ private variable
 -- isLinearDependent = not ∘ isLinearIndependent
 
 open _reaches_
-open ≈ᴹ-Reasoning
+-- open ≈ᴹ-Reasoning
+-- open ≈-Reasoning
 
 normLinearDep : ((xs , pivs , _) : MatrixWithPivots n m)
   → AllRowsNormalized pivs
@@ -67,6 +70,9 @@ normLinearDep {ℕ.zero} (xs , pivs , mPivs) _ _ = inj₂ $ λ _ ()
 normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros with pivs $ fromℕ _ in pivEq | mPivs $ fromℕ _
 ... | nothing | lift allZ = inj₁ help
   where
+  open ≈ᴹ-Reasoning
+  open ∑CM
+
   help : IsLinearDependent xs
   ys (proj₁ help) = δ $ fromℕ _
   xs*ys≈x (proj₁ help) = begin
@@ -79,12 +85,30 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros with pivs $ fromℕ 
 ... | just j | xsN#0 , _ = inj₂ help
   where
   help : IsLinearIndependent xs
-  help (ys by xs*ys≈ws) i with pivs i | mPivs i | normed i (fromℕ n) {!toℕ<n!}
-  ... | nothing | lift allZ | inj₂ (_ , q) rewrite pivEq = help2 q
+  help (ys by xs*ys≈ws) i with pivs i | mPivs i | normed i (fromℕ n) {!toℕ<n!} | cZeros i
+  ... | nothing | lift allZ | inj₂ (_ , q) | _ rewrite pivEq = help2 q
     where
     help2 : _ → _
     help2 ()
-  ... | just piv | xsIP#0 , xsIJ≈0 | inj₁ <-ineq = {!!}
+  ... | just piv | xsIP#0 , xsIJ≈0 | inj₁ <-ineq | cZ = ysI≈0
+
+    where
+    open ≈-Reasoning
+    open ∑CM renaming (∑ to ∑M) using ()
+    open SumRing ring using (∑; ∑Ext)
+
+    sameXs : ∀ j → xs j piv ≈ δ i j
+    sameXs j with i F.≟ j
+    ... | yes refl = {!!}
+    ... | no i≢j = cZ j i≢j
+
+    ysI≈0 = begin
+      ys i ≈⟨ {!!} ⟩
+      -- {!!} ≈⟨ {!!} ⟩
+      ∑ (λ j → ys j * δ i j) ≈˘⟨ ∑Ext {U = λ j → ys j * xs j piv} (*-congˡ ∘ sameXs) ⟩
+      ∑ (λ j → ys j * xs j piv) ≈˘⟨ ∑∑≈∑ {m} {suc n} (λ i j → ys i * xs i j) piv ⟩
+      ∑M (λ i j → ys i * xs i j) piv ≈⟨ xs*ys≈ws piv ⟩
+      0# ∎
 
 
 toNormLinearDep : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m) → AllRowsNormalized pivs → xs ≋ⱽ ys

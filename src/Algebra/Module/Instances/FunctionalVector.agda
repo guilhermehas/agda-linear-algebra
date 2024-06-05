@@ -40,7 +40,7 @@ _+ᴹ_ = zipWith _+_
 -ᴹ_ = map $ -_
 
 _*ₗ_ : Opₗ Carrier (VC n)
-_*ₗ_ r = map (r *_)
+_*ₗ_ r = map $ r *_
 
 +ᴹ-cong : Congruent₂ (_+ᴹ_ {n})
 +ᴹ-cong x≈y u≈v i = +-cong (x≈y i) (u≈v i)
