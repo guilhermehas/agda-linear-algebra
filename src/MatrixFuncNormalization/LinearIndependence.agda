@@ -11,6 +11,7 @@ open import Function using (_$_; _∘_)
 open import Data.Bool using (Bool; true; false; not)
 open import Data.Product using (proj₁; proj₂; _,_)
 open import Data.Maybe
+open import Data.Maybe.Relation.Unary.All
 open import Data.Sum
 open import Data.Maybe using (is-just)
 open import Data.Nat using (ℕ; zero; suc)
@@ -41,6 +42,7 @@ module ∑CM {n} = SumCommMonoid (record { isCommutativeMonoid = +ᴹ-isCommutat
 open module DFieldN {n} = DField heytingField (leftModule n)
 open module PFieldN {n} = PField heytingField (leftModule n) hiding (module ≈-Reasoning)
 open import Algebra.Module.PropsVec commutativeRing using (∑∑≈∑)
+open import MatrixFuncNormalization.Definitions dField
 
 private variable
   m n : ℕ
@@ -65,9 +67,10 @@ open _reaches_
 normLinearDep : ((xs , pivs , _) : MatrixWithPivots n m)
   → AllRowsNormalized pivs
   → ColumnsZero xs pivs
+  → PivsOne≁0⁺ xs pivs
   → IsLinearDependent xs ⊎ IsLinearIndependent xs
-normLinearDep {ℕ.zero} (xs , pivs , mPivs) _ _ = inj₂ $ λ _ ()
-normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros with pivs $ fromℕ _ in pivEq | mPivs $ fromℕ _
+normLinearDep {ℕ.zero} (xs , pivs , mPivs) _ _ pOne = inj₂ $ λ _ ()
+normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fromℕ _ in pivEq | mPivs $ fromℕ _
 ... | nothing | lift allZ = inj₁ help
   where
   open ≈ᴹ-Reasoning
@@ -85,35 +88,35 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros with pivs $ fromℕ 
 ... | just j | xsN#0 , _ = inj₂ help
   where
   help : IsLinearIndependent xs
-  help (ys by xs*ys≈ws) i with pivs i | mPivs i | normed i (fromℕ n) {!toℕ<n!} | cZeros i
-  ... | nothing | lift allZ | inj₂ (_ , q) | _ rewrite pivEq = help2 q
+  help (ys by xs*ys≈ws) i with pivs i | mPivs i | normed i (fromℕ n) {!toℕ<n!} | cZeros i | pOne i
+  ... | nothing | lift allZ | inj₂ (_ , q) | _ | _ rewrite pivEq = help2 q
     where
     help2 : _ → _
     help2 ()
-  ... | just piv | xsIP#0 , xsIJ≈0 | inj₁ <-ineq | cZ = ysI≈0
+  ... | just piv | xsIP#0 , xsIJ≈0 | inj₁ <-ineq | cZ | just pOneI = ysI≈0
 
     where
     open ≈-Reasoning
     open ∑CM renaming (∑ to ∑M) using ()
-    open SumRing ring using (∑; ∑Ext)
+    open SumRing ring using (∑; ∑Ext; ∑Mul1r)
 
     sameXs : ∀ j → xs j piv ≈ δ i j
     sameXs j with i F.≟ j
-    ... | yes refl = {!!}
+    ... | yes refl = pOneI
     ... | no i≢j = cZ j i≢j
 
     ysI≈0 = begin
-      ys i ≈⟨ {!!} ⟩
-      -- {!!} ≈⟨ {!!} ⟩
-      ∑ (λ j → ys j * δ i j) ≈˘⟨ ∑Ext {U = λ j → ys j * xs j piv} (*-congˡ ∘ sameXs) ⟩
-      ∑ (λ j → ys j * xs j piv) ≈˘⟨ ∑∑≈∑ {m} {suc n} (λ i j → ys i * xs i j) piv ⟩
+      ys i                          ≈˘⟨ ∑Mul1r ys i ⟩
+      ∑ (λ j → δ i j * ys j)         ≈⟨ ∑Ext (λ j → *-comm (δ i j) (ys j)) ⟩
+      ∑ (λ j → ys j * δ i j)        ≈˘⟨ ∑Ext {U = λ j → ys j * xs j piv} (*-congˡ ∘ sameXs) ⟩
+      ∑ (λ j → ys j * xs j piv)     ≈˘⟨ ∑∑≈∑ {m} {suc n} (λ i j → ys i * xs i j) piv ⟩
       ∑M (λ i j → ys i * xs i j) piv ≈⟨ xs*ys≈ws piv ⟩
       0# ∎
 
-
-toNormLinearDep : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m) → AllRowsNormalized pivs → xs ≋ⱽ ys
+toNormLinearDep : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m)
+  → AllRowsNormalized pivs → xs ≋ⱽ ys
   → IsLinearDependent xs ⊎ IsLinearIndependent xs
 toNormLinearDep xs (ys , pivs , mPivs) normed xs≋ⱽys = {!!}
 
 decLinearDep : (xs : Matrix F n m) → IsLinearDependent xs ⊎ IsLinearIndependent xs
-decLinearDep xs = let mPivs , normed , xs≈ⱽys = normalizeMatrix xs in toNormLinearDep xs mPivs normed (≈ⱽ⇒≋ⱽ xs≈ⱽys)
+decLinearDep xs = let mPivs , normed , xs≈ⱽys = normalizeMatrix xs in toNormLinearDep xs mPivs normed $ ≈ⱽ⇒≋ⱽ xs≈ⱽys

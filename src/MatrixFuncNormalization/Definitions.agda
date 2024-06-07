@@ -165,6 +165,9 @@ record MatrixNormed≁0 (m n : ℕ) : Set (c ⊔ ℓ₁ ⊔ ℓ₂) where
 PivsOne≁0 : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m) n) → Set _
 PivsOne≁0 xs pivs = ∀ i → xs i (pivs i) ≈ 1#
 
+PivsOne≁0⁺ : ∀ (xs : Matrix F n m) (pivs : Vector (Fin m ⁺) n) → Set _
+PivsOne≁0⁺ xs pivs = ∀ i → All (λ j → xs i j ≈ 1#) (pivs i)
+
 record MatrixIsNormed≁0≈1 (xs : Matrix F n m) : Set (ℓ₁ ⊔ ℓ₂) where
   constructor cIsNorm≁0≈1
   field
