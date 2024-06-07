@@ -7,9 +7,9 @@ open import Function
 open import Data.Bool using (true; false)
 open import Data.Product
 open import Data.Nat using (ℕ; z≤n; s≤s; suc)
-open import Data.Nat.Properties as ℕ hiding (<⇒≢; _≤?_; _≟_; ≤∧≢⇒<; <-asym; <-trans)
+open import Data.Nat.Properties as ℕ hiding (<⇒≢; _≤?_; _≟_; ≤∧≢⇒<; <-asym; <-trans; <-cmp)
 open import Data.Fin.Base as F using (Fin; zero; suc; inject₁; fromℕ)
-open import Data.Fin.Properties hiding (≤-refl; <-trans)
+open import Data.Fin.Properties as F hiding (≤-refl; <-trans)
 open import Data.Sum as Π
 open import Data.Vec.Functional
 open import Relation.Nullary.Construct.Add.Supremum
@@ -116,6 +116,14 @@ RowsNormalizedBeforeIJ i j i<j xs =
 private
   ≈∙-refl : Reflexive _≈∙_
   ≈∙-refl = ≈∙-refl′ ≈.refl
+
+allR→Monot : ∀ {xs : Vector A n} → AllRowsNormalized xs → Monotonic₁ F._≤_ _≤_ xs
+allR→Monot norm {i} {j} i≤j with <-cmp i j
+... | tri≈ _ ≡.refl _ = inj₂ ≈.refl
+... | tri> ¬i<j i≢j _ = contradiction (≤∧≢⇒< i≤j i≢j) ¬i<j
+... | tri< i<j _ _ with norm _ _ i<j
+...   | inj₁ p = inj₁ p
+...   | inj₂ (xsI≈⊤ , xsJ≈⊤) = inj₂ $ ≈.trans xsI≈⊤ $ ≈.sym xsJ≈⊤
 
 rowsNormalizedBeforeIJ++′ : ∀ i j .(i≤j : i F.≤ j) (xs : Vector A (suc n)) ys
   → RowsNormalizedBeforeIJ i (inject₁ j) (cong≤ʳ (sym (toℕ-inject₁ _)) i≤j) xs

@@ -47,22 +47,7 @@ open import MatrixFuncNormalization.Definitions dField
 private variable
   m n : ℕ
 
--- isLinearIndependentNormed : Matrix F n m → Bool
--- isLinearIndependentNormed {zero}  xs = true
--- isLinearIndependentNormed {suc n} xs = is-just $ proj₁ $ findPivAndValue $ xs $ fromℕ _
-
--- isLinearDependentNormed : Matrix F n m → Bool
--- isLinearDependentNormed = not ∘ isLinearIndependentNormed
-
--- isLinearIndependent : Matrix F n m → Bool
--- isLinearIndependent = isLinearIndependentNormed ∘ normalize
-
--- isLinearDependent : Matrix F n m → Bool
--- isLinearDependent = not ∘ isLinearIndependent
-
 open _reaches_
--- open ≈ᴹ-Reasoning
--- open ≈-Reasoning
 
 normLinearDep : ((xs , pivs , _) : MatrixWithPivots n m)
   → AllRowsNormalized pivs
@@ -88,12 +73,13 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fro
 ... | just j | xsN#0 , _ = inj₂ help
   where
   help : IsLinearIndependent xs
-  help (ys by xs*ys≈ws) i with pivs i | mPivs i | normed i (fromℕ n) {!toℕ<n!} | cZeros i | pOne i
-  ... | nothing | lift allZ | inj₂ (_ , q) | _ | _ rewrite pivEq = help2 q
+  help (ys by xs*ys≈ws) i with pivs i | mPivs i | allR→Monot normed (≤fromℕ i) | cZeros i | pOne i
+  ... | nothing | lift allZ | inj₁ () | _ | _
+  ... | nothing | lift allZ | inj₂ q  | _ | _ rewrite pivEq = help2 q
     where
     help2 : _ → _
     help2 ()
-  ... | just piv | xsIP#0 , xsIJ≈0 | inj₁ <-ineq | cZ | just pOneI = ysI≈0
+  ... | just piv | xsIP#0 , xsIJ≈0 | _ | cZ | just pOneI = ysI≈0
 
     where
     open ≈-Reasoning
