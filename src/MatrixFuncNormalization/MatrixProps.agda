@@ -118,10 +118,9 @@ private
   ≈∙-refl = ≈∙-refl′ ≈.refl
 
 allR→Monot : ∀ {xs : Vector A n} → AllRowsNormalized xs → Monotonic₁ F._≤_ _≤_ xs
-allR→Monot norm {i} {j} i≤j with <-cmp i j
-... | tri≈ _ ≡.refl _ = inj₂ ≈.refl
-... | tri> ¬i<j i≢j _ = contradiction (≤∧≢⇒< i≤j i≢j) ¬i<j
-... | tri< i<j _ _ with norm _ _ i<j
+allR→Monot {xs = xs} norm {i} {j} i≤j with m≤n⇒m<n∨m≡n i≤j
+... | inj₂ i≡j with ≡.refl ← toℕ-injective i≡j = inj₂ ≈.refl
+... | inj₁ i<j with norm _ _ i<j
 ...   | inj₁ p = inj₁ p
 ...   | inj₂ (xsI≈⊤ , xsJ≈⊤) = inj₂ $ ≈.trans xsI≈⊤ $ ≈.sym xsJ≈⊤
 
