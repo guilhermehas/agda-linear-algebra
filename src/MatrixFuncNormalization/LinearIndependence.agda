@@ -9,7 +9,7 @@ open import Algebra.Module.Bundles
 open import Algebra.Matrix
 open import Function using (_$_; _∘_)
 open import Data.Bool using (Bool; true; false; not)
-open import Data.Product using (proj₁; proj₂; _,_)
+open import Data.Product using (proj₁; proj₂; _,_; ∃)
 open import Data.Maybe
 open import Data.Maybe.Relation.Unary.All
 open import Data.Sum
@@ -101,8 +101,8 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fro
 
 toNormLinearDep : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m)
   → AllRowsNormalized pivs → xs ≋ⱽ ys
-  → IsLinearDependent xs ⊎ IsLinearIndependent xs
+  → ∃ $ LinearIndependent? xs
 toNormLinearDep xs (ys , pivs , mPivs) normed xs≋ⱽys = {!!}
 
-decLinearDep : (xs : Matrix F n m) → IsLinearDependent xs ⊎ IsLinearIndependent xs
+decLinearDep : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
 decLinearDep xs = let mPivs , normed , xs≈ⱽys = normalizeMatrix xs in toNormLinearDep xs mPivs normed $ ≈ⱽ⇒≋ⱽ xs≈ⱽys

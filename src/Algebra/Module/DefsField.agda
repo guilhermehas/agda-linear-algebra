@@ -13,6 +13,8 @@ module Algebra.Module.DefsField
 
 open import Algebra.Module.Definition leftModule public
 
+open import Level using (Level; _⊔_)
+open import Data.Bool
 open import Data.Product
 open import Data.Nat using (ℕ)
 open import Data.Vec.Functional
@@ -25,3 +27,7 @@ private variable
 
 IsLinearDependent : Vector M n → Set _
 IsLinearDependent xs = Σ[ (ys by _) ∈ xs reaches 0ᴹ ] ∃ λ i → ys i # 0#
+
+data LinearIndependent? (xs : Vector M n) : Bool → Set (c ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓm) where
+  linDep : IsLinearDependent   xs → LinearIndependent? xs false
+  linInd : IsLinearIndependent xs → LinearIndependent? xs true
