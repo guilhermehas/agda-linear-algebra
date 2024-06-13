@@ -100,7 +100,7 @@ linInd→¬linDep linIndep (reach , i , ysI#0) = tight _ _ .proj₂ (linIndep re
 --   $ ws by ≈ᴹ-trans (∑Ext (*ₗ-congˡ ∘ ≈ᴹ-sym ∘ xs≋ys)) xs*ws≈x , i , ws#0
 -- sameLinInd {n} xs ys (rec {ys = zs} (swapOp p q p≢q) xs≈ⱽzs same) false dep@(linDep (ws by xs*ws≈x , i , ws#0))
 --   with linDep (wws by xs*wws≈x , j , wws#0) ← sameLinInd _ _ xs≈ⱽzs false dep
---   = linDep ((swapV wws p q by ≈ᴹ-trans ∑Same xs*wws≈x) , ∃#0)
+--   = linDep $ (swapV wws p q by ≈ᴹ-trans ∑Same xs*wws≈x) , ∃#0
 --   where
 --   open ≈ᴹ-Reasoning
 
@@ -147,5 +147,7 @@ linInd→¬linDep linIndep (reach , i , ysI#0) = tight _ _ .proj₂ (linIndep re
 --     ∑ (swapV (wws *ᵣ zs) p q) ≈⟨ ∑Swap _ p q ⟩
 --     ∑ (wws *ᵣ zs) ∎
 
--- sameLinInd xs ys (rec (addCons p q p≢q r) xs≈ⱽys same) false (linDep (ws by xs*ws≈x , i , ws#0)) = linDep {!!}
+-- sameLinInd xs ys (rec {ys = zs} (addCons p q p≢q r) xs≈ⱽzs same) false dep@(linDep (ws by xs*ws≈x , i , ws#0))
+--   with linDep (wws by xs*wws≈x , j , wws#0) ← sameLinInd _ _ xs≈ⱽzs false dep
+--   = linDep (({!!} by ≈ᴹ-trans {!!} xs*wws≈x) , {!!})
 -- sameLinInd xs ys xs≈ⱽys true (linInd ind) = {!!}
