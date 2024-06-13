@@ -136,6 +136,13 @@ swap-involute xs i j k with k ≟ i | k ≟ j | i ≟ j
   _ ≡⟨ updateAt-minimal _ _ _ k≢i ⟩
   _ ∎
 
+swap-diff : ∀ (xs : Vector A n) k {i j} → k ≢ i → k ≢ j → swapV xs i j k ≡ xs k
+swap-diff xs k {i} {j} k≢i k≢j = begin
+  _ ≡⟨ updateAt-minimal _ _ _ k≢j ⟩
+  _ ≡⟨ updateAt-minimal _ _ _ k≢i ⟩
+  _ ∎
+
+
 firstHasProperty : {A : Set ℓ} (xs : Vector A n) (f : A → Bool) →
   maybe (λ (_ , a) → T (f a)) ⊤ (findFirst xs f)
 firstHasProperty {n = ℕ.zero} xs f = _

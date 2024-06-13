@@ -32,6 +32,7 @@ open import Vector.Properties
 open import Vector.Permutation
 import Algebra.Module.Base as MBase
 import Algebra.Module.Definition as MDefinitions
+import Algebra.Module.DefsField as DField
 open import Algebra.BigOps
 
 open import Vec.Updates.Base renaming (_∷_ to _::_)
