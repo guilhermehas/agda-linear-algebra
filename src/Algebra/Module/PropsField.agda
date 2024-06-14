@@ -29,6 +29,7 @@ open HeytingField hField renaming (Carrier to A) hiding (sym)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open CommutativeRing commutativeRing using (rawRing; *-commutativeMonoid; ring; sym)
+open import Algebra.Properties.Ring ring
 open LeftModule leftModule renaming (Carrierᴹ to M)
 open SumCommMonoid +ᴹ-commutativeMonoid
 open VRing rawRing using (_*ⱽ_)
@@ -240,14 +241,20 @@ private
 --     ∑ (ks *ᵣ ys) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ same) ⟩
 --     ∑ ksZs ≈˘⟨ genSum ksZs ⟩
 --     ksZs p +ᴹ ksZs q +ᴹ ∑ (ksZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) ≈⟨ +ᴹ-cong sameTwo (∑Ext sameInd) ⟩
---     -- {!!} ≈⟨ {!!} ⟩
 --     wsZs p +ᴹ wsZs q +ᴹ ∑ (wsZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) ≈⟨ genSum wsZs ⟩
 --     ∑ wsZs ∎
 
 
 --   ∃#0 : _
 --   ∃#0 with j ≟ p | j ≟ q
---   ... | yes ≡.refl | _ = p , #-congʳ {!!} {!!}
+--   ... | yes ≡.refl | _ = p , {!wws#0!}
+--     where
+--     ksJ≈ : ks j ≈ wws p - r * wws q
+--     ksJ≈ rewrite dec-yes (j ≟ j) ≡.refl .proj₂
+--       | dec-yes (q ≟ q) ≡.refl .proj₂
+--       | dec-no (q ≟ j) q≢p = +-congˡ (trans (distribˡ _ _ _)
+--       (trans (+-congˡ (trans (*-congˡ (zeroˡ _)) (zeroʳ _)))
+--       (trans (+-identityʳ _) (sym (-‿distribˡ-* _ _)))))
 --   ... | no j≢p | yes ≡.refl = j , #-congʳ help wws#0
 --     where
 --     help : wws j ≈ ks j
