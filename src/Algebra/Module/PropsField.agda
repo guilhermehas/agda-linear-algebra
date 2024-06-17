@@ -39,7 +39,7 @@ open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
 open import Algebra.Module.Base ring
 open import Algebra.Module.Props commutativeRing leftModule public
 open import Algebra.Module.VecSpace leftModule
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_)
 open import Relation.Binary.Definitions using (Decidable)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
@@ -176,12 +176,7 @@ module _ (_#?_ : Decidable _#_) where
     wsZs = wws *ᵣ zs
 
     genSum : (xs : Vector M _) → xs p +ᴹ xs q +ᴹ ∑ (xs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ)  ≈ᴹ ∑ xs
-    genSum xs = ≈ᴹ-sym (begin
-      ∑ xs ≈⟨ ∑Remove₂ xs p ⟩
-      xs p +ᴹ ∑ (xs [ p ]≔ 0ᴹ) ≈⟨ +ᴹ-congˡ (∑Remove₂ _ q) ⟩
-      xs p +ᴹ ((xs [ p ]≔ 0ᴹ) q +ᴹ ∑ (xs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) ) ≈˘⟨ +ᴹ-assoc _ _ _ ⟩
-      _ +ᴹ (xs [ p ]≔ 0ᴹ) q +ᴹ _ ≈⟨ +ᴹ-congʳ (+ᴹ-congˡ (≈ᴹ-reflexive (updateAt-minimal _ _ _ (p≢q ∘ ≡.sym)))) ⟩
-      _ +ᴹ xs q +ᴹ _ ∎)
+    genSum xs = ∑Two xs _ _ p≢q
 
     sameInd : ∀ i → (ksZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) i ≈ᴹ (wsZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) i
     sameInd i with i ≟ q | i ≟ p
@@ -277,3 +272,77 @@ module _ (_#?_ : Decidable _#_) where
       where
       help : wws j ≈ ks j
       help rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = refl
+
+{-
+  sameLinIndTrue : (xs ys : Vector M n) → xs ≈ⱽ ys
+    → IsLinearIndependent xs → IsLinearIndependent ys
+  sameLinIndTrue xs ys (idR xs≈ys) lxs rh@(zs by xs*zs≈x) =
+    lxs (zs by ≈ᴹ-trans (∑Ext $ *ₗ-congˡ ∘ xs≈ys) xs*zs≈x)
+  sameLinIndTrue xs ys (rec {ys = ws} (swapOp p q p≢q) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
+    with pp ← sameLinIndTrue _ _ xs≈ⱽys
+    = lxs (zs by {!!}) i
+  sameLinIndTrue {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
+    = help i (ks≈0 i)
+    where
+    open ≈ᴹ-Reasoning
+
+    q≢p = p≢q ∘ ≡.sym
+    v0 = r
+    wss = ws [ q ]← r *[ p ]
+    ks = zs [ p ]←₂ v0 *[ q ]
+
+    zsChange : ∀ j → j ≢ p → j ≢ q → wss j ≈ᴹ ys j → (ks *ᵣ ws) j ≈ᴹ (zs *ᵣ ys) j
+    zsChange j j≢p j≢q rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = *ₗ-congˡ
+
+    ksQ≈zs : ks q ≈ zs q
+    ksQ≈zs rewrite dec-no (p ≟ q) p≢q = refl
+
+    ksP≈zsV : ks p ≈ zs p + v0 * zs q
+    ksP≈zsV rewrite dec-yes (p ≟ p) ≡.refl .proj₂ = refl
+
+    wsP≈wss : ws p ≈ᴹ wss p
+    wsP≈wss rewrite dec-no (q ≟ p) q≢p = ≈ᴹ-refl
+
+    wsQ≈wss : ws q +ᴹ r *ₗ ws p ≈ᴹ wss q
+    wsQ≈wss rewrite dec-yes (q ≟ q) ≡.refl .proj₂ = ≈ᴹ-refl
+
+
+    sameR2 = begin
+      (v0 * zs q) *ₗ ws p ≈⟨ *ₗ-congʳ (*-comm _ _) ⟩
+      (zs q * r)  *ₗ ws p ≈⟨ *ₗ-assoc _ _ _ ⟩
+      zs q *ₗ r   *ₗ ws p ∎
+
+    sameRight = begin
+      (v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-comm _ _ ⟩
+      zs q *ₗ ws q +ᴹ (v0 * zs q) *ₗ ws p ≈⟨ +ᴹ-congˡ sameR2 ⟩
+      zs q *ₗ ws q +ᴹ zs q *ₗ r *ₗ ws p ∎
+
+    samePq = begin
+      (ks *ᵣ ws) p +ᴹ (ks *ᵣ ws) q ≈⟨ +ᴹ-cong (*ₗ-congʳ ksP≈zsV) (*ₗ-congʳ ksQ≈zs) ⟩
+      (zs p + v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-congʳ (*ₗ-distribʳ _ _ _) ⟩
+      zs p *ₗ ws p +ᴹ (v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-assoc _ _ _ ⟩
+      zs p *ₗ ws p +ᴹ ((v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q) ≈⟨ +ᴹ-congˡ sameRight ⟩
+      zs p *ₗ ws p +ᴹ (zs q *ₗ ws q +ᴹ zs q *ₗ r *ₗ ws p) ≈˘⟨ +ᴹ-congˡ (*ₗ-distribˡ _ _ _) ⟩
+      zs p *ₗ ws p +ᴹ zs q *ₗ (ws q +ᴹ r *ₗ ws p) ≈⟨ +ᴹ-cong
+        (*ₗ-congˡ (≈ᴹ-trans wsP≈wss (same p)))
+        (*ₗ-congˡ (≈ᴹ-trans wsQ≈wss (same q))) ⟩
+      (zs *ᵣ ys) p +ᴹ (zs *ᵣ ys) q ∎
+
+
+    ∑Same = ∑TwoExt _ _ _ _ p≢q samePq λ j j≢p j≢q → zsChange j j≢p j≢q (same j)
+
+    ks≈0 : ∀ j → ks j ≈ 0#
+    ks≈0 = sameLinIndTrue _ _ xs≈ⱽys lxs (ks by ≈ᴹ-trans ∑Same xs*zs≈x)
+
+    zsQ≈0 : ks q ≈ 0# → zs q ≈ 0#
+    zsQ≈0 rewrite dec-no (p ≟ q) p≢q = id
+
+    help : ∀ i → ks i ≈ 0# → zs i ≈ 0#
+    help i with p ≟ i
+    ... | no p≢i = id
+    ... | yes ≡.refl = help2
+      where
+      help2 : _ → _
+      help2 zsP = trans (trans (sym (+-identityʳ _))
+        (+-congˡ (sym (trans (*-congˡ (zsQ≈0 (ks≈0 q))) (zeroʳ _))))) zsP
+-}
