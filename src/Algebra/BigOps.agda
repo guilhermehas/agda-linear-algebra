@@ -127,6 +127,45 @@ module SumCommMonoid (cMonoid : CommutativeMonoid a ℓ) where
     helper : ∀ a b c → a ∙ (b ∙ c) ≈ b ∙ (a ∙ c)
     helper = solve 3 (λ a b c → (a ⊕ (b ⊕ c)) ⊜ (b ⊕ (a ⊕ c))) refl
 
+  ∑Two : ∀ (xs : Vector A n) p q (p≢q : p ≢ q) → xs p ∙ xs q ∙ ∑ (xs [ p ]≔ ε [ q ]≔ ε) ≈ ∑ xs
+  ∑Two xs p q p≢q = sym (begin
+    ∑ xs ≈⟨ ∑Remove₂ xs p ⟩
+    xs p ∙ ∑ (xs [ p ]≔ ε) ≈⟨ ∙-congˡ (∑Remove₂ _ q) ⟩
+    xs p ∙ ((xs [ p ]≔ ε) q ∙ ∑ (xs [ p ]≔ ε [ q ]≔ ε) ) ≈˘⟨ assoc _ _ _ ⟩
+    _ ∙ (xs [ p ]≔ ε) q ∙ _ ≈⟨ ∙-congʳ (∙-congˡ (reflexive (updateAt-minimal _ _ _ (p≢q ∘ ≡.sym)))) ⟩
+    _ ∙ xs q ∙ _ ∎)
+
+  ∑TwoExt : ∀ (xs ys : Vector A n) p q (p≢q : p ≢ q) →
+    xs p ∙ xs q ≈ ys p ∙ ys q → (∀ i → i ≢ p → i ≢ q → xs i ≈ ys i)
+    → ∑ xs ≈ ∑ ys
+  ∑TwoExt {n} xs ys p q p≢q xsPQ≈ysPQ same≢ = begin
+    ∑ xs ≈˘⟨ ∑Two xs _ _ p≢q ⟩
+    (xs p ∙ xs q ∙ _) ≈⟨ ∙-cong xsPQ≈ysPQ (∑Ext {n} same) ⟩
+    (ys p ∙ ys q ∙ _) ≈⟨ ∑Two ys _ _ p≢q ⟩
+    ∑ ys ∎
+    where
+
+    same : ∀ i → (xs [ p ]≔ ε [ q ]≔ ε) i ≈ (ys [ p ]≔ ε [ q ]≔ ε) i
+    same i with i ≟ q | i ≟ p
+    ... | yes ≡.refl | _ = begin
+      _  ≡⟨ updateAt-updates q _ ⟩
+      _ ≡˘⟨ updateAt-updates q _ ⟩
+      _ ∎
+    ... | no i≢q | yes ≡.refl = begin
+      _  ≡⟨ updateAt-minimal _ _ _ i≢q ⟩
+      _  ≡⟨ updateAt-updates p _ ⟩
+      _ ≡˘⟨ updateAt-updates p _ ⟩
+      _ ≡˘⟨ updateAt-minimal _ _ _ i≢q ⟩
+      _ ∎
+    ... | no i≢q | no i≢p = begin
+      _  ≡⟨ updateAt-minimal _ _ _ i≢q ⟩
+      _  ≡⟨ updateAt-minimal _ _ _ i≢p ⟩
+      _  ≈⟨ same≢ _ i≢p i≢q ⟩
+      _ ≡˘⟨ updateAt-minimal _ _ _ i≢p ⟩
+      _ ≡˘⟨ updateAt-minimal _ _ _ i≢q ⟩
+      _ ∎
+
+
   private
     helperF : ∀ (i : Fin $ ℕ.suc n) j → i F.≤ j → punchIn i j ≡ suc j
     helperF zero j i<j = ≡.refl
