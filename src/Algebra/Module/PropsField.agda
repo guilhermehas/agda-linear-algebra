@@ -136,13 +136,13 @@ private
 
 module _ (_#?_ : Decidable _#_) where
 
-  sameLinIndFalse : (xs ys : Vector M n) → xs ≈ⱽ ys
-    → LinearIndependent? xs false → LinearIndependent? ys false
-  sameLinIndFalse {n} xs ys (idR xs≋ys) (linDep (ws by xs*ws≈x , i , ws#0)) = linDep
-    $ ws by ≈ᴹ-trans (∑Ext (*ₗ-congˡ ∘ ≈ᴹ-sym ∘ xs≋ys)) xs*ws≈x , i , ws#0
-  sameLinIndFalse {n} xs ys (rec {ys = zs} (swapOp p q p≢q) xs≈ⱽzs same) dep@(linDep (ws by xs*ws≈x , i , ws#0))
-    with linDep (wws by xs*wws≈x , j , wws#0) ← sameLinIndFalse _ _ xs≈ⱽzs dep
-    = linDep $ (swapV wws p q by ≈ᴹ-trans ∑Same xs*wws≈x) , ∃#0
+  sameLinDep : (xs ys : Vector M n) → xs ≈ⱽ ys
+    → IsLinearDependent xs → IsLinearDependent ys
+  sameLinDep {n} xs ys (idR xs≋ys) (ws by xs*ws≈x , i , ws#0) =
+    ws by ≈ᴹ-trans (∑Ext (*ₗ-congˡ ∘ ≈ᴹ-sym ∘ xs≋ys)) xs*ws≈x , i , ws#0
+  sameLinDep {n} xs ys (rec {ys = zs} (swapOp p q p≢q) xs≈ⱽzs same) dep@(ws by xs*ws≈x , i , ws#0)
+    with wws by xs*wws≈x , j , wws#0 ← sameLinDep _ _ xs≈ⱽzs dep
+    = swapV wws p q by ≈ᴹ-trans ∑Same xs*wws≈x , ∃#0
     where
     open ≈ᴹ-Reasoning
 
@@ -167,9 +167,9 @@ module _ (_#?_ : Decidable _#_) where
       ∑ (swapV (wws *ᵣ zs) p q) ≈⟨ ∑Swap _ p q ⟩
       ∑ (wws *ᵣ zs) ∎
 
-  sameLinIndFalse xs ys (rec {ys = zs} (addCons p q p≢q r) xs≈ⱽzs same) dep@(linDep (ws by xs*ws≈x , i , ws#0))
-    with linDep (wws by xs*wws≈x , j , wws#0) ← sameLinIndFalse _ _ xs≈ⱽzs dep
-    = linDep (ks by ≈ᴹ-trans ∑Same xs*wws≈x , ∃#0)
+  sameLinDep xs ys (rec {ys = zs} (addCons p q p≢q r) xs≈ⱽzs same) dep@(ws by xs*ws≈x , i , ws#0)
+    with wws by xs*wws≈x , j , wws#0 ← sameLinDep _ _ xs≈ⱽzs dep
+    = ks by ≈ᴹ-trans ∑Same xs*wws≈x , ∃#0
 
     where
     open ≈ᴹ-Reasoning
@@ -279,123 +279,130 @@ module _ (_#?_ : Decidable _#_) where
       help : wws j ≈ ks j
       help rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = refl
 
-  sameLinIndTrue : (xs ys : Vector M n) → xs ≈ⱽ ys
-    → IsLinearIndependent xs → IsLinearIndependent ys
-  sameLinIndTrue xs ys (idR xs≈ys) lxs rh@(zs by xs*zs≈x) =
-    lxs (zs by ≈ᴹ-trans (∑Ext $ *ₗ-congˡ ∘ xs≈ys) xs*zs≈x)
-  sameLinIndTrue {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
-    = help i (ks≈0 i)
+sameLinInd : (xs ys : Vector M n) → xs ≈ⱽ ys
+  → IsLinearIndependent xs → IsLinearIndependent ys
+sameLinInd xs ys (idR xs≈ys) lxs rh@(zs by xs*zs≈x) =
+  lxs (zs by ≈ᴹ-trans (∑Ext $ *ₗ-congˡ ∘ xs≈ys) xs*zs≈x)
+sameLinInd {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
+  = help i (ks≈0 i)
+  where
+  open ≈ᴹ-Reasoning
+
+  q≢p = p≢q ∘ ≡.sym
+  v0 = r
+  wss = ws [ q ]← r *[ p ]
+  ks = zs [ p ]←₂ v0 *[ q ]
+
+  zsChange : ∀ j → j ≢ p → j ≢ q → wss j ≈ᴹ ys j → (ks *ᵣ ws) j ≈ᴹ (zs *ᵣ ys) j
+  zsChange j j≢p j≢q rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = *ₗ-congˡ
+
+  ksQ≈zs : ks q ≈ zs q
+  ksQ≈zs rewrite dec-no (p ≟ q) p≢q = refl
+
+  ksP≈zsV : ks p ≈ zs p + v0 * zs q
+  ksP≈zsV rewrite dec-yes (p ≟ p) ≡.refl .proj₂ = refl
+
+  wsP≈wss : ws p ≈ᴹ wss p
+  wsP≈wss rewrite dec-no (q ≟ p) q≢p = ≈ᴹ-refl
+
+  wsQ≈wss : ws q +ᴹ r *ₗ ws p ≈ᴹ wss q
+  wsQ≈wss rewrite dec-yes (q ≟ q) ≡.refl .proj₂ = ≈ᴹ-refl
+
+
+  sameR2 = begin
+    (v0 * zs q) *ₗ ws p ≈⟨ *ₗ-congʳ (*-comm _ _) ⟩
+    (zs q * r)  *ₗ ws p ≈⟨ *ₗ-assoc _ _ _ ⟩
+    zs q *ₗ r   *ₗ ws p ∎
+
+  sameRight = begin
+    (v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-comm _ _ ⟩
+    zs q *ₗ ws q +ᴹ (v0 * zs q) *ₗ ws p ≈⟨ +ᴹ-congˡ sameR2 ⟩
+    zs q *ₗ ws q +ᴹ zs q *ₗ r *ₗ ws p ∎
+
+  samePq = begin
+    (ks *ᵣ ws) p +ᴹ (ks *ᵣ ws) q ≈⟨ +ᴹ-cong (*ₗ-congʳ ksP≈zsV) (*ₗ-congʳ ksQ≈zs) ⟩
+    (zs p + v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-congʳ (*ₗ-distribʳ _ _ _) ⟩
+    zs p *ₗ ws p +ᴹ (v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-assoc _ _ _ ⟩
+    zs p *ₗ ws p +ᴹ ((v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q) ≈⟨ +ᴹ-congˡ sameRight ⟩
+    zs p *ₗ ws p +ᴹ (zs q *ₗ ws q +ᴹ zs q *ₗ r *ₗ ws p) ≈˘⟨ +ᴹ-congˡ (*ₗ-distribˡ _ _ _) ⟩
+    zs p *ₗ ws p +ᴹ zs q *ₗ (ws q +ᴹ r *ₗ ws p) ≈⟨ +ᴹ-cong
+      (*ₗ-congˡ (≈ᴹ-trans wsP≈wss (same p)))
+      (*ₗ-congˡ (≈ᴹ-trans wsQ≈wss (same q))) ⟩
+    (zs *ᵣ ys) p +ᴹ (zs *ᵣ ys) q ∎
+
+
+  ∑Same = ∑TwoExt _ _ _ _ p≢q samePq λ j j≢p j≢q → zsChange j j≢p j≢q (same j)
+
+  ks≈0 : ∀ j → ks j ≈ 0#
+  ks≈0 = sameLinInd _ _ xs≈ⱽys lxs (ks by ≈ᴹ-trans ∑Same xs*zs≈x)
+
+  zsQ≈0 : ks q ≈ 0# → zs q ≈ 0#
+  zsQ≈0 rewrite dec-no (p ≟ q) p≢q = id
+
+  help : ∀ i → ks i ≈ 0# → zs i ≈ 0#
+  help i with p ≟ i
+  ... | no p≢i = id
+  ... | yes ≡.refl = help2
     where
-    open ≈ᴹ-Reasoning
+    help2 : _ → _
+    help2 zsP = trans (trans (sym (+-identityʳ _))
+      (+-congˡ (sym (trans (*-congˡ (zsQ≈0 (ks≈0 q))) (zeroʳ _))))) zsP
 
-    q≢p = p≢q ∘ ≡.sym
-    v0 = r
-    wss = ws [ q ]← r *[ p ]
-    ks = zs [ p ]←₂ v0 *[ q ]
+sameLinInd {n} xs ys (rec {ys = ws} (swapOp p q p≢q) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
+  = help i
+  where
+  open ≈ᴹ-Reasoning
 
-    zsChange : ∀ j → j ≢ p → j ≢ q → wss j ≈ᴹ ys j → (ks *ᵣ ws) j ≈ᴹ (zs *ᵣ ys) j
-    zsChange j j≢p j≢q rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = *ₗ-congˡ
+  ks = swapV zs p q
 
-    ksQ≈zs : ks q ≈ zs q
-    ksQ≈zs rewrite dec-no (p ≟ q) p≢q = refl
+  swapYs≈ : ∀ k → swapV ys p q k ≈ᴹ ws k
+  swapYs≈ k with k ≟ p | k ≟ q
+  ... | yes ≡.refl | yes ≡.refl = begin
+    _ ≡⟨ updateAt-updates p _ ⟩
+    _ ≈˘⟨ same _ ⟩
+    _ ≡⟨ updateAt-updates k _ ⟩
+    _ ∎
+  ... | yes ≡.refl | no k≢q = begin
+    _ ≡⟨ updateAt-minimal _ _ _ k≢q ⟩
+    _ ≡⟨ updateAt-updates k _ ⟩
+    _ ≈˘⟨ same q ⟩
+    _ ≡⟨ updateAt-updates q _ ⟩
+    _ ∎
+  ... | no k≢p | yes ≡.refl = begin
+    _ ≡⟨ updateAt-updates k _ ⟩
+    _ ≈˘⟨ same _ ⟩
+    _ ≡⟨ updateAt-minimal _ _ _ (k≢p ∘ ≡.sym) ⟩
+    _ ≡⟨ updateAt-updates p _ ⟩
+    _ ∎
+  ... | no k≢p | no k≢q = begin
+    _ ≡⟨ updateAt-minimal _ _ _ k≢q ⟩
+    _ ≡⟨ updateAt-minimal _ _ _ k≢p ⟩
+    _ ≈˘⟨ same _ ⟩
+    _ ≡⟨ updateAt-minimal _ _ _ k≢q ⟩
+    _ ≡⟨ updateAt-minimal _ _ _ k≢p ⟩
+    _ ∎
 
-    ksP≈zsV : ks p ≈ zs p + v0 * zs q
-    ksP≈zsV rewrite dec-yes (p ≟ p) ≡.refl .proj₂ = refl
+  ∑Same : ∑ (ks *ᵣ ws) ≈ᴹ ∑ (zs *ᵣ ys)
+  ∑Same = begin
+    ∑ (ks *ᵣ ws) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ swapYs≈) ⟩
+    ∑ (ks *ᵣ swapV ys p q) ≈⟨ ∑Ext (swapV-assoc _ _ p≢q) ⟩
+    ∑ (swapV (zs *ᵣ ys) p q) ≈⟨ ∑Swap _ p q ⟩
+    ∑ (zs *ᵣ ys) ∎
 
-    wsP≈wss : ws p ≈ᴹ wss p
-    wsP≈wss rewrite dec-no (q ≟ p) q≢p = ≈ᴹ-refl
+  ks≈0 : ∀ j → ks j ≈ 0#
+  ks≈0 = sameLinInd _ _ xs≈ⱽys lxs (ks by ≈ᴹ-trans ∑Same xs*zs≈x)
 
-    wsQ≈wss : ws q +ᴹ r *ₗ ws p ≈ᴹ wss q
-    wsQ≈wss rewrite dec-yes (q ≟ q) ≡.refl .proj₂ = ≈ᴹ-refl
+  help : ∀ i → zs i ≈ 0#
+  help i with i ≟ p | i ≟ q
+  ... | yes ≡.refl | _ = trans (sym (reflexive (updateAt-updates q _))) (ks≈0 q)
+  ... | no i≢p | yes ≡.refl = trans
+    (sym (reflexive (≡.trans (updateAt-minimal _ _ _ p≢q) (updateAt-updates p _)))) (ks≈0 p)
+  ... | no i≢p | no i≢q = trans
+    (sym (reflexive (≡.trans (updateAt-minimal _ _ _ i≢q) (updateAt-minimal _ _ _ i≢p)))) (ks≈0 i)
 
+module _ (_#?_ : Decidable _#_) where
 
-    sameR2 = begin
-      (v0 * zs q) *ₗ ws p ≈⟨ *ₗ-congʳ (*-comm _ _) ⟩
-      (zs q * r)  *ₗ ws p ≈⟨ *ₗ-assoc _ _ _ ⟩
-      zs q *ₗ r   *ₗ ws p ∎
-
-    sameRight = begin
-      (v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-comm _ _ ⟩
-      zs q *ₗ ws q +ᴹ (v0 * zs q) *ₗ ws p ≈⟨ +ᴹ-congˡ sameR2 ⟩
-      zs q *ₗ ws q +ᴹ zs q *ₗ r *ₗ ws p ∎
-
-    samePq = begin
-      (ks *ᵣ ws) p +ᴹ (ks *ᵣ ws) q ≈⟨ +ᴹ-cong (*ₗ-congʳ ksP≈zsV) (*ₗ-congʳ ksQ≈zs) ⟩
-      (zs p + v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-congʳ (*ₗ-distribʳ _ _ _) ⟩
-      zs p *ₗ ws p +ᴹ (v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q ≈⟨ +ᴹ-assoc _ _ _ ⟩
-      zs p *ₗ ws p +ᴹ ((v0 * zs q) *ₗ ws p +ᴹ zs q *ₗ ws q) ≈⟨ +ᴹ-congˡ sameRight ⟩
-      zs p *ₗ ws p +ᴹ (zs q *ₗ ws q +ᴹ zs q *ₗ r *ₗ ws p) ≈˘⟨ +ᴹ-congˡ (*ₗ-distribˡ _ _ _) ⟩
-      zs p *ₗ ws p +ᴹ zs q *ₗ (ws q +ᴹ r *ₗ ws p) ≈⟨ +ᴹ-cong
-        (*ₗ-congˡ (≈ᴹ-trans wsP≈wss (same p)))
-        (*ₗ-congˡ (≈ᴹ-trans wsQ≈wss (same q))) ⟩
-      (zs *ᵣ ys) p +ᴹ (zs *ᵣ ys) q ∎
-
-
-    ∑Same = ∑TwoExt _ _ _ _ p≢q samePq λ j j≢p j≢q → zsChange j j≢p j≢q (same j)
-
-    ks≈0 : ∀ j → ks j ≈ 0#
-    ks≈0 = sameLinIndTrue _ _ xs≈ⱽys lxs (ks by ≈ᴹ-trans ∑Same xs*zs≈x)
-
-    zsQ≈0 : ks q ≈ 0# → zs q ≈ 0#
-    zsQ≈0 rewrite dec-no (p ≟ q) p≢q = id
-
-    help : ∀ i → ks i ≈ 0# → zs i ≈ 0#
-    help i with p ≟ i
-    ... | no p≢i = id
-    ... | yes ≡.refl = help2
-      where
-      help2 : _ → _
-      help2 zsP = trans (trans (sym (+-identityʳ _))
-        (+-congˡ (sym (trans (*-congˡ (zsQ≈0 (ks≈0 q))) (zeroʳ _))))) zsP
-
-  sameLinIndTrue {n} xs ys (rec {ys = ws} (swapOp p q p≢q) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
-    = help i
-    where
-    open ≈ᴹ-Reasoning
-
-    ks = swapV zs p q
-
-    swapYs≈ : ∀ k → swapV ys p q k ≈ᴹ ws k
-    swapYs≈ k with k ≟ p | k ≟ q
-    ... | yes ≡.refl | yes ≡.refl = begin
-      _ ≡⟨ updateAt-updates p _ ⟩
-      _ ≈˘⟨ same _ ⟩
-      _ ≡⟨ updateAt-updates k _ ⟩
-      _ ∎
-    ... | yes ≡.refl | no k≢q = begin
-      _ ≡⟨ updateAt-minimal _ _ _ k≢q ⟩
-      _ ≡⟨ updateAt-updates k _ ⟩
-      _ ≈˘⟨ same q ⟩
-      _ ≡⟨ updateAt-updates q _ ⟩
-      _ ∎
-    ... | no k≢p | yes ≡.refl = begin
-      _ ≡⟨ updateAt-updates k _ ⟩
-      _ ≈˘⟨ same _ ⟩
-      _ ≡⟨ updateAt-minimal _ _ _ (k≢p ∘ ≡.sym) ⟩
-      _ ≡⟨ updateAt-updates p _ ⟩
-      _ ∎
-    ... | no k≢p | no k≢q = begin
-      _ ≡⟨ updateAt-minimal _ _ _ k≢q ⟩
-      _ ≡⟨ updateAt-minimal _ _ _ k≢p ⟩
-      _ ≈˘⟨ same _ ⟩
-      _ ≡⟨ updateAt-minimal _ _ _ k≢q ⟩
-      _ ≡⟨ updateAt-minimal _ _ _ k≢p ⟩
-      _ ∎
-
-    ∑Same : ∑ (ks *ᵣ ws) ≈ᴹ ∑ (zs *ᵣ ys)
-    ∑Same = begin
-      ∑ (ks *ᵣ ws) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ swapYs≈) ⟩
-      ∑ (ks *ᵣ swapV ys p q) ≈⟨ ∑Ext (swapV-assoc _ _ p≢q) ⟩
-      ∑ (swapV (zs *ᵣ ys) p q) ≈⟨ ∑Swap _ p q ⟩
-      ∑ (zs *ᵣ ys) ∎
-
-    ks≈0 : ∀ j → ks j ≈ 0#
-    ks≈0 = sameLinIndTrue _ _ xs≈ⱽys lxs (ks by ≈ᴹ-trans ∑Same xs*zs≈x)
-
-    help : ∀ i → zs i ≈ 0#
-    help i with i ≟ p | i ≟ q
-    ... | yes ≡.refl | _ = trans (sym (reflexive (updateAt-updates q _))) (ks≈0 q)
-    ... | no i≢p | yes ≡.refl = trans
-      (sym (reflexive (≡.trans (updateAt-minimal _ _ _ p≢q) (updateAt-updates p _)))) (ks≈0 p)
-    ... | no i≢p | no i≢q = trans
-      (sym (reflexive (≡.trans (updateAt-minimal _ _ _ i≢q) (updateAt-minimal _ _ _ i≢p)))) (ks≈0 i)
+  sameLin : (xs ys : Vector M n) → xs ≈ⱽ ys → ∀ b
+    → LinearIndependent? xs b → LinearIndependent? ys b
+  sameLin xs ys xs≈ⱽys false (linDep ld) = linDep $ sameLinDep _#?_ xs ys xs≈ⱽys ld
+  sameLin xs ys xs≈ⱽys true  (linInd li) = linInd $ sameLinInd      xs ys xs≈ⱽys li
