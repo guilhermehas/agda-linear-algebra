@@ -171,6 +171,10 @@ swap-involute xs i j k with k ≟ i | k ≟ j | i ≟ j
   _ ≡⟨ updateAt-minimal _ _ _ k≢i ⟩
   _ ∎
 
+swap-same-left : ∀ {xs ys : Vector A n} {i j} → swapV xs i j ≗ ys → xs ≗ swapV ys i j
+swap-same-left {n = n} {xs} {ys} {i} {j} same =
+  swap-injective λ j → trans (same _) (sym (swap-involute ys _ _ _))
+
 swap-diff : ∀ (xs : Vector A n) k {i j} → k ≢ i → k ≢ j → swapV xs i j k ≡ xs k
 swap-diff xs k {i} {j} k≢i k≢j = begin
   _ ≡⟨ updateAt-minimal _ _ _ k≢j ⟩
