@@ -109,6 +109,41 @@ swap-exchange xs i j k with i ≟ j | k ≟ i | k ≟ j
   _ ≡˘⟨ updateAt-minimal _ _ _ k≢i ⟩
   _ ∎
 
+swap-injective : ∀ {xs ys : Vector A n} {i j} → swapV xs i j ≗ swapV ys i j → xs ≗ ys
+swap-injective {n = n} {xs} {ys} {i} {j} same k with k ≟ i | k ≟ j | i ≟ j
+... | yes refl | yes refl | _ = begin
+  _ ≡˘⟨ updateAt-updates i _ ⟩
+  _ ≡⟨ same k ⟩
+  _ ≡⟨ updateAt-updates i _ ⟩
+  _ ∎
+... | yes refl | no k≢j | yes refl = begin
+  _ ≡˘⟨ updateAt-updates i _ ⟩
+  _ ≡˘⟨ updateAt-minimal _ _ _ k≢j ⟩
+  _ ≡⟨ same k ⟩
+  _ ≡⟨ updateAt-minimal _ _ _ k≢j ⟩
+  _ ≡⟨ updateAt-updates i _ ⟩
+  _ ∎
+... | yes refl | no k≢j | no i≢j = begin
+  _ ≡˘⟨ updateAt-updates j _ ⟩
+  _ ≡⟨ same j ⟩
+  _ ≡⟨ updateAt-updates j _ ⟩
+  _ ∎
+... | no k≢i | yes refl | _ = begin
+  _ ≡˘⟨ updateAt-updates i _ ⟩
+  _ ≡˘⟨ updateAt-minimal _ _ _ (k≢i ∘ sym) ⟩
+  _ ≡⟨ same i ⟩
+  _ ≡⟨ updateAt-minimal _ _ _ (k≢i ∘ sym) ⟩
+  _ ≡⟨ updateAt-updates i _ ⟩
+  _ ∎
+... | no k≢i | no k≢j | _ = begin
+  _ ≡˘⟨ updateAt-minimal _ _ _ k≢i ⟩
+  _ ≡˘⟨ updateAt-minimal _ _ _ k≢j ⟩
+  _ ≡⟨ same k ⟩
+  _ ≡⟨ updateAt-minimal _ _ _ k≢j ⟩
+  _ ≡⟨ updateAt-minimal _ _ _ k≢i ⟩
+  _ ∎
+
+
 swap-involute : ∀ (xs : Vector A n) i j → swapV (swapV xs i j) i j ≗ xs
 swap-involute xs i j k with k ≟ i | k ≟ j | i ≟ j
 ... | yes refl | yes refl | _ = begin
