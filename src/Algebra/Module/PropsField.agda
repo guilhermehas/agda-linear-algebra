@@ -2,13 +2,15 @@ open import Algebra
 open import Algebra.Apartness
 open import Algebra.Module
 open import Function
+open import Algebra.DecidableField
 
 module Algebra.Module.PropsField
   {c ℓ₁ ℓ₂ mr ℓm}
-  (hField : HeytingField c ℓ₁ ℓ₂)
+  (dField : DecidableField c ℓ₁ ℓ₂)
   (leftModule : LeftModule (CommutativeRing.ring
     $ HeytingCommutativeRing.commutativeRing
-    $ HeytingField.heytingCommutativeRing hField) mr ℓm)
+    $ HeytingField.heytingCommutativeRing
+    $ DecidableField.heytingField dField) mr ℓm)
   where
 
 open import Data.Bool hiding (_≟_)
@@ -19,17 +21,20 @@ open import Data.Vec.Functional
 open import Data.Vec.Functional.Properties
 open import Relation.Unary.Properties
 
-open import Algebra.Module.DefsField hField leftModule
 open import Algebra.BigOps
 open import Vector.Base
 open import Vector.Properties
 open import Vector.Structures
 
+open DecidableField dField renaming (heytingField to hField; _≟_ to _#?_) using ()
 open HeytingField hField renaming (Carrier to A) hiding (sym)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open CommutativeRing commutativeRing using (rawRing; *-commutativeMonoid; ring; sym)
+
+open import Algebra.Module.DefsField hField leftModule
 open import Algebra.Properties.Ring ring
+
 open LeftModule leftModule renaming (Carrierᴹ to M)
 open SumCommMonoid +ᴹ-commutativeMonoid
 open VRing rawRing using (_*ⱽ_)
@@ -38,7 +43,7 @@ import Algebra.Solver.CommutativeMonoid +ᴹ-commutativeMonoid as +-Solver hidin
 open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
 open import Algebra.Module.Base ring
 open import Algebra.Module.Props commutativeRing leftModule public
-open import Algebra.Module.VecSpace leftModule
+open import Algebra.Module.VecSpace leftModule public
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≢_)
 open import Relation.Binary.Definitions using (Decidable)
 open import Relation.Nullary
@@ -134,150 +139,148 @@ private
       swapV (wws *ᵣ zs) p p p ∎
 
 
-module _ (_#?_ : Decidable _#_) where
+sameLinDep : (xs ys : Vector M n) → xs ≈ⱽ ys
+  → IsLinearDependent xs → IsLinearDependent ys
+sameLinDep {n} xs ys (idR xs≋ys) (ws by xs*ws≈x , i , ws#0) =
+  ws by ≈ᴹ-trans (∑Ext (*ₗ-congˡ ∘ ≈ᴹ-sym ∘ xs≋ys)) xs*ws≈x , i , ws#0
+sameLinDep {n} xs ys (rec {ys = zs} (swapOp p q p≢q) xs≈ⱽzs same) dep@(ws by xs*ws≈x , i , ws#0)
+  with wws by xs*wws≈x , j , wws#0 ← sameLinDep _ _ xs≈ⱽzs dep
+  = swapV wws p q by ≈ᴹ-trans ∑Same xs*wws≈x , ∃#0
+  where
+  open ≈ᴹ-Reasoning
 
-  sameLinDep : (xs ys : Vector M n) → xs ≈ⱽ ys
-    → IsLinearDependent xs → IsLinearDependent ys
-  sameLinDep {n} xs ys (idR xs≋ys) (ws by xs*ws≈x , i , ws#0) =
-    ws by ≈ᴹ-trans (∑Ext (*ₗ-congˡ ∘ ≈ᴹ-sym ∘ xs≋ys)) xs*ws≈x , i , ws#0
-  sameLinDep {n} xs ys (rec {ys = zs} (swapOp p q p≢q) xs≈ⱽzs same) dep@(ws by xs*ws≈x , i , ws#0)
-    with wws by xs*wws≈x , j , wws#0 ← sameLinDep _ _ xs≈ⱽzs dep
-    = swapV wws p q by ≈ᴹ-trans ∑Same xs*wws≈x , ∃#0
+
+  sameness : ∀ i → swapV wws p q i *ₗ ys i ≈ᴹ swapV (wws *ᵣ zs) p q i
+  sameness i = begin
+    swapV wws p q i *ₗ ys i          ≈˘⟨ *ₗ-congˡ (same i) ⟩
+    swapV wws p q i *ₗ swapV zs p q i ≈⟨ swapV-assoc wws _ p≢q _ ⟩
+    swapV (wws *ᵣ zs) p q i ∎
+
+  ∃#0 : _
+  ∃#0 with j ≟ p | j ≟ q
+  ... | yes ≡.refl | yes ≡.refl = p , #-congʳ (reflexive (≡.sym (updateAt-updates j _))) wws#0
+  ... | yes ≡.refl | no j≢q = q , #-congʳ (reflexive (≡.sym (updateAt-updates q _))) wws#0
+  ... | no j≢p | yes ≡.refl = p , #-congʳ (reflexive (≡.sym (≡.trans (updateAt-minimal _ _ _ (j≢p ∘ ≡.sym))
+    (updateAt-updates p _)))) wws#0
+  ... | no j≢p | no j≢q = _ , #-congʳ (reflexive (≡.sym (swap-diff _ _ j≢p j≢q))) wws#0
+
+  ∑Same : ∑ (swapV wws p q *ᵣ ys) ≈ᴹ ∑ (wws *ᵣ zs)
+  ∑Same = begin
+    ∑ (swapV wws p q *ᵣ ys) ≈⟨ ∑Ext sameness ⟩
+    ∑ (swapV (wws *ᵣ zs) p q) ≈⟨ ∑Swap _ p q ⟩
+    ∑ (wws *ᵣ zs) ∎
+
+sameLinDep xs ys (rec {ys = zs} (addCons p q p≢q r) xs≈ⱽzs same) dep@(ws by xs*ws≈x , i , ws#0)
+  with wws by xs*wws≈x , j , wws#0 ← sameLinDep _ _ xs≈ⱽzs dep
+  = ks by ≈ᴹ-trans ∑Same xs*wws≈x , ∃#0
+
+  where
+  open ≈ᴹ-Reasoning
+
+  q≢p = p≢q ∘ ≡.sym
+  v0 = - r
+  ks = wws [ q ]←₂ 0# *[ p ] [ p ]←₂ v0 *[ q ]
+  zsk = zs [ q ]← r *[ p ]
+  ksZs = ks *ᵣ zsk
+  wsZs = wws *ᵣ zs
+
+  genSum : (xs : Vector M _) → xs p +ᴹ xs q +ᴹ ∑ (xs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ)  ≈ᴹ ∑ xs
+  genSum xs = ∑Two xs _ _ p≢q
+
+  sameInd : ∀ i → (ksZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) i ≈ᴹ (wsZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) i
+  sameInd i with i ≟ q | i ≟ p
+  ... | yes ≡.refl | _ = begin
+    _  ≡⟨ updateAt-updates q _ ⟩
+    _ ≡˘⟨ updateAt-updates q _ ⟩
+    _ ∎
+  ... | no i≢q | yes ≡.refl = begin
+    _  ≡⟨ updateAt-minimal _ _ _ i≢q ⟩
+    _  ≡⟨ updateAt-updates p _ ⟩
+    _ ≡˘⟨ updateAt-updates p _ ⟩
+    _ ≡˘⟨ updateAt-minimal _ _ _ i≢q ⟩
+    _ ∎
+  ... | no i≢q | no i≢p = begin
+    _  ≡⟨ updateAt-minimal _ _ _ i≢q ⟩
+    _  ≡⟨ updateAt-minimal _ _ _ i≢p ⟩
+    _  ≡⟨ help ⟩
+    _ ≡˘⟨ updateAt-minimal _ _ _ i≢p ⟩
+    _ ≡˘⟨ updateAt-minimal _ _ _ i≢q ⟩
+    _ ∎ where
+
+    help : ksZs i ≡ wsZs i
+    help rewrite dec-no (p ≟ i) (i≢p ∘ ≡.sym) | dec-no (q ≟ i) (i≢q ∘ ≡.sym) = ≡.refl
+
+  sameTwo : ksZs p +ᴹ ksZs q ≈ᴹ wsZs p +ᴹ wsZs q
+  sameTwo rewrite dec-yes (p ≟ p) ≡.refl .proj₂ | dec-yes (q ≟ q) ≡.refl .proj₂
+    | dec-no (q ≟ p) (p≢q ∘ ≡.sym) | dec-no (p ≟ q) p≢q | dec-yes (q ≟ q) ≡.refl .proj₂ = begin
+      (wws p + v0 * (wws q + 0# * wws p)) *ₗ zs p
+        +ᴹ (wws q + 0# * wws p) *ₗ (zs q +ᴹ r *ₗ zs p) ≈⟨ +ᴹ-cong (*ₗ-congʳ (+-congˡ (*-congˡ
+          (trans (+-congˡ (zeroˡ _)) (+-identityʳ _)))))
+          (*ₗ-congʳ (trans (+-congˡ (zeroˡ _)) (+-identityʳ _))) ⟩
+
+      (wws p + v0 * wws q) *ₗ zs p +ᴹ wws q *ₗ (zs q +ᴹ r *ₗ zs p) ≈⟨ +ᴹ-cong
+        (*ₗ-distribʳ _ _ _) (*ₗ-distribˡ _ _ _) ⟩
+
+      wws p *ₗ zs p +ᴹ (v0 * wws q) *ₗ zs p +ᴹ (wws q *ₗ zs q +ᴹ wws q *ₗ r *ₗ zs p) ≈⟨ +ᴹ-assoc _ _ _ ⟩
+      wws p *ₗ zs p +ᴹ ((v0 * wws q) *ₗ zs p +ᴹ (wws q *ₗ zs q +ᴹ wws q *ₗ r *ₗ zs p)) ≈⟨
+        +ᴹ-congˡ help ⟩
+      wws p *ₗ zs p +ᴹ wws q *ₗ zs q ∎
+
+      where
+      open +-Solver
+
+      help2 = begin
+        (v0 * wws q) *ₗ zs p +ᴹ wws q *ₗ r *ₗ zs p ≈˘⟨ +ᴹ-congˡ (*ₗ-assoc _ _ _) ⟩
+        (v0 * wws q) *ₗ zs p +ᴹ (wws q * r) *ₗ zs p ≈˘⟨ *ₗ-distribʳ _ _ _ ⟩
+        (v0 * wws q + wws q * r) *ₗ zs p ≈⟨ *ₗ-congʳ (trans (+-congˡ (*-comm _ _)) (trans
+          (trans (sym (distribʳ _ _ _)) (*-congʳ (-‿inverseˡ _))) (zeroˡ (wws q)))) ⟩
+        0# *ₗ zs p ≈⟨ *ₗ-zeroˡ _ ⟩
+        0ᴹ ∎
+
+      help = begin
+        (v0 * wws q) *ₗ zs p +ᴹ (wws q *ₗ zs q +ᴹ wws q *ₗ r *ₗ zs p) ≈⟨
+          solve 3 (λ a b c → (a ⊕ (b ⊕ c)) , ((a ⊕ c) ⊕ b)) ≈ᴹ-refl _ _ _ ⟩
+        ((v0 * wws q) *ₗ zs p +ᴹ wws q *ₗ r *ₗ zs p) +ᴹ wws q *ₗ zs q ≈⟨ +ᴹ-congʳ help2 ⟩
+        0ᴹ +ᴹ wws q *ₗ zs q ≈⟨ +ᴹ-identityˡ _ ⟩
+        wws q *ₗ zs q ∎
+
+  ∑Same = begin
+    ∑ (ks *ᵣ ys) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ same) ⟩
+    ∑ ksZs ≈˘⟨ genSum ksZs ⟩
+    ksZs p +ᴹ ksZs q +ᴹ ∑ (ksZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) ≈⟨ +ᴹ-cong sameTwo (∑Ext sameInd) ⟩
+    wsZs p +ᴹ wsZs q +ᴹ ∑ (wsZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) ≈⟨ genSum wsZs ⟩
+    ∑ wsZs ∎
+
+
+  ∃#0 : _
+  ∃#0 with j ≟ p | j ≟ q | wws q #? 0#
+  ... | yes ≡.refl | _ | yes wwsQ#0 = q , #-congʳ help wwsQ#0
     where
-    open ≈ᴹ-Reasoning
-
-
-    sameness : ∀ i → swapV wws p q i *ₗ ys i ≈ᴹ swapV (wws *ᵣ zs) p q i
-    sameness i = begin
-      swapV wws p q i *ₗ ys i          ≈˘⟨ *ₗ-congˡ (same i) ⟩
-      swapV wws p q i *ₗ swapV zs p q i ≈⟨ swapV-assoc wws _ p≢q _ ⟩
-      swapV (wws *ᵣ zs) p q i ∎
-
-    ∃#0 : _
-    ∃#0 with j ≟ p | j ≟ q
-    ... | yes ≡.refl | yes ≡.refl = p , #-congʳ (reflexive (≡.sym (updateAt-updates j _))) wws#0
-    ... | yes ≡.refl | no j≢q = q , #-congʳ (reflexive (≡.sym (updateAt-updates q _))) wws#0
-    ... | no j≢p | yes ≡.refl = p , #-congʳ (reflexive (≡.sym (≡.trans (updateAt-minimal _ _ _ (j≢p ∘ ≡.sym))
-      (updateAt-updates p _)))) wws#0
-    ... | no j≢p | no j≢q = _ , #-congʳ (reflexive (≡.sym (swap-diff _ _ j≢p j≢q))) wws#0
-
-    ∑Same : ∑ (swapV wws p q *ᵣ ys) ≈ᴹ ∑ (wws *ᵣ zs)
-    ∑Same = begin
-      ∑ (swapV wws p q *ᵣ ys) ≈⟨ ∑Ext sameness ⟩
-      ∑ (swapV (wws *ᵣ zs) p q) ≈⟨ ∑Swap _ p q ⟩
-      ∑ (wws *ᵣ zs) ∎
-
-  sameLinDep xs ys (rec {ys = zs} (addCons p q p≢q r) xs≈ⱽzs same) dep@(ws by xs*ws≈x , i , ws#0)
-    with wws by xs*wws≈x , j , wws#0 ← sameLinDep _ _ xs≈ⱽzs dep
-    = ks by ≈ᴹ-trans ∑Same xs*wws≈x , ∃#0
-
+    help : wws q ≈ ks q
+    help rewrite dec-no (p ≟ q) p≢q | dec-yes (q ≟ q) ≡.refl .proj₂ = sym (trans (+-congˡ (zeroˡ _)) (+-identityʳ _))
+  ... | yes ≡.refl | _ | no wwsQ≈0 = p , #-congʳ (sym ksJ≈wwsP) wws#0
     where
-    open ≈ᴹ-Reasoning
+    ksJ≈ : ks j ≈ wws p - r * wws q
+    ksJ≈ rewrite dec-yes (j ≟ j) ≡.refl .proj₂
+      | dec-yes (q ≟ q) ≡.refl .proj₂
+      | dec-no (q ≟ j) q≢p = +-congˡ (trans (distribˡ _ _ _)
+      (trans (+-congˡ (trans (*-congˡ (zeroˡ _)) (zeroʳ _)))
+      (trans (+-identityʳ _) (sym (-‿distribˡ-* _ _)))))
 
-    q≢p = p≢q ∘ ≡.sym
-    v0 = - r
-    ks = wws [ q ]←₂ 0# *[ p ] [ p ]←₂ v0 *[ q ]
-    zsk = zs [ q ]← r *[ p ]
-    ksZs = ks *ᵣ zsk
-    wsZs = wws *ᵣ zs
+    ksJ≈wwsP : ks j ≈ wws p
+    ksJ≈wwsP = trans ksJ≈ (trans (+-congˡ (trans (-‿cong
+      (trans (*-congˡ (tight _ _ .proj₁ wwsQ≈0 )) (zeroʳ _))) -0#≈0#)) (+-identityʳ _))
 
-    genSum : (xs : Vector M _) → xs p +ᴹ xs q +ᴹ ∑ (xs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ)  ≈ᴹ ∑ xs
-    genSum xs = ∑Two xs _ _ p≢q
-
-    sameInd : ∀ i → (ksZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) i ≈ᴹ (wsZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) i
-    sameInd i with i ≟ q | i ≟ p
-    ... | yes ≡.refl | _ = begin
-      _  ≡⟨ updateAt-updates q _ ⟩
-      _ ≡˘⟨ updateAt-updates q _ ⟩
-      _ ∎
-    ... | no i≢q | yes ≡.refl = begin
-      _  ≡⟨ updateAt-minimal _ _ _ i≢q ⟩
-      _  ≡⟨ updateAt-updates p _ ⟩
-      _ ≡˘⟨ updateAt-updates p _ ⟩
-      _ ≡˘⟨ updateAt-minimal _ _ _ i≢q ⟩
-      _ ∎
-    ... | no i≢q | no i≢p = begin
-      _  ≡⟨ updateAt-minimal _ _ _ i≢q ⟩
-      _  ≡⟨ updateAt-minimal _ _ _ i≢p ⟩
-      _  ≡⟨ help ⟩
-      _ ≡˘⟨ updateAt-minimal _ _ _ i≢p ⟩
-      _ ≡˘⟨ updateAt-minimal _ _ _ i≢q ⟩
-      _ ∎ where
-
-      help : ksZs i ≡ wsZs i
-      help rewrite dec-no (p ≟ i) (i≢p ∘ ≡.sym) | dec-no (q ≟ i) (i≢q ∘ ≡.sym) = ≡.refl
-
-    sameTwo : ksZs p +ᴹ ksZs q ≈ᴹ wsZs p +ᴹ wsZs q
-    sameTwo rewrite dec-yes (p ≟ p) ≡.refl .proj₂ | dec-yes (q ≟ q) ≡.refl .proj₂
-      | dec-no (q ≟ p) (p≢q ∘ ≡.sym) | dec-no (p ≟ q) p≢q | dec-yes (q ≟ q) ≡.refl .proj₂ = begin
-        (wws p + v0 * (wws q + 0# * wws p)) *ₗ zs p
-          +ᴹ (wws q + 0# * wws p) *ₗ (zs q +ᴹ r *ₗ zs p) ≈⟨ +ᴹ-cong (*ₗ-congʳ (+-congˡ (*-congˡ
-            (trans (+-congˡ (zeroˡ _)) (+-identityʳ _)))))
-            (*ₗ-congʳ (trans (+-congˡ (zeroˡ _)) (+-identityʳ _))) ⟩
-
-        (wws p + v0 * wws q) *ₗ zs p +ᴹ wws q *ₗ (zs q +ᴹ r *ₗ zs p) ≈⟨ +ᴹ-cong
-          (*ₗ-distribʳ _ _ _) (*ₗ-distribˡ _ _ _) ⟩
-
-        wws p *ₗ zs p +ᴹ (v0 * wws q) *ₗ zs p +ᴹ (wws q *ₗ zs q +ᴹ wws q *ₗ r *ₗ zs p) ≈⟨ +ᴹ-assoc _ _ _ ⟩
-        wws p *ₗ zs p +ᴹ ((v0 * wws q) *ₗ zs p +ᴹ (wws q *ₗ zs q +ᴹ wws q *ₗ r *ₗ zs p)) ≈⟨
-          +ᴹ-congˡ help ⟩
-        wws p *ₗ zs p +ᴹ wws q *ₗ zs q ∎
-
-        where
-        open +-Solver
-
-        help2 = begin
-          (v0 * wws q) *ₗ zs p +ᴹ wws q *ₗ r *ₗ zs p ≈˘⟨ +ᴹ-congˡ (*ₗ-assoc _ _ _) ⟩
-          (v0 * wws q) *ₗ zs p +ᴹ (wws q * r) *ₗ zs p ≈˘⟨ *ₗ-distribʳ _ _ _ ⟩
-          (v0 * wws q + wws q * r) *ₗ zs p ≈⟨ *ₗ-congʳ (trans (+-congˡ (*-comm _ _)) (trans
-            (trans (sym (distribʳ _ _ _)) (*-congʳ (-‿inverseˡ _))) (zeroˡ (wws q)))) ⟩
-          0# *ₗ zs p ≈⟨ *ₗ-zeroˡ _ ⟩
-          0ᴹ ∎
-
-        help = begin
-          (v0 * wws q) *ₗ zs p +ᴹ (wws q *ₗ zs q +ᴹ wws q *ₗ r *ₗ zs p) ≈⟨
-            solve 3 (λ a b c → (a ⊕ (b ⊕ c)) , ((a ⊕ c) ⊕ b)) ≈ᴹ-refl _ _ _ ⟩
-          ((v0 * wws q) *ₗ zs p +ᴹ wws q *ₗ r *ₗ zs p) +ᴹ wws q *ₗ zs q ≈⟨ +ᴹ-congʳ help2 ⟩
-          0ᴹ +ᴹ wws q *ₗ zs q ≈⟨ +ᴹ-identityˡ _ ⟩
-          wws q *ₗ zs q ∎
-
-    ∑Same = begin
-      ∑ (ks *ᵣ ys) ≈˘⟨ ∑Ext (*ₗ-congˡ ∘ same) ⟩
-      ∑ ksZs ≈˘⟨ genSum ksZs ⟩
-      ksZs p +ᴹ ksZs q +ᴹ ∑ (ksZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) ≈⟨ +ᴹ-cong sameTwo (∑Ext sameInd) ⟩
-      wsZs p +ᴹ wsZs q +ᴹ ∑ (wsZs [ p ]≔ 0ᴹ [ q ]≔ 0ᴹ) ≈⟨ genSum wsZs ⟩
-      ∑ wsZs ∎
-
-
-    ∃#0 : _
-    ∃#0 with j ≟ p | j ≟ q | wws q #? 0#
-    ... | yes ≡.refl | _ | yes wwsQ#0 = q , #-congʳ help wwsQ#0
-      where
-      help : wws q ≈ ks q
-      help rewrite dec-no (p ≟ q) p≢q | dec-yes (q ≟ q) ≡.refl .proj₂ = sym (trans (+-congˡ (zeroˡ _)) (+-identityʳ _))
-    ... | yes ≡.refl | _ | no wwsQ≈0 = p , #-congʳ (sym ksJ≈wwsP) wws#0
-      where
-      ksJ≈ : ks j ≈ wws p - r * wws q
-      ksJ≈ rewrite dec-yes (j ≟ j) ≡.refl .proj₂
-        | dec-yes (q ≟ q) ≡.refl .proj₂
-        | dec-no (q ≟ j) q≢p = +-congˡ (trans (distribˡ _ _ _)
-        (trans (+-congˡ (trans (*-congˡ (zeroˡ _)) (zeroʳ _)))
-        (trans (+-identityʳ _) (sym (-‿distribˡ-* _ _)))))
-
-      ksJ≈wwsP : ks j ≈ wws p
-      ksJ≈wwsP = trans ksJ≈ (trans (+-congˡ (trans (-‿cong
-        (trans (*-congˡ (tight _ _ .proj₁ wwsQ≈0 )) (zeroʳ _))) -0#≈0#)) (+-identityʳ _))
-
-    ... | no j≢p | yes ≡.refl | _ = j , #-congʳ help wws#0
-      where
-      help : wws j ≈ ks j
-      help rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym)
-        | dec-yes (j ≟ j) ≡.refl .proj₂
-        = sym (trans (+-congˡ (zeroˡ _)) (+-identityʳ _))
-    ... | no j≢p | no j≢q | _ = j , #-congʳ help wws#0
-      where
-      help : wws j ≈ ks j
-      help rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = refl
+  ... | no j≢p | yes ≡.refl | _ = j , #-congʳ help wws#0
+    where
+    help : wws j ≈ ks j
+    help rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym)
+      | dec-yes (j ≟ j) ≡.refl .proj₂
+      = sym (trans (+-congˡ (zeroˡ _)) (+-identityʳ _))
+  ... | no j≢p | no j≢q | _ = j , #-congʳ help wws#0
+    where
+    help : wws j ≈ ks j
+    help rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = refl
 
 sameLinInd : (xs ys : Vector M n) → xs ≈ⱽ ys
   → IsLinearIndependent xs → IsLinearIndependent ys
@@ -400,9 +403,7 @@ sameLinInd {n} xs ys (rec {ys = ws} (swapOp p q p≢q) xs≈ⱽys same) lxs rh@(
   ... | no i≢p | no i≢q = trans
     (sym (reflexive (≡.trans (updateAt-minimal _ _ _ i≢q) (updateAt-minimal _ _ _ i≢p)))) (ks≈0 i)
 
-module _ (_#?_ : Decidable _#_) where
-
-  sameLin : (xs ys : Vector M n) → xs ≈ⱽ ys → ∀ b
-    → LinearIndependent? xs b → LinearIndependent? ys b
-  sameLin xs ys xs≈ⱽys false (linDep ld) = linDep $ sameLinDep _#?_ xs ys xs≈ⱽys ld
-  sameLin xs ys xs≈ⱽys true  (linInd li) = linInd $ sameLinInd      xs ys xs≈ⱽys li
+sameLin : (xs ys : Vector M n) → xs ≈ⱽ ys → ∀ b
+  → LinearIndependent? xs b → LinearIndependent? ys b
+sameLin xs ys xs≈ⱽys false (linDep ld) = linDep $ sameLinDep xs ys xs≈ⱽys ld
+sameLin xs ys xs≈ⱽys true  (linInd li) = linInd $ sameLinInd xs ys xs≈ⱽys li

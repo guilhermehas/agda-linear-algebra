@@ -34,13 +34,12 @@ open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (ring; sym)
 open import Algebra.Module.Instances.FunctionalVector ring
 open PNorm
-open PVec hiding (module ≈ᴹ-Reasoning)
 open SumRing ring using (δ; δii≡1#)
 open LeftModule using (+ᴹ-isCommutativeMonoid)
 
 module ∑CM {n} = SumCommMonoid (record { isCommutativeMonoid = +ᴹ-isCommutativeMonoid $ leftModule n})
 open module DFieldN {n} = DField heytingField (leftModule n)
-open module PFieldN {n} = PField heytingField (leftModule n) hiding (module ≈-Reasoning)
+open module PFieldN {n} = PField dField (leftModule n) hiding (module ≈-Reasoning)
 open import Algebra.Module.PropsVec commutativeRing using (∑∑≈∑)
 open import MatrixFuncNormalization.Definitions dField
 
@@ -98,10 +97,6 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fro
       ∑ (λ j → ys j * xs j piv)     ≈˘⟨ ∑∑≈∑ {m} {suc n} (λ i j → ys i * xs i j) piv ⟩
       ∑M (λ i j → ys i * xs i j) piv ≈⟨ xs*ys≈ws piv ⟩
       0# ∎
-
--- sameLinInd : (xs ys : Matrix F n m) → xs ≈ⱽ ys → ∀ b
---   → LinearIndependent? xs b → LinearIndependent? ys b
--- sameLinInd = {!!}
 
 toNormLinearDep : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m)
   → AllRowsNormalized pivs → xs ≈ⱽ ys
