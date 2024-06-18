@@ -101,7 +101,18 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fro
 toNormLinearDep : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m)
   → AllRowsNormalized pivs → xs ≈ⱽ ys
   → ∃ $ LinearIndependent? xs
-toNormLinearDep xs (ys , pivs , mPivs) normed xs≈ⱽys = {!!}
+toNormLinearDep xs mPiv@(ys , pivs , mPivs) normed xs≈ⱽys = help linXs
+  where
+
+  linXs : IsLinearDependent ys ⊎ IsLinearIndependent ys
+  linXs = normLinearDep mPiv normed {!!} {!!}
+
+  sameLd : ∀ {b} → LinearIndependent? ys b → LinearIndependent? xs b
+  sameLd = sameLin ys xs (≈ⱽ-sym xs≈ⱽys) _
+
+  help : _ → _
+  help (inj₁ lInd) = _ , sameLd (linDep lInd)
+  help (inj₂ lDep) = _ , sameLd (linInd lDep)
 
 decLinearDep : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
 decLinearDep xs = let mPivs , normed , xs≈ⱽys = normalizeMatrix xs in toNormLinearDep xs mPivs normed $ xs≈ⱽys
