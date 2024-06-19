@@ -12,3 +12,5 @@ open import Examples
 open import MatrixFuncNormalization.MainTheo
 
 open import SystemEquations.UniqueSolution
+
+open import MatrixFuncNormalization.LinearIndependence
