@@ -165,26 +165,6 @@ divZeroSameLinRev xsNorm _ (linInd lInd) = linInd help
     ldKs : ∀ k → ks k ≈ 0#
     ldKs = lInd xs⇒0ᴹ
 
-toNormLinearDep2 : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m)
-  → AllRowsNormalized pivs → xs ≈ⱽ ys
-  → ∃ $ LinearIndependent? xs
-toNormLinearDep2 xs mPiv@(ys , pivs , mPivs) normed xs≈ⱽys = help linXs
-  where
-
-  linXs : IsLinearDependent ys ⊎ IsLinearIndependent ys
-  linXs = normLinearDep mPiv normed {!!} {!!}
-
-  sameLd : ∀ {b} → LinearIndependent? ys b → LinearIndependent? xs b
-  sameLd = sameLin ys xs (≈ⱽ-sym xs≈ⱽys) _
-
-  help : _ → _
-  help (inj₁ lInd) = _ , sameLd (linDep lInd)
-  help (inj₂ lDep) = _ , sameLd (linInd lDep)
-
-decLinearDep2 : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
-decLinearDep2 xs = let mPivs , normed , xs≈ⱽys = normalizeMatrix xs in toNormLinearDep2 xs mPivs normed $ xs≈ⱽys
-
-
 divZeroSameLin : (xsNorm : MatrixNormed n m) (open MatrixNormed xsNorm) (open MatNormed xsNorm renaming (ys to zs)) → ∀ b
   → LinearIndependent? zs b
   → LinearIndependent? xs b
