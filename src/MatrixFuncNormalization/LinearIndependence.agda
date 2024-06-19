@@ -26,6 +26,7 @@ import MatrixFuncNormalization.normBef as NormBef
 import Algebra.Module.DefsField as DField
 import Algebra.Module.PropsField as PField
 
+open import MatrixFuncNormalization.MainTheo dField
 open DecidableField dField renaming (Carrier to F) hiding (sym)
 open NormBef dField
 open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZero)
@@ -182,3 +183,19 @@ toNormLinearDep2 xs mPiv@(ys , pivs , mPivs) normed xs≈ⱽys = help linXs
 
 decLinearDep2 : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
 decLinearDep2 xs = let mPivs , normed , xs≈ⱽys = normalizeMatrix xs in toNormLinearDep2 xs mPivs normed $ xs≈ⱽys
+
+
+decLinearDep : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
+decLinearDep xs = {!!}
+  where
+  open FromNormalization (normalize xs) renaming (ys to ws; ysNormed to wsNormed)
+  open MatNormed (record { isNormed = wsNormed }) renaming (ys to zs)
+
+  linDepYs : IsLinearDependent zs ⊎ IsLinearIndependent zs
+  linDepYs = normLinearDep (zs , pivs , mPivAfter) pivsCrescent columnsZeros pivsOne
+
+  sameLd : ∀ {b} → LinearIndependent? ws b → LinearIndependent? xs b
+  sameLd = sameLin ws xs (≈ⱽ-sym xs≈ⱽys) _
+
+  sameLd2 : ∀ {b} → LinearIndependent? ws b → LinearIndependent? zs b
+  sameLd2 = divZeroSameLin (record { isNormed = wsNormed }) _
