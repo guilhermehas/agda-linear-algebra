@@ -61,3 +61,13 @@ x⁻¹#0 x x#0 = invertibleˡ⇒# (x , (begin
     x * x⁻¹       ≈˘⟨ *-congʳ (x-0≈x _) ⟩
     (x - 0#) * x⁻¹ ≈⟨ invX2 ⟩
     1# ∎
+
+x#0*y≈0⇒y≈0 : ∀ {x y} → x # 0# → x * y ≈ 0# → y ≈ 0#
+x#0*y≈0⇒y≈0 {x} {y} x#0 x*y≈0 with (x⁻¹ , invL , invR) ← #0⇒invertible x#0
+  = begin
+  y            ≈˘⟨ *-identityˡ _ ⟩
+  1# * y       ≈˘⟨ *-congʳ invL ⟩
+  x⁻¹ * x * y   ≈⟨ *-assoc _ _ _ ⟩
+  x⁻¹ * (x * y) ≈⟨ *-congˡ x*y≈0 ⟩
+  x⁻¹ * 0#      ≈⟨ zeroʳ _ ⟩
+  0# ∎

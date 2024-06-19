@@ -58,9 +58,18 @@ multiplyF : ∀ (xs : Vector F n) (p : Fin n ⁺) → F
 multiplyF xs ⊤⁺ = 1#
 multiplyF xs [ p ] = xs p
 
+divideF : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → F
+divideF xs ⊤⁺ vPos = 1#
+divideF xs [ _ ] (xp#0 , _) = #⇒invertible xp#0 .proj₁
+
 divideVec : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → Vector F n
 divideVec xs ⊤⁺ vPos i = xs i
 divideVec xs [ p ] (xp#0 , _) i = #⇒invertible xp#0 .proj₁ * xs i
+
+divideF*vec≈divideVec : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) i
+  → divideF xs p vPos * xs i ≈ divideVec xs p vPos i
+divideF*vec≈divideVec xs [ p ] (xp#0 , _) i = refl
+divideF*vec≈divideVec xs ⊤⁺ vPos i = *-identityˡ _
 
 multiply*divide≈same : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) i
   → multiplyF xs p * divideVec xs p vPos i ≈ xs i
@@ -78,6 +87,9 @@ multiplyF#0 : ∀ (xs : Vector F n) (p : Fin n ⁺) (vPos : VecPivotPos xs p) �
 multiplyF#0 xs ⊤⁺ _ = 1#0
 multiplyF#0 xs [ p ] (xsP#0 , _) = xsP#0
 
+divideF#0 : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → divideF xs p vPos # 0#
+divideF#0 xs [ p ] vPos = x⁻¹#0 _ _
+divideF#0 xs ⊤⁺ vPos = 1#0
 
 divideVec₂ : ∀ (xs : Vector F n) p (vPos : VecPivotPos xs p) → Vector F n
 divideVec₂ xs p vPos i = invVecValue xs p vPos * xs i

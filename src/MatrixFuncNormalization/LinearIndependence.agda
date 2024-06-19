@@ -29,9 +29,10 @@ import Algebra.Module.PropsField as PField
 open DecidableField dField renaming (Carrier to F) hiding (sym)
 open NormBef dField
 open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZero)
-open import MatrixFuncNormalization.ElimZeros.Properties dField
-  using (divideVec; multiplyF; multiplyF#0; multiply*divide≈same; module MatNormed)
+open import MatrixFuncNormalization.ElimZeros.Properties dField hiding
+  (module PFieldN)
 open HeytingField heytingField using (heytingCommutativeRing)
+open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (ring; sym; *-commutativeMonoid)
@@ -130,7 +131,38 @@ divZeroSameLin {n = n} {m} xsNorm _ (linDep (ys by xs*ys≈x , i , ysI#0)) = lin
   wsI#0 = x#0y#0→xy#0 (multiplyF#0 (xs i) (pivs i) (mPivots i)) ysI#0
 
 
-divZeroSameLin xsNorm _ (linInd lInd) = {!!}
+divZeroSameLin xsNorm _ (linInd lInd) = linInd help
+  where
+  open MatrixNormed xsNorm
+  open MatNormed xsNorm renaming (ys to zs)
+  open ∑CM
+  open *-Solver
+
+  help : ∀ (rh@(ws by _) : _ reaches 0ᴹ) i → ws i ≈ 0#
+  help (ws by ws*zs≈0) i = x#0*y≈0⇒y≈0 (divideF#0 (xs i) (pivs i) _) (ldKs i)
+    where
+    rs : Vector _ _
+    rs j = divideF (xs j) (pivs j) (mPivots j)
+
+    ks : Vector _ _
+    ks j = rs j * ws j
+
+    ks*xs≈ws*zs : ∀ i j → ks i * xs i j ≈ ws i * zs i j
+    ks*xs≈ws*zs i j = begin
+      rs i * ws i * xs i j   ≈⟨ solve 3 (λ a b c → ((a ⊕ b) ⊕ c) , (b ⊕ a ⊕ c)) refl _ _ _ ⟩
+      ws i * (rs i * xs i j) ≈⟨ *-congˡ (divideF*vec≈divideVec (xs i) (pivs i) _ _) ⟩
+      ws i * zs i j ∎ where open ≈-Reasoning
+
+    ∑ks*xs≈0 = begin
+      ∑ (ks *ᵣ xs) ≈⟨ ∑Ext ks*xs≈ws*zs ⟩
+      ∑ (ws *ᵣ zs) ≈⟨ ws*zs≈0 ⟩
+      0ᴹ ∎ where open ≈ᴹ-Reasoning
+
+    xs⇒0ᴹ : xs reaches 0ᴹ
+    xs⇒0ᴹ = ks by ∑ks*xs≈0
+
+    ldKs : ∀ k → ks k ≈ 0#
+    ldKs = lInd xs⇒0ᴹ
 
 toNormLinearDep2 : (xs : Matrix F n m) ((ys , pivs , _) : MatrixWithPivots n m)
   → AllRowsNormalized pivs → xs ≈ⱽ ys
