@@ -104,10 +104,10 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fro
       ∑M (λ i j → ys i * xs i j) piv ≈⟨ xs*ys≈ws piv ⟩
       0# ∎
 
-divZeroSameLin : (xsNorm : MatrixNormed n m) (open MatrixNormed xsNorm) (open MatNormed xsNorm renaming (ys to zs)) → ∀ b
+divZeroSameLinRev : (xsNorm : MatrixNormed n m) (open MatrixNormed xsNorm) (open MatNormed xsNorm renaming (ys to zs)) → ∀ b
   → LinearIndependent? xs b
   → LinearIndependent? zs b
-divZeroSameLin {n = n} {m} xsNorm _ (linDep (ys by xs*ys≈x , i , ysI#0)) = linDep (ws by ∑Same , i , wsI#0)
+divZeroSameLinRev {n = n} {m} xsNorm _ (linDep (ys by xs*ys≈x , i , ysI#0)) = linDep (ws by ∑Same , i , wsI#0)
   where
   open MatrixNormed xsNorm
   open MatNormed xsNorm renaming (ys to zs)
@@ -132,7 +132,7 @@ divZeroSameLin {n = n} {m} xsNorm _ (linDep (ys by xs*ys≈x , i , ysI#0)) = lin
   wsI#0 = x#0y#0→xy#0 (multiplyF#0 (xs i) (pivs i) (mPivots i)) ysI#0
 
 
-divZeroSameLin xsNorm _ (linInd lInd) = linInd help
+divZeroSameLinRev xsNorm _ (linInd lInd) = linInd help
   where
   open MatrixNormed xsNorm
   open MatNormed xsNorm renaming (ys to zs)
@@ -185,8 +185,71 @@ decLinearDep2 : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
 decLinearDep2 xs = let mPivs , normed , xs≈ⱽys = normalizeMatrix xs in toNormLinearDep2 xs mPivs normed $ xs≈ⱽys
 
 
+divZeroSameLin : (xsNorm : MatrixNormed n m) (open MatrixNormed xsNorm) (open MatNormed xsNorm renaming (ys to zs)) → ∀ b
+  → LinearIndependent? zs b
+  → LinearIndependent? xs b
+divZeroSameLin {n = n} {m} xsNorm _ (linDep (ys by xs*ys≈x , i , ysI#0)) = linDep (ws by ∑Same , i , wsI#0)
+  where
+  open MatrixNormed xsNorm
+  open MatNormed xsNorm renaming (ys to zs)
+  open ∑CM
+  open *-Solver
+
+  ks : Vector _ _
+  ks j = divideF (xs j) (pivs j) (mPivots j)
+
+  ws : Vector _ _
+  ws j = ks j * ys j
+
+  ws*xs≈ys*zs = λ i j → begin
+    ws i * xs i j       ≈⟨ solve 3 (λ a b c → ((a ⊕ b) ⊕ c) , (b ⊕ a ⊕ c)) refl _ _ _ ⟩
+    ys i * (_ * xs i j) ≈⟨ *-congˡ (divideF*vec≈divideVec (xs i) (pivs i) _ _) ⟩
+    ys i * zs i j ∎
+    where open ≈-Reasoning
+
+  ∑Same = begin
+    ∑ (ws *ᵣ xs) ≈⟨ ∑Ext {n} {m} ws*xs≈ys*zs ⟩
+    ∑ (ys *ᵣ zs) ≈⟨ xs*ys≈x ⟩
+    0ᴹ ∎
+    where open ≈ᴹ-Reasoning
+
+  wsI#0 = x#0y#0→xy#0 (divideF#0 (xs i) (pivs i) _) ysI#0
+
+divZeroSameLin xsNorm _ (linInd lInd) = linInd help
+  where
+  open MatrixNormed xsNorm
+  open MatNormed xsNorm renaming (ys to zs)
+  open ∑CM
+  open *-Solver
+
+  help : ∀ (rh@(ws by _) : xs reaches 0ᴹ) i → ws i ≈ 0#
+  help (ws by ws*zs≈0) i = x#0*y≈0⇒y≈0 (multiplyF#0 (xs i) (pivs i) (mPivots i)) (ldKs i)
+    where
+    rs : Vector _ _
+    rs j = multiplyF (xs j) (pivs j)
+
+    ks : Vector _ _
+    ks j = rs j * ws j
+
+    ks*xs≈ws*zs : ∀ i j → ks i * zs i j ≈ ws i * xs i j
+    ks*xs≈ws*zs i j = begin
+      rs i * ws i * zs i j   ≈⟨ solve 3 (λ a b c → ((a ⊕ b) ⊕ c) , (b ⊕ a ⊕ c)) refl _ _ _ ⟩
+      ws i * (rs i * zs i j) ≈⟨ *-congˡ (multiply*divide≈same (xs i) (pivs i) _ _) ⟩
+      ws i * xs i j ∎ where open ≈-Reasoning
+
+    ∑ks*xs≈0 = begin
+      ∑ (ks *ᵣ zs) ≈⟨ ∑Ext ks*xs≈ws*zs ⟩
+      ∑ (ws *ᵣ xs) ≈⟨ ws*zs≈0 ⟩
+      0ᴹ ∎ where open ≈ᴹ-Reasoning
+
+    xs⇒0ᴹ : zs reaches 0ᴹ
+    xs⇒0ᴹ = ks by ∑ks*xs≈0
+
+    ldKs : ∀ k → ks k ≈ 0#
+    ldKs = lInd xs⇒0ᴹ
+
 decLinearDep : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
-decLinearDep xs = {!!}
+decLinearDep xs = _ , sameLd (sameLd3 (proj₂ (help linDepYs)))
   where
   open FromNormalization (normalize xs) renaming (ys to ws; ysNormed to wsNormed)
   open MatNormed (record { isNormed = wsNormed }) renaming (ys to zs)
@@ -198,4 +261,11 @@ decLinearDep xs = {!!}
   sameLd = sameLin ws xs (≈ⱽ-sym xs≈ⱽys) _
 
   sameLd2 : ∀ {b} → LinearIndependent? ws b → LinearIndependent? zs b
-  sameLd2 = divZeroSameLin (record { isNormed = wsNormed }) _
+  sameLd2 = divZeroSameLinRev (record { isNormed = wsNormed }) _
+
+  sameLd3 : ∀ {b} → LinearIndependent? zs b → LinearIndependent? ws b
+  sameLd3 = divZeroSameLin (record { isNormed = wsNormed }) _
+
+  help : IsLinearDependent zs ⊎ IsLinearIndependent zs → ∃ (LinearIndependent? zs)
+  help (inj₁ lDep) = _ , linDep lDep
+  help (inj₂ lInd) = _ , linInd lInd
