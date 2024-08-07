@@ -37,7 +37,7 @@ jobs:
         uses: cachix/install-nix-action@v27
       - name: Get HTML
         run: |
-          nix-shell -p "agda.withPackages(p: with p; [standard-library])" --command "agda --html src/EverythingUseful.agda"
+          nix build #html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
