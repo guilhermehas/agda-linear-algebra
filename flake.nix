@@ -9,17 +9,16 @@
 
   outputs = { self, flake-utils, flake-compat, nixpkgs }:
     let
+      filterL = lib: with lib; with builtins; name: type:
+                  !(hasSuffix ".nix" name && type == "regular") &&
+                  !(baseNameOf name == "flake.lock" && type == "regular") &&
+                  !(baseNameOf name == "nix" && type == "directory");
+      srcL = lib: with lib; cleanSourceWith {
+          filter = filterL lib;
+          src = ./.;
+        };
         linear-algebra-overlay = final: prev: with prev.agdaPackages;
-          let filter = with lib; with builtins; name: type:
-                    !(hasSuffix ".nix" name && type == "regular") &&
-                    !(baseNameOf name == "flake.lock" && type == "regular") &&
-                    !(baseNameOf name == "nix" && type == "directory");
-              src = with lib; cleanSourceWith {
-                  inherit filter;
-                  src = ./.;
-                };
-
-          in
+          let src = srcL lib; in
           {
             agdaPackages = prev.agdaPackages // {
                 linear-algebra = mkDerivation {
@@ -54,6 +53,14 @@
       packages = {
         inherit agda-all linear-algebra agda-with-linear-algebra;
         inherit (pkgs) agda-linear-algebra-src;
+        html = pkgs.stdenv.mkDerivation {
+          name = "html";
+          buildInputs = [ agda-all ];
+
+          src = srcL nixpkgs.lib;
+          buildPhase = "agda --html src/EverythingUseful.agda";
+          installPhase = "mv html $out";
+        };
       };
       defaultPackage = packages.linear-algebra;
     }) // rec {
