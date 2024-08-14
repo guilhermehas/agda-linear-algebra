@@ -19,33 +19,37 @@
 )
 
 = Introduction
-The main purpose of linear algebra in Agda is to solve a linear system of equations. For example:
+The main purpose of linear algebra in Agda is to solve linear systems of equations. For example:
 $ x + y = 3 \
   x - y = 1 $
-After solving, the solutions will be $$ x = 2 $$ and $$ y = 1 $$.
+After solving, the solution will be $x = 2 and y = 1$.
 
 There are three cases for a solution of a system of equations.
-The most common is the previous one when each variable has one unique solution.
+The most common is the previous one when each variable has one unique value.
 The second case is when there is no solution for a system of equations. For example:
 $ x = 0 \
   x = 1 $
 It is impossible that $x$ has two different values.
 
-The last case is the unspecified system of equations. For example:
+The last case is the under-specified system of equations. For example:
 $ x - y = 0 $ <same>
-In that case, the solution can be parametrized as:
+In that case, the set of all solutions can be expressed as:
 $ vec(x, y) = k dot vec(1, 1) $ <vecK>
+
+A solution $x = 1 and y = 1$ can be found when $k = 1$.
 
 In the library, after solving a linear system of equations,
 the function returns one of the three cases with the mathematical proof that it found a solution or not.
-In addition, in the case of an unspecified solution, the function returns proof that every solution can be found.
-From previous example @same, a solution $$ x = 1 and y = 1 $$ can be found when $$ k = 1  $$ in the equation @vecK.
+In addition, in the case of an under-specified solution, the function returns proof that every solution can be found.
+
 
 = Overview
 
 == Gaussian Elimination
-The library does the Gaussian elimination of the matrix to solve the linear system of equations.
+The linear system of equations is represented as a matrix,
+and the library uses a Gaussian elimination to find the solution in the matrix form.
 For example, from this system of equations:
+// TODO: show the first example
 $ x&     &= 1 \
   x& + y &= 3 $
 we have the matrix and the vector:
@@ -57,44 +61,52 @@ $ A dot v = b$.
 
 The library append $A$ and $b$ in that way:
 $ A|b = mat(1,0,1; 1,1,3)  $
-And solves the Gauss Elimination by subtracting the second line from the first one.
+Performing the first step of the Gauss Elimination by subtracting the second line from the first one.
 So the new system of equations becomes:
-$ A|b = mat(1,0,1; 0,1,2) $
+$ A'|b' = mat(1,0,1; 0,1,2) $
 
-After normalizing $A$, the library can find the solution of the linear system of equations.
+After normalizing $A$, the library reads of the solution of the linear system of equations as the
+vector $vec(1, 2)$.
 
 == Vector Space
-After each step of the Gaussian elimination, the vector space of the rows of $$ A|b $$ is preserved.
+After each step of the Gaussian elimination, the span of the rows of $A|b$ is preserved.
 That means that:
-$ forall v, (exists u , upright(A|b) dot u = v) <-> (exists u, A|b dot u = v) $
+$ forall v, (exists u , A|b dot u = v) <-> (exists u', A'|b' dot u' = v) $
 
 With that property, it is possible to prove that the solution of the normalized matrix is the same of the original matrix.
 It is necessary to have both sides of the implication because it is also necessary to prove that all the solutions of the original matrix
-is also a solution to the new matrix.
+are also solutions to the new matrix.
 
 #set math.mat(augment: {})
 
 = Data types
 
 == Vectors and Matrixes
-Most of the code base is done using functional vectors and functional matrixes.
-Vectors are defined as a function $ "Fin" n -> A $
-And matrixes are defined as *Vector (Vector A n) m*.
+// TODO: explain other types of defining matrix
+Most of the code base is done using functional vectors and functional matrices.
+                                   // TODO: A should have the same font on both sides
+The type of Vectors is defined as $ "Vector A n" = "Fin n" -> A $
+The type of matrices is: $ "Matrix A n m" = "Vector (Vector A n) m" $
+where *n* is the number of rows and *m* is the number of columns.
 
-Using the functional definition instead of the conventional data-typed definition helps with index manipulation.
-However, it isn't good most of the time.
-For example, type inference works better when using data-typed definitions.
+// TODO: Use this paragraph later for discussion, add a forward point here
+// Using the functional definition instead of the conventional data-typed definition helps with index manipulation.
+// However, it isn't good most of the time.
+// For example, type inference works better when using data-typed definitions.
 
-== Algebra
-The algebra used is the same as Agda Standard Library.
-For the definitions, they use setoids instead of equalities.
-In this library, it is necessary because vectors and matrixes are defined in a functional way.
-However, if it is defined in the data way, setoids would just increase the complexity without any gains.
+== Underlying scalars
+In Gaussian elimination, the elements of the matrices are fields defined in the Agda Standard Library.
+As in the standard library field definition, we use setoids for handling equalities.
+// TODO: Use this paragraph later for discussion, add a forward point here
+// In this library, it is necessary because vectors and matrixes are defined in a functional way.
+// However, if it is defined in the data way, setoids would just increase the complexity without any gains.
 
 == Vector Space
-In the library, there is the vector space relation which means that two lists of vectors have the same vector space.
-Each element of the list of vectors is a Left Module.
+The implementation of the vector space uses Left Module.
+Each row of the matrix is an element of Left Module.
 
+== Vector Space span relation
+In the library, there is the vector space relation which means that two lists of vectors have the same vector space.
 Two lists of vectors have the same vector space if both of them can reach the same element.
 
 == Vector Space sub-relation
