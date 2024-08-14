@@ -21,3 +21,6 @@ Compile agda files:
 ``` sh
 agda src/EverythingUseful.agda
 ```
+
+## Documentation?
++ See main.typ writting using https://typst.app/
