@@ -22,5 +22,11 @@ Compile agda files:
 agda src/EverythingUseful.agda
 ```
 
-## Documentation?
-+ See main.typ writting using https://typst.app/
+## Documentation
++ See [Typst website](https://typst.app) to understand how Typst works.
++ It is not possible to compile Typst documents using Nix, but if you have Typst installed in your machine, you can run to visualize the documentation:
+
+``` sh
+typst compile main.typ
+```
+
