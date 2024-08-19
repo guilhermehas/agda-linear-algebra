@@ -18,6 +18,10 @@
   bibliography: bibliography("refs.bib"),
 )
 
+#show link: underline
+#let websiteRoot = "https://guilhermehas.github.io/agda-linear-algebra/"
+#let web(ext, row, content) = link((websiteRoot, ext, ".html", "#", str(row)).join(), content)
+
 = Introduction
 The main purpose of linear algebra in Agda is to solve linear systems of equations. For example:
 $ x + y = 3 \
@@ -61,7 +65,7 @@ $ A dot v = b$.
 
 The library append $A$ and $b$ in that way:
 $ A|b = mat(1,0,1; 1,1,3)  $
-Performing the first step of the Gauss Elimination by subtracting the second line from the first one.
+The first step of Gauss Elimination is performed by subtracting the second line from the first.
 So the new system of equations becomes:
 $ A'|b' = mat(1,0,1; 0,1,2) $
 
@@ -73,7 +77,7 @@ After each step of the Gaussian elimination, the span of the rows of $A|b$ is pr
 That means that:
 $ forall v, (exists u , A|b dot u = v) <-> (exists u', A'|b' dot u' = v) $
 
-With that property, it is possible to prove that the solution of the normalized matrix is the same of the original matrix.
+With that property, it is possible to prove that the normalized matrix's solution is the same as the original matrix.
 It is necessary to have both sides of the implication because it is also necessary to prove that all the solutions of the original matrix
 are also solutions to the new matrix.
 
@@ -85,8 +89,8 @@ are also solutions to the new matrix.
 // TODO: explain other types of defining matrix
 Most of the code base is done using functional vectors and functional matrices.
                                    // TODO: A should have the same font on both sides
-The type of Vectors is defined as $ "Vector A n" = "Fin n" -> A $
-The type of matrices is: $ "Matrix A n m" = "Vector (Vector A n) m" $
+The type of #web("Data.Vec.Functional", 1232)[Vectors] is defined as $ "Vector A n" = "Fin n" -> A $
+The type of #web("Algebra.Matrix.Base", 397)[matrices] is: $ "Matrix A n m" = "Vector (Vector A n) m" $
 where *n* is the number of rows and *m* is the number of columns.
 
 // TODO: Use this paragraph later for discussion, add a forward point here
