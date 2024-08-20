@@ -53,24 +53,33 @@ In addition, in the case of an under-specified solution, the function returns pr
 The linear system of equations is represented as a matrix,
 and the library uses a Gaussian elimination to find the solution in the matrix form.
 For example, from this system of equations:
-// TODO: show the first example
-$ x&     &= 1 \
-  x& + y &= 3 $
+
+$ x + y = 3 \
+  x - y = 1 $
 we have the matrix and the vector:
-$ A = mat(1, 0; 1, 1) space b = vec(1, 3) $
+$ A = mat(1, 1; 1, -1) space b = vec(3, 1) $
 such that
 $ A dot v = b$.
 
 #set math.mat(augment: (vline: 2, stroke: (dash: "dashed")))
 
 The library append $A$ and $b$ in that way:
-$ A|b = mat(1,0,1; 1,1,3)  $
+$ A|b = mat(1,1,3; 1,-1,1)  $
 The first step of Gauss Elimination is performed by subtracting the second line from the first.
 So the new system of equations becomes:
-$ A'|b' = mat(1,0,1; 0,1,2) $
+$ mat(1,1,3; 0,-2,-2) $
+
+This matrix already has a triangle of zeros in the down left and it is necessary to have the triangle of zeros in the upper right also.
+To achieve this, it is necessary to add half of the second row to the first one.
+
+$ mat(1,0,2; 0,-2,-2) $
+
+In the last step, the second row is divided by minus two, so the new matrix is an identity matrix.
+
+$ A'|b' = mat(1,0,2; 0,1,1) $
 
 After normalizing $A$, the library reads of the solution of the linear system of equations as the
-vector $vec(1, 2)$.
+vector $vec(2, 1)$.
 
 == Vector Space
 After each step of the Gaussian elimination, the span of the rows of $A|b$ is preserved.
