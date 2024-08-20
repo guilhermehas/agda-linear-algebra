@@ -95,10 +95,8 @@ are also solutions to the new matrix.
 = Data types
 
 == Vectors and Matrixes
-// TODO: explain other types of defining matrix
 Most of the code base is done using functional vectors and functional matrices.
-                                   // TODO: A should have the same font on both sides
-The type of #web("Data.Vec.Functional", 1232)[Vectors] is defined as $ "Vector A n" = "Fin n" -> A $
+The type of #web("Data.Vec.Functional", 1232)[Vectors] is defined as $ "Vector" A space n = "Fin n" -> A $
 The type of #web("Algebra.Matrix.Base", 397)[matrices] is: $ "Matrix A n m" = "Vector (Vector A n) m" $
 where *n* is the number of rows and *m* is the number of columns.
 
