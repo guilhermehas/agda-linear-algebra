@@ -99,18 +99,12 @@ Most of the code base is done using functional vectors and functional matrices.
 The type of #web("Data.Vec.Functional", 1232)[Vectors] is defined as $ "Vector" A space n = "Fin n" -> A $
 The type of #web("Algebra.Matrix.Base", 397)[matrices] is: $ "Matrix A n m" = "Vector (Vector A n) m" $
 where *n* is the number of rows and *m* is the number of columns.
-
-// TODO: Use this paragraph later for discussion, add a forward point here
-// Using the functional definition instead of the conventional data-typed definition helps with index manipulation.
-// However, it isn't good most of the time.
-// For example, type inference works better when using data-typed definitions.
+For more explanations of functional definitions, look at @fdef.
 
 == Underlying scalars
 In Gaussian elimination, the elements of the matrices are fields defined in the Agda Standard Library.
 As in the standard library field definition, we use setoids for handling equalities.
-// TODO: Use this paragraph later for discussion, add a forward point here
-// In this library, it is necessary because vectors and matrixes are defined in a functional way.
-// However, if it is defined in the data way, setoids would just increase the complexity without any gains.
+For more explanations about setoids, look at @setoids.
 
 == Vector Space
 The implementation of the vector space uses Left Module.
@@ -222,6 +216,17 @@ In the end, each variable has a parametrized solution and I proved using all the
 this parametrized solution is valid in all of the equations.
 In addition, I proved that all solutions can be expressed by the parametrized solution,
 which means that it is the most generous one.
+
+= Discussion
+
+== Functional definition <fdef>
+Using the functional definition instead of the conventional data-typed definition helps with index manipulation.
+However, it isn't good most of the time.
+For example, type inference works better when using data-typed definitions.
+
+== Setoids <setoids>
+In this library, it is necessary because vectors and matrixes are defined in a functional way.
+However, if it is defined in the data way, setoids would just increase the complexity without any gains.
 
 = Future Work
 I should prove that the vectors that create the parametrized solution should be linearly independent.
