@@ -10,6 +10,7 @@ open import Level using (Level; _⊔_)
 open import Function
 open import Relation.Binary
 open import Relation.Unary
+open import Data.Product
 open import Data.Nat using (ℕ)
 open import Data.Vec.Functional
 open import Vector.Structures
@@ -35,6 +36,9 @@ record _reaches_ (xs : Vector M n) (x : M) : Set (ℓm ⊔ rr) where
   field
     ys      : Vector A n
     xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x
+
+span : Vector M n → Set _
+span xs = Σ[ x ∈ M ] xs reaches x
 
 _⊆ⱽ_ _⊇ⱽ_ : (xs : Vector M m) (ys : Vector M n) → Set _
 xs ⊆ⱽ ys = (xs reaches_) ⊆ (ys reaches_)
