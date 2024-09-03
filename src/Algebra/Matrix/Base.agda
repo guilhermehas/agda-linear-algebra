@@ -19,7 +19,7 @@ private variable
   m n p : ℕ
 
 Matrix : Set a → (m n : ℕ) → Set a
-Matrix A m n = Vector (Vector A n) m
+Matrix A n m = Vector (Vector A m) n
 
 _++ⱽ_ : Matrix A m n → Matrix A m p → Matrix A m (n ℕ.+ p)
 _++ⱽ_ {n = n} xs ys i j = [ xs i , ys i ] (splitAt n j)
