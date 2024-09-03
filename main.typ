@@ -82,13 +82,10 @@ After normalizing $A$, the library reads of the solution of the linear system of
 vector $vec(2, 1)$.
 
 == Vector Space
-After each step of the Gaussian elimination, the span of the rows of $A|b$ is preserved.
+After each step of the Gaussian elimination, the #web("Algebra.Module.Definition", 893)[ span ]
+(it is composed for all points that a list of vectors can reach by adding and multiplication) of the rows of $A|b$ is preserved.
 That means that:
-// TODO: Maybe change the equality to another symbol
-$ "span"(A|b) = "span"(A'|b') $
-
-// TODO: Explain span
-// $ "span"("xs") = Sigma ["x" in "M"] |"xs" "reaches" "x"|  $
+$ "span"(A|b) tilde.eq "span"(A'|b') $
 
 With that property, it is possible to prove that the normalized matrix's solution is the same as the original matrix.
 It is necessary to have both sides of the implication because it is also necessary to prove that all the solutions of the original matrix
@@ -118,7 +115,7 @@ For more explanations about setoids, look at @setoids.
 // The implementation of the vector space uses Left Module.
 // Each row of the matrix is an element of Left Module.
 
-== #web("Algebra.Module.Definition", 993)[ Vector Space span relation ]
+== #web("Algebra.Module.Definition", 1079)[ Vector Space span relation ]
 In the library, there is the vector space relation which means that two lists of vectors span the same vector space.
 Two lists of vectors have the same vector space if both of them can reach the same element.
 
