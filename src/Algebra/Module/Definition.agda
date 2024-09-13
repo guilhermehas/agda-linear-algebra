@@ -37,8 +37,10 @@ record _reaches_ (xs : Vector M n) (x : M) : Set (ℓm ⊔ rr) where
     ys      : Vector A n
     xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x
 
+pattern vecGen ys = ys by _
+
 span : Vector M n → Set _
-span xs = Σ[ x ∈ M ] xs reaches x
+span xs = ∃ (xs reaches_)
 
 _⊆ⱽ_ _⊇ⱽ_ : (xs : Vector M m) (ys : Vector M n) → Set _
 xs ⊆ⱽ ys = (xs reaches_) ⊆ (ys reaches_)
@@ -53,4 +55,4 @@ _isSolutionOf_by_ : A → Vector M n → (M → Set ℓ) → Set _
 α isSolutionOf v by ∑≡  = ∀ k → ∑≡ (α *ₗ v k)
 
 IsLinearIndependent : Vector M n → Set _
-IsLinearIndependent xs = ((ys by _) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#
+IsLinearIndependent xs = ∀ ((vecGen ys) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#
