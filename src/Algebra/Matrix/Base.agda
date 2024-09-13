@@ -18,7 +18,7 @@ private variable
   A : Set a
   m n p : ℕ
 
-Matrix : Set a → (m n : ℕ) → Set a
+Matrix : Set a → (n m : ℕ) → Set a
 Matrix A n m = Vector (Vector A m) n
 
 _++ⱽ_ : Matrix A m n → Matrix A m p → Matrix A m (n ℕ.+ p)
