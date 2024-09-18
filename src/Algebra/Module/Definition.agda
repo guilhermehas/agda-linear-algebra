@@ -24,6 +24,7 @@ open SumMonoid +ᴹ-monoid
 private variable
   ℓ : Level
   m n : ℕ
+  zs : Vector M n
 
 infix 4 _⊆ⱽ_ _⊇ⱽ_ _≋ⱽ_
 infixr 7 _*ᵣ_
@@ -31,11 +32,14 @@ infixr 7 _*ᵣ_
 _*ᵣ_ : Vector A n → Op₁ $ Vector M n
 (u *ᵣ v) i = u i *ₗ v i
 
+_reaches_by_ : (xs : Vector M n) (x : M) (ys : Vector A n) → Set _
+xs reaches x by ys = ∑ (ys *ᵣ xs) ≈ᴹ x
+
 record _reaches_ (xs : Vector M n) (x : M) : Set (ℓm ⊔ rr) where
   constructor _by_
   field
     ys      : Vector A n
-    xs*ys≈x : ∑ (ys *ᵣ xs) ≈ᴹ x
+    xs*ys≈x : xs reaches x by ys
 
 pattern vecGen ys = ys by _
 
@@ -56,3 +60,6 @@ _isSolutionOf_by_ : A → Vector M n → (M → Set ℓ) → Set _
 
 IsLinearIndependent : Vector M n → Set _
 IsLinearIndependent xs = ∀ ((vecGen ys) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#
+
+IsLinearIndependent′ : Vector M n → Set _
+IsLinearIndependent′ xs = ∀ {ys} (_ : xs reaches 0ᴹ by ys) → ∀ i → ys i ≈ 0#
