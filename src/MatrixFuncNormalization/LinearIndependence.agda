@@ -59,7 +59,7 @@ normLinearDep : ((xs , pivs , _) : MatrixWithPivots n m)
   → ColumnsZero xs pivs
   → PivsOne≁0⁺ xs pivs
   → IsLinearDependent xs ⊎ IsLinearIndependent xs
-normLinearDep {ℕ.zero} (xs , pivs , mPivs) _ _ pOne = inj₂ $ λ _ ()
+normLinearDep {ℕ.zero} (xs , pivs , mPivs) _ _ pOne = inj₂ λ _ ()
 normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fromℕ _ in pivEq | mPivs $ fromℕ _
 ... | nothing | lift allZ = inj₁ help
   where
@@ -78,7 +78,7 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fro
 ... | just j | xsN#0 , _ = inj₂ help
   where
   help : IsLinearIndependent xs
-  help (ys by xs*ys≈ws) i with pivs i | mPivs i | allR→Monot normed (≤fromℕ i) | cZeros i | pOne i
+  help {ys} xs*ys≈ws i with pivs i | mPivs i | allR→Monot normed (≤fromℕ i) | cZeros i | pOne i
   ... | nothing | lift allZ | inj₁ () | _ | _
   ... | nothing | lift allZ | inj₂ q  | _ | _ rewrite pivEq = help2 q
     where
@@ -96,13 +96,14 @@ normLinearDep {suc n} {m} (xs , pivs , mPivs) normed cZeros pOne with pivs $ fro
     ... | yes ≡.refl = pOneI
     ... | no i≢j = cZ j i≢j
 
-    ysI≈0 = begin
+    ysI≈0 =  begin
       ys i                          ≈˘⟨ ∑Mul1r ys i ⟩
       ∑ (λ j → δ i j * ys j)         ≈⟨ ∑Ext (λ j → *-comm (δ i j) (ys j)) ⟩
       ∑ (λ j → ys j * δ i j)        ≈˘⟨ ∑Ext {U = λ j → ys j * xs j piv} (*-congˡ ∘ sameXs) ⟩
       ∑ (λ j → ys j * xs j piv)     ≈˘⟨ ∑∑≈∑ {m} {suc n} (λ i j → ys i * xs i j) piv ⟩
       ∑M (λ i j → ys i * xs i j) piv ≈⟨ xs*ys≈ws piv ⟩
       0# ∎
+
 
 divZeroSameLinRev : (xsNorm : MatrixNormed n m) (open MatrixNormed xsNorm) (open MatNormed xsNorm renaming (ys to zs)) → ∀ b
   → LinearIndependent? xs b
@@ -132,15 +133,15 @@ divZeroSameLinRev {n = n} {m} xsNorm _ (linDep (ys by xs*ys≈x , i , ysI#0)) = 
   wsI#0 = x#0y#0→xy#0 (multiplyF#0 (xs i) (pivs i) (mPivots i)) ysI#0
 
 
-divZeroSameLinRev xsNorm _ (linInd lInd) = linInd help
+divZeroSameLinRev xsNorm _ (linInd lInd) = linInd  help
   where
   open MatrixNormed xsNorm
   open MatNormed xsNorm renaming (ys to zs)
   open ∑CM
   open *-Solver
 
-  help : ∀ (rh@(ws by _) : _ reaches 0ᴹ) i → ws i ≈ 0#
-  help (ws by ws*zs≈0) i = x#0*y≈0⇒y≈0 (divideF#0 (xs i) (pivs i) _) (ldKs i)
+  help : ∀ {ws} (_ : _ reaches 0ᴹ by ws) i → ws i ≈ 0#
+  help {ws} ws*zs≈0 i = x#0*y≈0⇒y≈0 (divideF#0 (xs i) (pivs i) _) (ldKs i)
     where
     rs : Vector _ _
     rs j = divideF (xs j) (pivs j) (mPivots j)
@@ -159,11 +160,8 @@ divZeroSameLinRev xsNorm _ (linInd lInd) = linInd help
       ∑ (ws *ᵣ zs) ≈⟨ ws*zs≈0 ⟩
       0ᴹ ∎ where open ≈ᴹ-Reasoning
 
-    xs⇒0ᴹ : xs reaches 0ᴹ
-    xs⇒0ᴹ = ks by ∑ks*xs≈0
-
-    ldKs : ∀ k → ks k ≈ 0#
-    ldKs = lInd xs⇒0ᴹ
+    ldKs : ∀ k → ks k ≈ 0#  -- ks =V 0V   or   isZV ks
+    ldKs =  lInd ∑ks*xs≈0
 
 divZeroSameLin : (xsNorm : MatrixNormed n m) (open MatrixNormed xsNorm) (open MatNormed xsNorm renaming (ys to zs)) → ∀ b
   → LinearIndependent? zs b
@@ -202,8 +200,8 @@ divZeroSameLin xsNorm _ (linInd lInd) = linInd help
   open ∑CM
   open *-Solver
 
-  help : ∀ (rh@(ws by _) : xs reaches 0ᴹ) i → ws i ≈ 0#
-  help (ws by ws*zs≈0) i = x#0*y≈0⇒y≈0 (multiplyF#0 (xs i) (pivs i) (mPivots i)) (ldKs i)
+  help : ∀ {ws} (_ : xs reaches 0ᴹ by ws) i → ws i ≈ 0#
+  help {ws} ws*zs≈0 i = x#0*y≈0⇒y≈0 (multiplyF#0 (xs i) (pivs i) (mPivots i)) (ldKs i)
     where
     rs : Vector _ _
     rs j = multiplyF (xs j) (pivs j)
@@ -222,11 +220,8 @@ divZeroSameLin xsNorm _ (linInd lInd) = linInd help
       ∑ (ws *ᵣ xs) ≈⟨ ws*zs≈0 ⟩
       0ᴹ ∎ where open ≈ᴹ-Reasoning
 
-    xs⇒0ᴹ : zs reaches 0ᴹ
-    xs⇒0ᴹ = ks by ∑ks*xs≈0
-
     ldKs : ∀ k → ks k ≈ 0#
-    ldKs = lInd xs⇒0ᴹ
+    ldKs = lInd ∑ks*xs≈0
 
 decLinearDep : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs
 decLinearDep xs = _ , sameLd (sameLd3 (proj₂ (help linDepYs)))

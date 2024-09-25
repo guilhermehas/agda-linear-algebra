@@ -13,6 +13,7 @@ open import Relation.Unary
 open import Data.Product
 open import Data.Nat using (ℕ)
 open import Data.Vec.Functional
+open import Data.Vec.Functional.Relation.Binary.Pointwise
 open import Vector.Structures
 open import Algebra.BigOps
 open import Relation.Unary.PredicateTransformer hiding (_⊔_)
@@ -58,8 +59,16 @@ record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) w
 _isSolutionOf_by_ : A → Vector M n → (M → Set ℓ) → Set _
 α isSolutionOf v by ∑≡  = ∀ k → ∑≡ (α *ₗ v k)
 
-IsLinearIndependent : Vector M n → Set _
-IsLinearIndependent xs = ∀ ((vecGen ys) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#
+-- IsLinearIndependent' : Vector M n → Set _
+-- IsLinearIndependent' xs = ∀ ((vecGen ys) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#
 
-IsLinearIndependent′ : Vector M n → Set _
-IsLinearIndependent′ xs = ∀ {ys} (_ : xs reaches 0ᴹ by ys) → ∀ i → ys i ≈ 0#
+-- TODO promotion needed!
+0V : Vector A n
+0V {n} = replicate n 0#
+
+-- TODO promotion needed!
+_=V_ : Vector A n -> Vector A n -> Set _
+_=V_ = Pointwise _≈_
+
+IsLinearIndependent : Vector M n → Set _
+IsLinearIndependent xs = ∀ {ys} (_ : ∑ (ys *ᵣ xs) ≈ᴹ 0ᴹ) → ys =V 0V

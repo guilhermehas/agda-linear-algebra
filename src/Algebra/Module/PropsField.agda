@@ -102,7 +102,7 @@ private variable
 *#0≈ⱽ xs ys#0 = record { fwd = *#0⊆ⱽ xs ys#0 ; bwd = *ₗ#0⊆ⱽ xs _ }
 
 linInd→¬linDep : IsLinearIndependent xs → ¬ IsLinearDependent xs
-linInd→¬linDep linIndep (reach , i , ysI#0) = tight _ _ .proj₂ (linIndep reach i) ysI#0
+linInd→¬linDep linIndep (_ by xs*ys≈x , i , ysI#0) = tight _ _ .proj₂ (linIndep xs*ys≈x i) ysI#0
 
 private
   _[_]←₂_*[_] : Vector A n → Fin n → A → Fin n → Vector A n
@@ -282,11 +282,12 @@ sameLinDep xs ys (rec {ys = zs} (addCons p q p≢q r) xs≈ⱽzs same) dep@(ws b
     help : wws j ≈ ks j
     help rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = refl
 
+
 sameLinInd : (xs ys : Vector M n) → xs ≈ⱽ ys
   → IsLinearIndependent xs → IsLinearIndependent ys
-sameLinInd xs ys (idR xs≈ys) lxs rh@(zs by xs*zs≈x) =
-  lxs (zs by ≈ᴹ-trans (∑Ext $ *ₗ-congˡ ∘ xs≈ys) xs*zs≈x)
-sameLinInd {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
+sameLinInd xs ys (idR xs≈ys) lxs xs*zs≈x =
+  lxs (≈ᴹ-trans (∑Ext $ *ₗ-congˡ ∘ xs≈ys) xs*zs≈x)
+sameLinInd {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs {zs} xs*zs≈x i
   = help i (ks≈0 i)
   where
   open ≈ᴹ-Reasoning
@@ -294,7 +295,7 @@ sameLinInd {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs r
   q≢p = p≢q ∘ ≡.sym
   v0 = r
   wss = ws [ q ]← r *[ p ]
-  ks = zs [ p ]←₂ v0 *[ q ]
+  ks = _ [ p ]←₂ v0 *[ q ]
 
   zsChange : ∀ j → j ≢ p → j ≢ q → wss j ≈ᴹ ys j → (ks *ᵣ ws) j ≈ᴹ (zs *ᵣ ys) j
   zsChange j j≢p j≢q rewrite dec-no (p ≟ j) (j≢p ∘ ≡.sym) | dec-no (q ≟ j) (j≢q ∘ ≡.sym) = *ₗ-congˡ
@@ -337,7 +338,7 @@ sameLinInd {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs r
   ∑Same = ∑TwoExt _ _ _ _ p≢q samePq λ j j≢p j≢q → zsChange j j≢p j≢q (same j)
 
   ks≈0 : ∀ j → ks j ≈ 0#
-  ks≈0 = sameLinInd _ _ xs≈ⱽys lxs (ks by ≈ᴹ-trans ∑Same xs*zs≈x)
+  ks≈0 = sameLinInd _ _ xs≈ⱽys lxs (≈ᴹ-trans ∑Same xs*zs≈x)
 
   zsQ≈0 : ks q ≈ 0# → zs q ≈ 0#
   zsQ≈0 rewrite dec-no (p ≟ q) p≢q = id
@@ -351,7 +352,7 @@ sameLinInd {n} xs ys (rec {ys = ws} (addCons p q p≢q r) xs≈ⱽys same) lxs r
     help2 zsP = trans (trans (sym (+-identityʳ _))
       (+-congˡ (sym (trans (*-congˡ (zsQ≈0 (ks≈0 q))) (zeroʳ _))))) zsP
 
-sameLinInd {n} xs ys (rec {ys = ws} (swapOp p q p≢q) xs≈ⱽys same) lxs rh@(zs by xs*zs≈x) i
+sameLinInd {n} xs ys (rec {ys = ws} (swapOp p q p≢q) xs≈ⱽys same) lxs {zs} xs*zs≈x i
   = help i
   where
   open ≈ᴹ-Reasoning
@@ -393,7 +394,7 @@ sameLinInd {n} xs ys (rec {ys = ws} (swapOp p q p≢q) xs≈ⱽys same) lxs rh@(
     ∑ (zs *ᵣ ys) ∎
 
   ks≈0 : ∀ j → ks j ≈ 0#
-  ks≈0 = sameLinInd _ _ xs≈ⱽys lxs (ks by ≈ᴹ-trans ∑Same xs*zs≈x)
+  ks≈0 = sameLinInd _ _ xs≈ⱽys lxs (≈ᴹ-trans ∑Same xs*zs≈x)
 
   help : ∀ i → zs i ≈ 0#
   help i with i ≟ p | i ≟ q
@@ -407,3 +408,4 @@ sameLin : (xs ys : Vector M n) → xs ≈ⱽ ys → ∀ b
   → LinearIndependent? xs b → LinearIndependent? ys b
 sameLin xs ys xs≈ⱽys false (linDep ld) = linDep $ sameLinDep xs ys xs≈ⱽys ld
 sameLin xs ys xs≈ⱽys true  (linInd li) = linInd $ sameLinInd xs ys xs≈ⱽys li
+
