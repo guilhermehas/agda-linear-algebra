@@ -72,3 +72,25 @@ _=V_ = Pointwise _≈_
 
 IsLinearIndependent : Vector M n → Set _
 IsLinearIndependent xs = ∀ {ys} (_ : ∑ (ys *ᵣ xs) ≈ᴹ 0ᴹ) → ys =V 0V
+{-
+Equivalent statements: (all about vectors in an m-dimensional space M)
+  A: IsLinearIndependent {n} xs
+
+  B: rank (makeMatrix {n} xs) ≡ n
+
+  C: solve (makeSystem {n} xs) = { 0V }  -- informally
+
+  D: case m of
+         todo
+       3 -> case n of
+         0 -> True
+         1 -> isNonZero xs
+         2 -> not Collinear xs₁ xs₂
+         3 -> cross (dot xs₁ xs₂) xs₃
+         n -> False
+       m -> fallback
+
+Statements A, B, C should be equivalent (in LinAlg terms), and D is a
+specialisation for a particular case (m=3).
+
+-}
