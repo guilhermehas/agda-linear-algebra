@@ -330,11 +330,11 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
 
   where
   help : vSplit (λ x → predFin (xs (suc x))) (predFin (xs (suc i))) ≡ inj₂ i
-    → vSplit (λ x → predFin (xs (suc x))) p ≡ inj₂ i
+    → vSplit (pred-tail xs) p ≡ inj₂ i
   help rewrite eqS = id
 
   help2 : [ inj₁ ∙ inj₂ ∘ suc ] (vSplit (pred-tail xs) p) ≡ inj₂ (suc i)
-  help2 rewrite help g = ≡.refl
+  help2 = cong [ inj₁ ∙ inj₂ ∘ suc ] (help g)
 
 ... | suc c | f | g | 0F | ()
 ... | suc c | f | g | suc p | _ rewrite eq0 = help2
@@ -344,7 +344,7 @@ vSplit-same {ℕ.suc (ℕ.suc n)} {ℕ.suc m} xs (suc i) normed with
   help rewrite eqS = id
 
   help2 : [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (vSplit (pred-vec xs) p) ≡ inj₂ (suc i)
-  help2 rewrite help (f (suc i) (pred-normed normed eq0)) = ≡.refl
+  help2 = cong [ inj₁ ∘ ℕ.suc ∙ inj₂ ] (help (f (suc i) (pred-normed normed eq0)))
 
 vSplit-rPivs : ∀ (xs : Vector (Fin n) m) i (normed : AllRowsNormalized≁0 xs)
   → vSplit xs (rPivs xs .proj₂ i) ≡ inj₁ (toℕ i)
