@@ -13,7 +13,6 @@ open import Relation.Unary
 open import Data.Product
 open import Data.Nat using (ℕ)
 open import Data.Vec.Functional
-open import Data.Vec.Functional.Relation.Binary.Pointwise
 open import Vector.Structures
 open import Algebra.BigOps
 open import Relation.Unary.PredicateTransformer hiding (_⊔_)
@@ -62,6 +61,7 @@ _isSolutionOf_by_ : A → Vector M n → (M → Set ℓ) → Set _
 
 IsLinearIndependent : Vector M n → Set _
 IsLinearIndependent xs = ∀ {ys} (_ : ∑ (ys *ᵣ xs) ≈ᴹ 0ᴹ) → is0 ys
+
 {-
 Equivalent statements: (all about vectors in an m-dimensional space M)
   A: IsLinearIndependent {n} xs

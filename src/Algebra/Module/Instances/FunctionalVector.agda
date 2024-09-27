@@ -1,4 +1,4 @@
-open import Function using (_$_)
+open import Function using (_$_; _∘_)
 open import Data.Product hiding (map)
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
@@ -7,6 +7,7 @@ open import Algebra.Core
 open import Algebra.Bundles
 open import Algebra.Module
 open import Relation.Binary
+open import Relation.Nullary.Negation.Core using (¬_)
 import Data.Vec.Functional.Relation.Binary.Equality.Setoid as VecSetoid
 import Algebra.Definitions as AD
 import Algebra.Structures as AS
@@ -38,6 +39,9 @@ _+ᴹ_ = zipWith _+_
 
 is0 : VC n → _
 is0 = _≈ᴹ 0ᴹ
+
+_≠0 : VC n → _
+_≠0 = ¬_ ∘ is0
 
 -ᴹ_ : Op₁ $ VC n
 -ᴹ_ = map $ -_
