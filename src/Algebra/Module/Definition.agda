@@ -20,6 +20,7 @@ open import Relation.Unary.PredicateTransformer hiding (_⊔_)
 
 open Ring ring renaming (Carrier to A)
 open LeftModule leftModule renaming (Carrierᴹ to M)
+open import Algebra.Module.Instances.FunctionalVector ring using (is0) renaming (0ᴹ to 0V; _≈ᴹ_ to _≋_)
 open SumMonoid +ᴹ-monoid
 
 private variable
@@ -59,19 +60,8 @@ record _≋ⱽ_ (xs : Vector M m) (ys : Vector M n) : Set (ℓm ⊔ mr ⊔ rr) w
 _isSolutionOf_by_ : A → Vector M n → (M → Set ℓ) → Set _
 α isSolutionOf v by ∑≡  = ∀ k → ∑≡ (α *ₗ v k)
 
--- IsLinearIndependent' : Vector M n → Set _
--- IsLinearIndependent' xs = ∀ ((vecGen ys) : xs reaches 0ᴹ) → ∀ i → ys i ≈ 0#
-
--- TODO promotion needed!
-0V : Vector A n
-0V {n} = replicate n 0#
-
--- TODO promotion needed!
-_=V_ : Vector A n -> Vector A n -> Set _
-_=V_ = Pointwise _≈_
-
 IsLinearIndependent : Vector M n → Set _
-IsLinearIndependent xs = ∀ {ys} (_ : ∑ (ys *ᵣ xs) ≈ᴹ 0ᴹ) → ys =V 0V
+IsLinearIndependent xs = ∀ {ys} (_ : ∑ (ys *ᵣ xs) ≈ᴹ 0ᴹ) → is0 ys
 {-
 Equivalent statements: (all about vectors in an m-dimensional space M)
   A: IsLinearIndependent {n} xs

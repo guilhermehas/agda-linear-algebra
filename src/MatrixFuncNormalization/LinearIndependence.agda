@@ -160,7 +160,7 @@ divZeroSameLinRev xsNorm _ (linInd lInd) = linInd  help
       ∑ (ws *ᵣ zs) ≈⟨ ws*zs≈0 ⟩
       0ᴹ ∎ where open ≈ᴹ-Reasoning
 
-    ldKs : ∀ k → ks k ≈ 0#  -- ks =V 0V   or   isZV ks
+    ldKs : is0 ks
     ldKs =  lInd ∑ks*xs≈0
 
 divZeroSameLin : (xsNorm : MatrixNormed n m) (open MatrixNormed xsNorm) (open MatNormed xsNorm renaming (ys to zs)) → ∀ b
@@ -220,7 +220,7 @@ divZeroSameLin xsNorm _ (linInd lInd) = linInd help
       ∑ (ws *ᵣ xs) ≈⟨ ws*zs≈0 ⟩
       0ᴹ ∎ where open ≈ᴹ-Reasoning
 
-    ldKs : ∀ k → ks k ≈ 0#
+    ldKs : is0 ks
     ldKs = lInd ∑ks*xs≈0
 
 decLinearDep : (xs : Matrix F n m) → ∃ $ LinearIndependent? xs

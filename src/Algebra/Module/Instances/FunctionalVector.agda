@@ -36,6 +36,9 @@ _+ᴹ_ = zipWith _+_
 0ᴹ : VC n
 0ᴹ = replicate _ 0#
 
+is0 : VC n → _
+is0 = _≈ᴹ 0ᴹ
+
 -ᴹ_ : Op₁ $ VC n
 -ᴹ_ = map $ -_
 
