@@ -56,7 +56,12 @@ IsCLinearIndependent {2+ (suc _)} {2} xs (s≤s (s≤s z≤n)) = ⊥
 IsCLinearIndependent {0} {3} xs (s≤s (s≤s (s≤s z≤n))) = ⊤
 IsCLinearIndependent {1} {3} xs (s≤s (s≤s (s≤s z≤n))) = xs 0F 0F # 0#
 IsCLinearIndependent {2} {3} xs (s≤s (s≤s (s≤s z≤n))) = AreNotCollinear (xs 0F) (xs 1F)
-IsCLinearIndependent {3} {3} xs (s≤s (s≤s (s≤s z≤n))) = {!!}
+IsCLinearIndependent {3} {3} xs (s≤s (s≤s (s≤s z≤n))) = let
+  -- Determinant different than zero
+  a = xs 0F 0F; b = xs 0F 1F; c = xs 0F 2F
+  d = xs 1F 0F; e = xs 1F 0F; f = xs 1F 2F
+  g = xs 2F 0F; h = xs 2F 0F; i = xs 2F 2F
+  in a * (e * i - h * f) - b * (d * i - g * f) + c * (d * h - e * g) # 0#
 IsCLinearIndependent {2+ (2+ n)} {3} xs (s≤s (s≤s (s≤s z≤n))) = ⊥
 
 
