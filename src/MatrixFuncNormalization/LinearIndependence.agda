@@ -32,10 +32,8 @@ open NormBef dField
 open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZero)
 open import MatrixFuncNormalization.ElimZeros.Properties dField hiding
   (module PFieldN)
-open HeytingField heytingField using (heytingCommutativeRing)
 open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
-open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (ring; sym; *-commutativeMonoid)
 open import Algebra.Module.Instances.FunctionalVector ring
 open PNorm

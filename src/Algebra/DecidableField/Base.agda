@@ -44,3 +44,6 @@ record DecidableField c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) wher
 
   heytingField : HeytingField c ℓ₁ ℓ₂
   heytingField = record { isHeytingField = isHeytingField }
+
+  open HeytingField heytingField using (heytingCommutativeRing) public
+  open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing) public

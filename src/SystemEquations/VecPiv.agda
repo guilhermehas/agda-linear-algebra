@@ -36,8 +36,6 @@ import Algebra.Module.Props as MProps′
 open import Algebra.BigOps
 
 open DecidableField dField renaming (Carrier to F) hiding (sym)
-open HeytingField heytingField using (heytingCommutativeRing)
-open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring; sym; +-commutativeMonoid)
 open import Algebra.Properties.Ring ring
 open VRing rawRing

@@ -28,8 +28,6 @@ open import MatrixFuncNormalization.NormAfter.PropsFlip dField
 open import MatrixFuncNormalization.Definitions dField
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField) hiding (sym)
-open HeytingField hField using (heytingCommutativeRing)
-open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (ring; sym)
 open import Algebra.HeytingField.Properties hField
 open import Algebra.Ring.Properties

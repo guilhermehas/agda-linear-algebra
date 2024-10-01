@@ -13,8 +13,6 @@ import MatrixFuncNormalization.ElimZeros.Base as EZeros
 module MatrixFuncNormalization.NormAfter.AppendIdentity {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ ℓ₂) where
 
   open DecidableField dField renaming (Carrier to F; heytingField to hField)
-  open HeytingField hField using (heytingCommutativeRing)
-  open HeytingCommutativeRing heytingCommutativeRing
   open CommutativeRing commutativeRing
   open MRing rawRing
   open NormAfter dField

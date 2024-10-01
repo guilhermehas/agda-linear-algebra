@@ -12,8 +12,6 @@ open import Data.Nat.Base using (ℕ)
 open import Algebra.Matrix.Structures
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
-open HeytingField hField using (heytingCommutativeRing)
-open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
 open CommutativeRing commutativeRing using (rawRing; ring)
 
 open import MatrixFuncNormalization.NormAfter.PropsFlip dField
