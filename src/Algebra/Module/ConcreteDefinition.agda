@@ -22,7 +22,7 @@ open CommutativeRing commutativeRing using (ring; sym)
 open Ring ring using (rawRing)
 open import Algebra.Module.Instances.FunctionalVector ring
 import Algebra.Module.Definition as MDef'
-open import Tactic.RingSolver.Core.AlmostCommutativeRing
+open import Tactic.RingSolver.NonReflective almostCommutativeRing
 
 open module MDef {n} = MDef' (leftModule n)
 
@@ -69,7 +69,7 @@ IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
   where
   help₁ : xs 1F 1F * xs 0F 0F * ys 0F + ys 1F * xs 1F 0F * xs 1F 1F ≈ 0#
   help₁ = trans {!solve!}
-    (trans (*-congˡ (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 0F))) (zeroʳ _))
+    (trans (*-congˡ {x = xs 1F 1F} (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 0F))) (zeroʳ _))
 
   help₂ : xs 1F 0F * (ys 0F * xs 0F 1F + ys 1F * xs 1F 1F) ≈ 0#
   help₂ = trans (*-congˡ (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 1F))) (zeroʳ _)
