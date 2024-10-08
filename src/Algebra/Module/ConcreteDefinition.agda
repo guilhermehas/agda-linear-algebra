@@ -5,6 +5,7 @@ open import Algebra.DecidableField
 module Algebra.Module.ConcreteDefinition {c ℓ₁} (HCR : DecidableField c ℓ₁ ℓ₁) where
 
 open import Level
+open import Function
 open import Data.Nat hiding (_+_; _*_; _⊔_)
 open import Data.Fin using () renaming (suc to fsuc)
 open import Data.Empty.Polymorphic
@@ -22,11 +23,11 @@ open CommutativeRing commutativeRing using (ring; sym)
 open Ring ring using (rawRing)
 open import Algebra.Module.Instances.FunctionalVector ring
 import Algebra.Module.Definition as MDef'
-open import Tactic.RingSolver.NonReflective almostCommutativeRing
+open import Relation.Binary.Reasoning.Setoid setoid
 
 open module MDef {n} = MDef' (leftModule n)
 
-open MRing rawRing
+open MRing rawRing hiding (0ᴹ)
 
 private variable
   m n : ℕ
@@ -72,9 +73,17 @@ IsCInd⇒Ind {1} {2} xs (s≤s (s≤s z≤n)) cLin ∑≈0 0F =
   x#0*y≈0⇒y≈0 cLin (trans (*-comm _ _) (trans (sym (+-identityʳ _)) (∑≈0 0F)))
 IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
   where
-  help₁ : xs 1F 1F * xs 0F 0F * ys 0F + ys 1F * xs 1F 0F * xs 1F 1F ≈ 0#
-  help₁ = trans {!solve!}
-    (trans (*-congˡ {x = xs 1F 1F} (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 0F))) (zeroʳ _))
+  open *-solver
+
+  help₁ = begin
+    xs 1F 1F * xs 0F 0F * ys 0F + ys 1F * xs 1F 0F * xs 1F 1F
+      ≈⟨ +-cong (solve 3 (λ a b c → a ⊕ b ⊕ c , a ⊕ (c ⊕ b)) refl _ _ _)
+                (solve 3 (λ a b c → a ⊕ b ⊕ c , c ⊕ (a ⊕ b)) refl _ _ _) ⟩
+    xs 1F 1F * (ys 0F * xs 0F 0F) + xs 1F 1F * (ys 1F * xs 1F 0F) ≈˘⟨ distribˡ _ _ _ ⟩
+    xs 1F 1F * (ys 0F * xs 0F 0F + ys 1F * xs 1F 0F)
+      ≈⟨ *-congˡ {x = xs 1F 1F} (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 0F)) ⟩
+    _ * 0# ≈⟨ zeroʳ _ ⟩
+    0# ∎
 
   help₂ : xs 1F 0F * (ys 0F * xs 0F 1F + ys 1F * xs 1F 1F) ≈ 0#
   help₂ = trans (*-congˡ (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 1F))) (zeroʳ _)

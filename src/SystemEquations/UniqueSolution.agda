@@ -31,7 +31,7 @@ import Algebra.Module.Props as MProps′
 open import Algebra.BigOps
 
 open DecidableField dField renaming (Carrier to F) hiding (sym)
-open CommutativeRing commutativeRing using (rawRing; ring; sym; +-commutativeMonoid)
+open CommutativeRing commutativeRing using (rawRing; ring; sym)
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Algebra.Properties.Ring ring
 open VRing rawRing

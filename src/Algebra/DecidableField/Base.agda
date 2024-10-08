@@ -5,11 +5,13 @@ open import Relation.Binary.Core using (Rel)
 open import Algebra.Core using (Op₁; Op₂)
 open import Algebra.Apartness.Structures
 open import Algebra.Apartness.Bundles
+open import Algebra.Bundles
 open import Relation.Binary.Definitions using (Decidable)
 open import Relation.Nullary
 open import Tactic.RingSolver.Core.AlmostCommutativeRing
 open import Data.Maybe
 open import Data.Product
+import Algebra.Solver.CommutativeMonoid as CMSolver renaming (_⊕_ to infixl 5 _⊕_)
 
 module _
   {c ℓ₁ ℓ₂} {Carrier : Set c}
@@ -50,6 +52,7 @@ record DecidableField c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) wher
 
   open HeytingField heytingField using (heytingCommutativeRing) public
   open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing) public
+  open CommutativeRing commutativeRing using (*-commutativeMonoid; +-commutativeMonoid) public
 
   almostCommutativeRing : AlmostCommutativeRing _ _
   almostCommutativeRing = fromCommutativeRing commutativeRing ≟?
@@ -58,3 +61,6 @@ record DecidableField c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) wher
     ≟? x with 0# ≟ x
     ... | yes _ = nothing
     ... | no 0#x = just (tight _ _ .proj₁ 0#x)
+
+  module *-solver = CMSolver *-commutativeMonoid
+  module +-solver = CMSolver +-commutativeMonoid

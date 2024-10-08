@@ -34,7 +34,7 @@ open import MatrixFuncNormalization.ElimZeros.Properties dField hiding
   (module PFieldN)
 open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
-open CommutativeRing commutativeRing using (ring; sym; *-commutativeMonoid)
+open CommutativeRing commutativeRing using (ring; sym)
 open import Algebra.Module.Instances.FunctionalVector ring
 open PNorm
 open SumRing ring using (δ; δii≡1#)
