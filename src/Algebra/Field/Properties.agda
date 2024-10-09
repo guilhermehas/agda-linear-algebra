@@ -25,7 +25,6 @@ module FieldUnits {ℓ ℓ'} (field' : Field ℓ ℓ') where
   open import Algebra.Definitions.RawSemiring semiRing
   open import Relation.Binary.Reasoning.Setoid setoid
   open CR.Units commutativeRing
-  open R.Units ring
 
   private
     A≢0 = Σ[ a ∈ A ] (a ≉ 0#)

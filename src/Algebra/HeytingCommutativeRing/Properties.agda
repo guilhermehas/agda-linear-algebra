@@ -12,6 +12,9 @@ open ReasonSetoid setoid
 open import Algebra.Apartness.Properties.HeytingCommutativeRing HF
 open import Algebra.Definitions _≈_ using (Invertible)
 
+open import Algebra.CommRing.Properties
+open Units commutativeRing public
+
 private variable
   x y z : Carrier
 

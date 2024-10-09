@@ -39,7 +39,6 @@ open import Algebra.BigOps
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.Reasoning.Setoid setoid
-open Units ring
 open module PFieldN {n} = PField dField (leftModule n)
 open module MDefN {n} = MDefinition (leftModule n)
 open PNorm

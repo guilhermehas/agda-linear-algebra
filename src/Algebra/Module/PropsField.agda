@@ -33,7 +33,6 @@ open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutati
 open CommutativeRing commutativeRing using (rawRing; *-commutativeMonoid; ring; sym)
 
 open import Algebra.Module.DefsField hField leftModule
-open import Algebra.Properties.Ring ring
 
 open LeftModule leftModule renaming (Carrierᴹ to M)
 open SumCommMonoid +ᴹ-commutativeMonoid

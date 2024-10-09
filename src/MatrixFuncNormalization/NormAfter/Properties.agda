@@ -59,7 +59,6 @@ open import Algebra.Module.Base ring
 open M hiding (_+ᴹ_)
 open module PVec {n} = VecSpace (leftModule n)
 open PNormAfter using (_<′_; AllRowsNormalizedRight; simpleFinProps)
-open RingProps ring
 module ≈ = Setoid setoid
 open module ≋‵ = EqSetoids setoid using (≋-setoid)
 open module ≋ {n} = EqSetoids (≋-setoid n)

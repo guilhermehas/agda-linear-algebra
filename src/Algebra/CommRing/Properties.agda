@@ -16,7 +16,8 @@ module Units (R' : CommutativeRing ℓ ℓ') where
 
   open CommutativeRing R' renaming (Carrier to R)
   open import Relation.Binary.Reasoning.Setoid setoid
-  open RP.Units ring
+  open RP.Units ring using (0RightAnnihilates; 0LeftAnnihilates) public
+  open import Algebra.Properties.Ring ring public
 
   semiRing : RawSemiring _ _
   semiRing = record { Carrier = R ; _≈_ = _≈_ ; _+_ = _+_ ; _*_ = _*_ ; 0# = 0# ; 1# = 1# }
