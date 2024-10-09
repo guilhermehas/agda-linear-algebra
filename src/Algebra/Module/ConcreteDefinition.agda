@@ -44,9 +44,12 @@ AreNotCollinear {1} xs ys = ⊥
 AreNotCollinear {2+ n} xs ys = AreCollinear (tail xs) (tail ys) → xs 0F * ys 1F # xs 1F * ys 0F
 
 AreCollinear⇒LinDep : AreCollinear xs ys → IsLinearDependent (xs ∷ ys ∷ [])
-AreCollinear⇒LinDep {ℕ.suc ℕ.zero} {xs} {ys} (lift _) .proj₁ = fromVec (ys 0F V.∷ - xs 0F V.∷ V.[]) by λ where 0F → {!!}
-AreCollinear⇒LinDep {ℕ.suc ℕ.zero} {xs} {ys} (lift _) .proj₂ = {!!}
-AreCollinear⇒LinDep {2+ n} {xs} {ys} x = {!!}
+AreCollinear⇒LinDep {1} {xs} {ys} _ .proj₁ = fromVec (ys 0F V.∷ - xs 0F V.∷ V.[]) by λ where 0F → {!!}
+AreCollinear⇒LinDep {1} {xs} {ys} _ .proj₂ = {!!}
+AreCollinear⇒LinDep {2} {xs} {ys} same = {!!}
+AreCollinear⇒LinDep {2+ (ℕ.suc n)} {xs} {ys} (same , col) =
+  let linRest = AreCollinear⇒LinDep {xs = tail xs} col in
+  {!!}
 
 IsCLinearIndependent : Matrix A n m → m ≤ 3 → Set ℓ₁
 IsCLinearIndependent {0} {0} xs z≤n = ⊤
