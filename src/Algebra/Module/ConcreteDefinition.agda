@@ -99,7 +99,8 @@ IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
     0# ≈˘⟨ help₂ ⟩
     ys 0F * (xs 1F 0F * xs 0F 1F) + ys 1F * xs 1F 0F * xs 1F 1F ∎
 
-  help₄ = {!+-cancelʳ!}
+  help₄ : ys 0F * (xs 1F 1F * xs 0F 0F) ≈ ys 0F * (xs 1F 0F * xs 0F 1F)
+  help₄ = +-cancelʳ _ _ _ help₃
 
 IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin ∑≈0 1F = {!!}
 
