@@ -23,7 +23,6 @@ open import MatrixFuncNormalization.NormAfter.Properties dField
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)
-open CommutativeRing commutativeRing using (rawRing; ring)
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Algebra.Module.Instances.AllVecLeftModule ring using (leftModule)
 open import Algebra.Module.PropsVec commutativeRing hiding (module MDef′)

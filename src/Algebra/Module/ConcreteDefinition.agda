@@ -16,15 +16,14 @@ open import Data.Fin.Patterns
 open import Algebra.Matrix.Structures
 open import Relation.Nullary.Negation.Core
 
-open DecidableField HCR renaming (Carrier to A) hiding (sym)
+open DecidableField HCR renaming (Carrier to A)
 open import Algebra.DecidableField.Properties HCR
-open CommutativeRing commutativeRing using (ring; sym)
-open Ring ring using (rawRing)
 open import Algebra.Module.Instances.FunctionalVector ring
 import Algebra.Module.Definition as MDef'
+import Algebra.Module.DefsField as MDef''
 open import Relation.Binary.Reasoning.Setoid setoid
 
-open module MDef {n} = MDef' (leftModule n)
+open module MDefa {n} = MDef'' heytingField (leftModule n)
 
 open MRing rawRing hiding (0ᴹ)
 
@@ -42,6 +41,8 @@ AreNotCollinear : (xs ys : Vector A n) → Set ℓ₁
 AreNotCollinear {0} xs ys = ⊤
 AreNotCollinear {1} xs ys = ⊥
 AreNotCollinear {2+ n} xs ys = AreCollinear (tail xs) (tail ys) → xs 0F * ys 1F # xs 1F * ys 0F
+
+-- AreCollinear⇒LinDep :
 
 IsCLinearIndependent : Matrix A n m → m ≤ 3 → Set ℓ₁
 IsCLinearIndependent {0} {0} xs z≤n = ⊤

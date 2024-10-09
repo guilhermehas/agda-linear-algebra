@@ -47,7 +47,6 @@ open HeytingField hField using (heytingCommutativeRing)
 open NormAfterBase dField
 open hFieldProps hField
 open HFProps hField
-open CommutativeRing commutativeRing using (rawRing; ring)
 open NormBef dField using (normalizeMatrix; AllZeros; _-v_; sameVecPiv; alwaysSamePivot)
   renaming ( VecPivotPos to VecPivotPosLeft
            ; Lookup≢0 to Lookup≢0Left

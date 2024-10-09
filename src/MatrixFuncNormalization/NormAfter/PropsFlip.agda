@@ -46,7 +46,7 @@ open import SystemEquations.Definitions dField
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open hFieldProps hField
 open HCR heytingCommutativeRing
-open CommutativeRing commutativeRing using (rawRing; ring)
+-- open CommutativeRing commutativeRing using (rawRing; ring)
 open NormBef dField using (normalizeMatrix; AllZeros; _-v_; matrix→matPivs; MatrixWithPivots; matrixPivs)
   renaming ( VecPivotPos to VecPivotPosLeft
            ; Lookup≢0 to Lookup≢0Left

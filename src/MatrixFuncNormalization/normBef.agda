@@ -42,7 +42,6 @@ open import lbry
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)
 open hFieldProps hField
-open CommutativeRing commutativeRing using (rawRing; ring)
 open MRing rawRing
 open MRingProps ring
 open RingProps ring

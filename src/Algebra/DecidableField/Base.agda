@@ -27,7 +27,7 @@ module _
 
     _≟_ = decidableInequality
 
-    open IsHeytingField isHeytingField public
+    open IsHeytingField isHeytingField hiding (sym) public
 
 record DecidableField c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
   infix  8 -_
@@ -51,8 +51,8 @@ record DecidableField c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) wher
   heytingField = record { isHeytingField = isHeytingField }
 
   open HeytingField heytingField using (heytingCommutativeRing) public
-  open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing) public
-  open CommutativeRing commutativeRing using (*-commutativeMonoid; +-commutativeMonoid) public
+  open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing; apartnessRelation) public
+  open CommutativeRing commutativeRing using (*-commutativeMonoid; +-commutativeMonoid; ring; rawRing; sym) public
 
   almostCommutativeRing : AlmostCommutativeRing _ _
   almostCommutativeRing = fromCommutativeRing commutativeRing ≟?

@@ -23,9 +23,8 @@ import Algebra.Module.Props as MProps
 
 open import Algebra.Matrix.Structures
 
-open DecidableField dField renaming (Carrier to F; heytingField to hField) hiding (sym)
+open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
-open CommutativeRing commutativeRing using (rawRing; ring; sym)
 
 open import MatrixFuncNormalization.normBef dField
 open import MatrixFuncNormalization.NormAfter.PropsFlip dField

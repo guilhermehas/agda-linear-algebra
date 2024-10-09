@@ -30,7 +30,6 @@ open import Vector
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open HeytingField hField using (heytingCommutativeRing)
-open CommutativeRing commutativeRing using (rawRing; ring)
 open NormBef dField using (normalizeMatrix; AllZeros; _-v_)
   renaming ( VecPivotPos to VecPivotPosLeft
            ; Lookup≢0 to Lookup≢0Left
