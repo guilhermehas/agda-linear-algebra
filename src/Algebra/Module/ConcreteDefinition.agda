@@ -58,12 +58,16 @@ IsCLinearIndependent {1} {3} xs (s≤s (s≤s (s≤s z≤n))) = xs 0F 0F # 0#
 IsCLinearIndependent {2} {3} xs (s≤s (s≤s (s≤s z≤n))) = AreNotCollinear (xs 0F) (xs 1F)
 IsCLinearIndependent {3} {3} xs (s≤s (s≤s (s≤s z≤n))) = let
   -- Determinant different than zero
+  -- TODO: rename to a to a00, ...
   a = xs 0F 0F; b = xs 0F 1F; c = xs 0F 2F
   d = xs 1F 0F; e = xs 1F 0F; f = xs 1F 2F
   g = xs 2F 0F; h = xs 2F 0F; i = xs 2F 2F
-  in a * (e * i - h * f) - b * (d * i - g * f) + c * (d * h - e * g) # 0#
+  in a * (e * i - h * f) + b * (g * f - d * i) + c * (d * h - e * g) # 0#
+  -- xs 0F ⋆ᵣ (xs 1F × xs 2F)
 IsCLinearIndependent {2+ (2+ n)} {3} xs (s≤s (s≤s (s≤s z≤n))) = ⊥
 
+Ind⇒IsCInd : (xs : Matrix A n m) (m≤3 : m ≤ 3) → IsLinearIndependent xs → IsCLinearIndependent xs m≤3
+Ind⇒IsCInd = {!!}
 
 IsCInd⇒Ind : (xs : Matrix A n m) (m≤3 : m ≤ 3) → IsCLinearIndependent xs m≤3 → IsLinearIndependent xs
 IsCInd⇒Ind {1} {1} xs (s≤s z≤n) cLin ∑≈0 0F =
