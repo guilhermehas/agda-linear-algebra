@@ -17,8 +17,7 @@ open import Algebra.Matrix.Structures
 open import Relation.Nullary.Negation.Core
 
 open DecidableField HCR renaming (Carrier to A) hiding (sym)
-open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
-open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
+open import Algebra.DecidableField.Properties HCR
 open CommutativeRing commutativeRing using (ring; sym)
 open Ring ring using (rawRing)
 open import Algebra.Module.Instances.FunctionalVector ring
@@ -76,8 +75,8 @@ IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
   open *-solver
 
   help₁ = begin
-    xs 1F 1F * xs 0F 0F * ys 0F + ys 1F * xs 1F 0F * xs 1F 1F
-      ≈⟨ +-cong (solve 3 (λ a b c → a ⊕ b ⊕ c , a ⊕ (c ⊕ b)) refl _ _ _)
+    ys 0F * (xs 1F 1F * xs 0F 0F) + ys 1F * xs 1F 0F * xs 1F 1F
+      ≈⟨ +-cong (solve 3 (λ a b c → c ⊕ (a ⊕ b) , a ⊕ (c ⊕ b)) refl _ _ _)
                 (solve 3 (λ a b c → a ⊕ b ⊕ c , c ⊕ (a ⊕ b)) refl _ _ _) ⟩
     xs 1F 1F * (ys 0F * xs 0F 0F) + xs 1F 1F * (ys 1F * xs 1F 0F) ≈˘⟨ distribˡ _ _ _ ⟩
     xs 1F 1F * (ys 0F * xs 0F 0F + ys 1F * xs 1F 0F)
@@ -85,8 +84,22 @@ IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
     _ * 0# ≈⟨ zeroʳ _ ⟩
     0# ∎
 
-  help₂ : xs 1F 0F * (ys 0F * xs 0F 1F + ys 1F * xs 1F 1F) ≈ 0#
-  help₂ = trans (*-congˡ (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 1F))) (zeroʳ _)
+  help₂ = begin
+    ys 0F * (xs 1F 0F * xs 0F 1F) + ys 1F * xs 1F 0F * xs 1F 1F ≈⟨ +-cong
+      (solve 3 (λ a b c → b ⊕ (a ⊕ c) , a ⊕ (b ⊕ c)) refl _ _ _)
+      (solve 3 (λ a b c → b ⊕ a ⊕ c   , a ⊕ (b ⊕ c)) refl _ _ _) ⟩
+    xs 1F 0F * (ys 0F * xs 0F 1F) + xs 1F 0F * (ys 1F * xs 1F 1F) ≈˘⟨ distribˡ _ _ _ ⟩
+    xs 1F 0F * (ys 0F * xs 0F 1F + ys 1F * xs 1F 1F)
+      ≈⟨ *-congˡ (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 1F)) ⟩
+    _ * 0# ≈⟨ zeroʳ _ ⟩
+    0# ∎
+
+  help₃ = begin
+    ys 0F * (xs 1F 1F * xs 0F 0F) + ys 1F * xs 1F 0F * xs 1F 1F ≈⟨ help₁ ⟩
+    0# ≈˘⟨ help₂ ⟩
+    ys 0F * (xs 1F 0F * xs 0F 1F) + ys 1F * xs 1F 0F * xs 1F 1F ∎
+
+  help₄ = {!+-cancelʳ!}
 
 IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin ∑≈0 1F = {!!}
 
