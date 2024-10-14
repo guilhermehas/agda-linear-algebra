@@ -6,22 +6,23 @@ module Algebra.Module.ConcreteDefinition {c ℓ₁} (HCR : DecidableField c ℓ�
 
 open import Level
 open import Function
-open import Data.Nat hiding (_+_; _*_; _⊔_)
+open import Data.Nat hiding (_+_; _*_; _⊔_; _≟_)
 open import Data.Fin using () renaming (suc to fsuc)
 open import Data.Empty.Polymorphic
 open import Data.Product
-open import Data.Unit.Polymorphic
+open import Data.Unit.Polymorphic hiding (_≟_)
 import Data.Vec as V
 open import Data.Vec.Functional
 open import Data.Fin.Patterns
 open import Algebra.Matrix.Structures
 open import Relation.Nullary.Negation.Core
 
-open DecidableField HCR renaming (Carrier to A)
+open DecidableField HCR renaming (Carrier to A;  trans to infixr 5 _∙_)
 open import Algebra.DecidableField.Properties HCR
 open import Algebra.Module.Instances.FunctionalVector ring
 import Algebra.Module.DefsField as MDef'
 open import Relation.Binary.Reasoning.Setoid setoid
+open import Relation.Nullary
 
 open module MDef {n} = MDef' heytingField (leftModule n)
 
@@ -44,8 +45,19 @@ AreNotCollinear {1} xs ys = ⊥
 AreNotCollinear {2+ n} xs ys = AreCollinear (tail xs) (tail ys) → xs 0F * ys 1F # xs 1F * ys 0F
 
 AreCollinear⇒LinDep : AreCollinear xs ys → IsLinearDependent (xs ∷ ys ∷ [])
-AreCollinear⇒LinDep {1} {xs} {ys} _ .proj₁ = fromVec (ys 0F V.∷ - xs 0F V.∷ V.[]) by λ where 0F → {!!}
-AreCollinear⇒LinDep {1} {xs} {ys} _ .proj₂ = {!!}
+AreCollinear⇒LinDep {1} {xs} {ys} _ with ys 0F ≟ 0#
+AreCollinear⇒LinDep {1} {xs} {ys} _ | yes ys0F#0 = help₁ , 0F , ys0F#0
+  where
+  help = begin
+      ys 0F * xs 0F + (- xs 0F * ys 0F + 0#) ≈⟨ +-congˡ (+-identityʳ _ ∙ sym (-‿distribˡ-* _ _) ∙ -‿cong (*-comm _ _)) ⟩
+      ys 0F * xs 0F + - (ys 0F * xs 0F)      ≈⟨ -‿inverseʳ _ ⟩
+      0# ∎
+  help₁ : _
+  help₁ = fromVec (ys 0F V.∷ - xs 0F V.∷ V.[]) by λ where 0F → help
+
+AreCollinear⇒LinDep {1} {xs} {ys} _ | no _ = {!c!}
+
+
 AreCollinear⇒LinDep {2} {xs} {ys} same = {!!}
 AreCollinear⇒LinDep {2+ (ℕ.suc n)} {xs} {ys} (same , col) =
   let linRest = AreCollinear⇒LinDep {xs = tail xs} col in
@@ -79,9 +91,9 @@ Ind⇒IsCInd = {!!}
 
 IsCInd⇒Ind : (xs : Matrix A n m) (m≤3 : m ≤ 3) → IsCLinearIndependent xs m≤3 → IsLinearIndependent xs
 IsCInd⇒Ind {1} {1} xs (s≤s z≤n) cLin ∑≈0 0F =
-  x#0*y≈0⇒y≈0 cLin (trans (*-comm _ _) (trans (sym (+-identityʳ _)) (∑≈0 0F)))
+  x#0*y≈0⇒y≈0 cLin (*-comm _ _ ∙ (sym (+-identityʳ _) ∙ ∑≈0 0F))
 IsCInd⇒Ind {1} {2} xs (s≤s (s≤s z≤n)) cLin ∑≈0 0F =
-  x#0*y≈0⇒y≈0 cLin (trans (*-comm _ _) (trans (sym (+-identityʳ _)) (∑≈0 0F)))
+  x#0*y≈0⇒y≈0 cLin (*-comm _ _ ∙ (sym (+-identityʳ _) ∙ (∑≈0 0F)))
 IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
   where
   open *-solver
@@ -92,7 +104,7 @@ IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
                 (solve 3 (λ a b c → a ⊕ b ⊕ c , c ⊕ (a ⊕ b)) refl _ _ _) ⟩
     xs 1F 1F * (ys 0F * xs 0F 0F) + xs 1F 1F * (ys 1F * xs 1F 0F) ≈˘⟨ distribˡ _ _ _ ⟩
     xs 1F 1F * (ys 0F * xs 0F 0F + ys 1F * xs 1F 0F)
-      ≈⟨ *-congˡ {x = xs 1F 1F} (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 0F)) ⟩
+      ≈⟨ *-congˡ {x = xs 1F 1F} (sym (+-congˡ (+-identityʳ _)) ∙ ∑≈0 0F) ⟩
     _ * 0# ≈⟨ zeroʳ _ ⟩
     0# ∎
 
@@ -102,7 +114,7 @@ IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
       (solve 3 (λ a b c → b ⊕ a ⊕ c   , a ⊕ (b ⊕ c)) refl _ _ _) ⟩
     xs 1F 0F * (ys 0F * xs 0F 1F) + xs 1F 0F * (ys 1F * xs 1F 1F) ≈˘⟨ distribˡ _ _ _ ⟩
     xs 1F 0F * (ys 0F * xs 0F 1F + ys 1F * xs 1F 1F)
-      ≈⟨ *-congˡ (trans (sym (+-congˡ (+-identityʳ _))) (∑≈0 1F)) ⟩
+      ≈⟨ *-congˡ (sym (+-congˡ (+-identityʳ _)) ∙ ∑≈0 1F) ⟩
     _ * 0# ≈⟨ zeroʳ _ ⟩
     0# ∎
 
@@ -117,6 +129,6 @@ IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin {ys} ∑≈0 0F = {!!}
 IsCInd⇒Ind {2} {2} xs (s≤s (s≤s z≤n)) cLin ∑≈0 1F = {!!}
 
 IsCInd⇒Ind {1} {3} xs (s≤s (s≤s (s≤s z≤n))) cLin ∑≈0 0F =
-  x#0*y≈0⇒y≈0 cLin (trans (*-comm _ _) (trans (sym (+-identityʳ _)) (∑≈0 0F)))
+  x#0*y≈0⇒y≈0 cLin (*-comm _ _ ∙ (sym (+-identityʳ _) ∙ ∑≈0 0F))
 IsCInd⇒Ind {2} {3} xs (s≤s (s≤s (s≤s z≤n))) cLin ∑≈0 i = {!!}
 IsCInd⇒Ind {3} {3} xs (s≤s (s≤s (s≤s z≤n))) cLin ∑≈0 i = {!!}
