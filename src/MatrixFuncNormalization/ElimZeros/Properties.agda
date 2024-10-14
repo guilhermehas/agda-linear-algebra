@@ -35,7 +35,6 @@ import Algebra.Module.PropsField as PField
 open import Algebra.Module.Instances.FunctionalVector ring
 open import Algebra.BigOps
 
-open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Data.Vec.Functional.Relation.Binary.Equality.Setoid setoid
 open import Relation.Binary.Reasoning.Setoid setoid
 open module PFieldN {n} = PField dField (leftModule n)

@@ -45,17 +45,25 @@ AreNotCollinear {1} xs ys = ⊥
 AreNotCollinear {2+ n} xs ys = AreCollinear (tail xs) (tail ys) → xs 0F * ys 1F # xs 1F * ys 0F
 
 AreCollinear⇒LinDep : AreCollinear xs ys → IsLinearDependent (xs ∷ ys ∷ [])
-AreCollinear⇒LinDep {1} {xs} {ys} _ with ys 0F ≟ 0#
-AreCollinear⇒LinDep {1} {xs} {ys} _ | yes ys0F#0 = help₁ , 0F , ys0F#0
+AreCollinear⇒LinDep {1} {xs} {ys} _ with ys 0F #≟ 0#
+AreCollinear⇒LinDep {1} {xs} {ys} _ | diff ys0F#0 _ = help₁ , 0F , ys0F#0
   where
   help = begin
       ys 0F * xs 0F + (- xs 0F * ys 0F + 0#) ≈⟨ +-congˡ (+-identityʳ _ ∙ sym (-‿distribˡ-* _ _) ∙ -‿cong (*-comm _ _)) ⟩
       ys 0F * xs 0F + - (ys 0F * xs 0F)      ≈⟨ -‿inverseʳ _ ⟩
       0# ∎
   help₁ : _
-  help₁ = fromVec (ys 0F V.∷ - xs 0F V.∷ V.[]) by λ where 0F → help
+  help₁ = fromVec (ys 0F V.∷ V.[ - xs 0F ]) by λ where 0F → help
+AreCollinear⇒LinDep {1} {xs} {ys} _ | sameIE ys0F≈0 ¬# = help₁ , 1F , 1#0
+  where
+  help = begin
+    0# * xs 0F + (1# * ys 0F + 0#) ≈⟨ +-cong (zeroˡ _) (+-congʳ (*-identityˡ _) ∙ +-identityʳ _) ⟩
+    0# + ys 0F                     ≈⟨ +-identityˡ _ ⟩
+    ys 0F                          ≈⟨ ys0F≈0 ⟩
+    0# ∎
 
-AreCollinear⇒LinDep {1} {xs} {ys} _ | no _ = {!c!}
+  help₁ = fromVec (0# V.∷ V.[ 1# ]) by λ where 0F → help
+
 
 
 AreCollinear⇒LinDep {2} {xs} {ys} same = {!!}

@@ -33,7 +33,6 @@ open import MatrixFuncNormalization.NormAfter.Properties dField using (ColumnsZe
 open import MatrixFuncNormalization.ElimZeros.Properties dField hiding
   (module PFieldN)
 open import Algebra.HeytingCommutativeRing.Properties heytingCommutativeRing
-open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open import Algebra.Module.Instances.FunctionalVector ring
 open PNorm
 open SumRing ring using (δ; δii≡1#)

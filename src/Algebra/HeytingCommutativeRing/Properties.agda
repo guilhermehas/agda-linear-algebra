@@ -9,7 +9,7 @@ module Algebra.HeytingCommutativeRing.Properties
 open HeytingCommutativeRing HF
 open ReasonSetoid setoid
 
-open import Algebra.Apartness.Properties.HeytingCommutativeRing HF
+open import Algebra.Apartness.Properties.HeytingCommutativeRing HF public
 open import Algebra.Definitions _≈_ using (Invertible)
 
 open import Algebra.CommRing.Properties

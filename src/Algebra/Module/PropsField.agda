@@ -29,7 +29,6 @@ open import Vector.Structures
 open DecidableField dField renaming (heytingField to hField; _≟_ to _#?_) using ()
 open HeytingField hField renaming (Carrier to A) hiding (sym)
 open HeytingCommutativeRing heytingCommutativeRing using (commutativeRing)
-open import Algebra.Apartness.Properties.HeytingCommutativeRing heytingCommutativeRing
 open CommutativeRing commutativeRing using (rawRing; *-commutativeMonoid; ring; sym)
 
 open import Algebra.Module.DefsField hField leftModule

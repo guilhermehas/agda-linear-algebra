@@ -20,6 +20,10 @@ module _
   (_+_ _*_ : Op₂ Carrier) (-_ : Op₁ Carrier) (0# 1# : Carrier)
   where
 
+  data IneqEq (x y : Carrier) : Set (ℓ₁ ⊔ ℓ₂) where
+    sameIE : (x≈y : x ≈ y) (¬# : ¬ (x # y)) → IneqEq x y
+    diff : (x#y : x # y) (¬≈ : ¬ (x ≈ y)) → IneqEq x y
+
   record IsDecidableField : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
     field
       isHeytingField      : IsHeytingField _≈_ _#_ _+_ _*_ -_ 0# 1#
@@ -28,6 +32,11 @@ module _
     _≟_ = decidableInequality
 
     open IsHeytingField isHeytingField hiding (sym) public
+
+    _#≟_ : ∀ x y → IneqEq x y
+    x #≟ y with x ≟ y
+    ... | yes x#y = diff x#y λ sameIE → tight _ _ .proj₂ sameIE x#y
+    ... | no ¬x#y = sameIE (tight _ _ .proj₁ ¬x#y) ¬x#y
 
 record DecidableField c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
   infix  8 -_
