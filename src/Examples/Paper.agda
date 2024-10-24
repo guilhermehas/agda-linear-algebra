@@ -8,5 +8,5 @@ open import Rational.Properties using (+-*-decidableField)
 open import SystemEquations.Data +-*-decidableField
 open import Relation.Binary.PropositionalEquality using (refl; _≡_)
 
-_ : solveComplex ((1 ∷ [ 1 ]) ∷ [ 1 ∷ [ -1 ] ]) (3 ∷ [ 1 ]) ≡ (8 / 4 ∷ [ 2 / 2 ]) +span []
+_ : solveSimple ((1 ∷ [ 1 ]) ∷ [ 1 ∷ [ -1 ] ]) (3 ∷ [ 1 ]) ≡ 8 / 4 ∷ [ 2 / 2 ]
 _ = refl

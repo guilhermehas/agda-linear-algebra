@@ -105,6 +105,10 @@ vecSpanSolutionJust : Solution n → Maybe $ ∃ $ AffineTranspose n
 vecSpanSolutionJust (sol p affine) = just $ _ , vAff→vAffT affine
 vecSpanSolutionJust noSol = nothing
 
+vecSpanSolutionJust2 : Solution n → Maybe $ Vec F n
+vecSpanSolutionJust2 (sol p affine) = just $ unfoldConstants affine
+vecSpanSolutionJust2 noSol = nothing
+
 matrixSolutionJust : Solution n → Maybe $ ∃ $ flip (Matrix F) n
 matrixSolutionJust (sol p affine) = just $ _ , (coeffs $ vAff→vAffT affine)
 matrixSolutionJust noSol = nothing
@@ -138,3 +142,9 @@ solveComplex A b = solveComplexSE $ system A b
 
 solveComplex0 : (A : Matrix F n m) → From-just-matrix $ matrixSolutionJust $ solve $ system A $ repeat 0#
 solveComplex0 A = from-just-matrix (matrixSolutionJust $ solve $ system A $ repeat 0#)
+
+solveSimpleSE : (se : SystemEquations n m) → From-just $ vecSpanSolutionJust2 (solve se)
+solveSimpleSE = from-just ∘ vecSpanSolutionJust2 ∘ solve
+
+solveSimple : (A : Matrix F n m) (b : Vec F n) → From-just $ vecSpanSolutionJust2 $ solve $ system A b
+solveSimple A b = solveSimpleSE $ system A b
