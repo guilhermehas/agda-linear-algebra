@@ -42,10 +42,8 @@ $ vec(x, y) = k dot vec(1, 1) $ <vecK>
 
 A solution $x = 1 and y = 1$ can be found when $k = 1$.
 
-In the library, after solving a linear system of equations,
-the function returns one of the three cases with the mathematical proof that it found a solution or not.
-In addition, in the case of an under-specified solution, the function returns proof that every solution can be found.
-
+In the #web("Examples.Paper", 343)[library], after solving a linear system of equations in the simplest case,
+the function returns the solution of rational numbers in their unnormalized formula.
 
 = Overview
 
