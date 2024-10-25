@@ -15,7 +15,7 @@ import MatrixFuncNormalization.normBef as NormField
 
 open import Algebra.MatrixData
 import Algebra.Module.VecSpace as VecSpace
-open import Rational.Properties
+open import Rational.Unnormalized.Properties
 
 open DecidableField dField renaming (Carrier to F; heytingField to hField)
 open NormField dField hiding (getCoeff)

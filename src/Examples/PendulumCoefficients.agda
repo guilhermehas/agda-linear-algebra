@@ -22,7 +22,7 @@ open import Algebra.Apartness
 
 open import Algebra.SubModule
 import Algebra.MatrixData.Relation.Setoid as MSetoid
-open import Rational.Properties
+open import Rational.Unnormalized.Properties
 open import Rational.Unnormalized.Literals
 import MatrixNormalization.normLinesField as NormField
 

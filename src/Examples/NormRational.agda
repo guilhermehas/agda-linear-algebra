@@ -20,7 +20,7 @@ import MatrixDataNormalization.Base as NormAll
 
 import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Algebra.DecidableField
-open import Rational.Properties
+open import Rational.Unnormalized.Properties
 open import Rational.Literals
 open import Rational.Unnormalized.Literals
 open import SystemEquations.Data +-*-decidableField

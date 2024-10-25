@@ -4,7 +4,7 @@ open import Data.Unit using ()
 open import Rational.Literals
 open import Data.Vec
 open import Data.Rational.Unnormalised using (_/_)
-open import Rational.Properties using (+-*-decidableField)
+open import Rational.Unnormalized.Properties using (+-*-decidableField)
 open import SystemEquations.Data +-*-decidableField
 open import Relation.Binary.PropositionalEquality using (refl; _≡_)
 
