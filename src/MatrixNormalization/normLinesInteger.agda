@@ -5,7 +5,7 @@ open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
 open import Function
 open import Data.Empty
 open import Data.Unit.Polymorphic
-open import Data.Product
+open import Data.Product hiding (zipWith)
 open import Data.Product.Properties
 open import Data.Sum
 open import Data.Sum.Relation.Binary.LeftOrder

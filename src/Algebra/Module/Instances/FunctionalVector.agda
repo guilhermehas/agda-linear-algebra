@@ -1,5 +1,5 @@
 open import Function using (_$_; _∘_)
-open import Data.Product hiding (map)
+open import Data.Product hiding (map; zipWith)
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
 open import Data.Vec.Functional

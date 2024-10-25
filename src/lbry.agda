@@ -14,7 +14,7 @@ open import Induction.WellFounded
 open import Relation.Binary.Definitions using (Tri; tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as ReasonSetoid
-open import Relation.Nullary hiding (Irrelevant)
+open import Relation.Nullary hiding (Irrelevant; Recomputable)
 open import Relation.Unary using (Pred; Recomputable)
 open import Relation.Unary.Consequences
 open import Algebra hiding (Invertible)
