@@ -31,7 +31,7 @@ divideVec : Op₁ $ Vector F n
 divideVec {n = n} xs = fromMaybe xs (Maybe.map (λ (_ , inv) i → inv * xs i) (findFirstWithProp xs fMaybe))
   where
   fMaybe : (x : F) → Maybe F
-  fMaybe x = Maybe.map (proj₁ ∘ #⇒invertible) (decToMaybe $ x ≟ 0#)
+  fMaybe x = Maybe.map (proj₁ ∘ #⇒invertible) (dec⇒maybe $ x ≟ 0#)
 
 divideByCoeff : Op₁ $ Matrix F n m
 divideByCoeff = V.map divideVec

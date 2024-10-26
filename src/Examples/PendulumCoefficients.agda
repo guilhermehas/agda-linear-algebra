@@ -21,6 +21,7 @@ import Algebra.Module.Instances.FunctionalVector as AMIF
 open import Algebra.Apartness
 
 open import Algebra.SubModule
+open import Algebra.Definitions.RawMagma
 import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Rational.Unnormalized.Properties
 open import Rational.Unnormalized.Literals
@@ -118,7 +119,7 @@ pendulumNormed = normalizeD pendulum++id
 -- 0  0  0 |
 
 coeff : Vec ℚᵘ nRow
-coeff = drop nCol (lookup pendulumNormed (fromℕ<″ 3 (less-than-or-equal refl)))
+coeff = drop nCol (lookup pendulumNormed (fromℕ<″ 3 (_ , refl)))
 
 -- | 0 0 0 | 1 0 -1 2 0
 
@@ -129,4 +130,4 @@ coeff≡coeffRes : coeff ≋v coeffRes
 coeff≡coeffRes = from-yes (coeff ≟v coeffRes)
 
 coeff2 : Vec ℚᵘ nRow
-coeff2 = drop nCol (lookup pendulumNormed (fromℕ<″ 4 (less-than-or-equal refl)))
+coeff2 = drop nCol (lookup pendulumNormed (fromℕ<″ 4 (_ , refl)))
