@@ -34,26 +34,30 @@ private variable
 
 
 AreCollinear : (xs ys : Vector A n) → Set ℓ₁
-AreCollinear {0} xs ys = ⊥
+AreCollinear {0} xs ys = ⊤
 AreCollinear {1} xs ys = ⊤
-AreCollinear {2} xs ys = xs 0F * ys 1F ≈ xs 1F * ys 0F
+AreCollinear {2} xs ys          = xs 0F * ys 1F ≈ xs 1F * ys 0F -- TODO: remove this line
 AreCollinear {2+ (suc n)} xs ys = xs 0F * ys 1F ≈ xs 1F * ys 0F × AreCollinear (tail xs) (tail ys)
 
 AreNotCollinear : (xs ys : Vector A n) → Set ℓ₁
-AreNotCollinear {0} xs ys = ⊤
+AreNotCollinear {0} xs ys = ⊥
 AreNotCollinear {1} xs ys = ⊥
 AreNotCollinear {2+ n} xs ys = AreCollinear (tail xs) (tail ys) → xs 0F * ys 1F # xs 1F * ys 0F
 
 AreCollinear⇒LinDep : AreCollinear xs ys → IsLinearDependent (xs ∷ ys ∷ [])
+AreCollinear⇒LinDep {0} {xs} {ys} _ = ((λ _ → 1#) by (λ ())) , (0F , 1#0)
 AreCollinear⇒LinDep {1} {xs} {ys} _ with ys 0F #≟ 0#
 ... | diff ys0F#0 _ = help₁ , 0F , ys0F#0
   where
+  x0 = xs 0F
+  y0 = ys 0F
+
   help = begin
-      ys 0F * xs 0F + (- xs 0F * ys 0F + 0#) ≈⟨ +-congˡ (+-identityʳ _ ∙ sym (-‿distribˡ-* _ _) ∙ -‿cong (*-comm _ _)) ⟩
-      ys 0F * xs 0F + - (ys 0F * xs 0F)      ≈⟨ -‿inverseʳ _ ⟩
+      y0 * x0 + (- x0 * y0 + 0#) ≈⟨ +-congˡ (+-identityʳ _ ∙ sym (-‿distribˡ-* _ _) ∙ -‿cong (*-comm _ _)) ⟩
+      y0 * x0 + - (y0 * x0)      ≈⟨ -‿inverseʳ _ ⟩
       0# ∎
   help₁ : _
-  help₁ = fromVec (ys 0F V.∷ V.[ - xs 0F ]) by λ where 0F → help
+  help₁ = fromVec (y0 V.∷ V.[ - x0 ]) by λ where 0F → help
 ... | sameIE ys0F≈0 ¬# = help₁ , 1F , 1#0
   where
   help = begin
@@ -125,6 +129,7 @@ AreCollinear⇒LinDep {2+ (ℕ.suc n)} {xs} {ys} (same , col) =
   let linRest = AreCollinear⇒LinDep {xs = tail xs} col in
   {!!}
 
+-- TODO: Add automatic proof that m ≤ 3
 IsCLinearIndependent : Matrix A n m → m ≤ 3 → Set ℓ₁
 IsCLinearIndependent {0} {0} xs z≤n = ⊤
 IsCLinearIndependent {suc n} {0} xs z≤n = ⊥
