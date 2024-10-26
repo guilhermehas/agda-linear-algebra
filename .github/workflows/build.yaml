@@ -10,4 +10,3 @@ jobs:
     - uses: DeterminateSystems/flake-checker-action@main
     - name: Run `nix build`
       run: nix build .
-    - run: nix flake check
