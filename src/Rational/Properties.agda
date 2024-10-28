@@ -38,7 +38,5 @@ inv p p≠0 = 1/_ p ⦃ ≢-nonZero p≠0 ⦄
 _≢?_ : Decidable _≢_
 x ≢? y = ¬? (x ≟ y)
 
--- open HeytingField {!+-*-heytingField!} renaming (Carrier to F) hiding (refl)
-
--- +-*-decidableField : DecidableField _ _ _
--- +-*-decidableField = record { isDecidableField = record { isHeytingField = {!isHeytingField!} ; decidableInequality = _≢?_ }}
++-*-decidableField : DecidableField _ _ _
++-*-decidableField = record { isDecidableField = record { isHeytingField = isHeytingField ; decidableInequality = _≢?_ }}

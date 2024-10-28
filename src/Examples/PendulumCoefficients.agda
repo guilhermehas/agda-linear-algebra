@@ -2,6 +2,7 @@
 -- Main example at the end: (TODO explain more)
 
 open import Level using (0ℓ)
+open import Data.Unit using ()
 open import Data.Nat as ℕ hiding (_/_; _≟_)
 import Data.Nat.Properties as ℕ
 import Data.Integer as ℤ
@@ -9,7 +10,7 @@ open import Data.Fin hiding (_≟_)
 open import Data.Product
 open import Data.Vec
 import Data.Vec.Relation.Binary.Pointwise.Inductive as PI
-open import Data.Rational.Unnormalised hiding (truncate)
+open import Data.Rational.Unnormalised hiding (truncate) renaming (0ℚᵘ to 0ℚ; 1ℚᵘ to 1ℚ)
 open import Data.Rational.Unnormalised.Properties
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality hiding ([_]; setoid)
@@ -24,7 +25,7 @@ open import Algebra.SubModule
 open import Algebra.Definitions.RawMagma
 import Algebra.MatrixData.Relation.Setoid as MSetoid
 open import Rational.Unnormalized.Properties
-open import Rational.Unnormalized.Literals
+open import Rational.Unnormalized.Literals hiding (fromNat; Number)
 import MatrixNormalization.normLinesField as NormField
 
 open HeytingField +-*-heytingField renaming (Carrier to F) hiding (refl)
@@ -57,7 +58,7 @@ _+++_ : Matrix m n → Matrix p n → Matrix (m ℕ.+ p) n
 
 allZeros : ∀ m n → Matrix m n
 allZeros m zero = []
-allZeros m (suc n) = replicate _ 0ℚᵘ ∷ allZeros m n
+allZeros m (suc n) = replicate _ 0ℚ ∷ allZeros m n
 
 SquareMatrix : ℕ → Set _
 SquareMatrix n = Matrix n n
@@ -71,18 +72,18 @@ idMat (suc n) = subst SquareMatrix (ℕ.+-comm n 1) matrixRes
   matrixN = idMat n +++ allZeros 1 n
 
   matrixRes : Matrix (n ℕ.+ 1) (n ℕ.+ 1)
-  matrixRes = matrixN ++ [ replicate _ 0ℚᵘ ++ [ 1ℚᵘ ]  ]
+  matrixRes = matrixN ++ [ replicate _ 0ℚ ++ [ 1ℚ ]  ]
 
 matrix22 : Matrix 2 2
-matrix22 = (1ℚᵘ ∷ [ 1ℚᵘ ] )
-        ∷ [ 1ℚᵘ ∷ [ 2ℚᵘ ] ]
+matrix22 = (1ℚ ∷ [ 1ℚ ] )
+        ∷ [ 1ℚ ∷ [ 2ℚ ] ]
 
 normedMatrix22 : Matrix _ _
 normedMatrix22 = normalizeD matrix22
 
 normedMatrix22Res : Matrix 2 2
-normedMatrix22Res = (1ℚᵘ ∷ [ 1ℚᵘ ])
-                 ∷ [ 0ℚᵘ ∷ [ 1ℚᵘ ] ]
+normedMatrix22Res = (1ℚ ∷ [ 1ℚ ])
+                 ∷ [ 0ℚ ∷ [ 1ℚ ] ]
 
 normed22≡res : normedMatrix22 ≋ normedMatrix22Res
 normed22≡res = from-yes (normedMatrix22 ≟ normedMatrix22Res)
@@ -93,11 +94,11 @@ nRow = 5
 pendulumExample : Matrix nCol nRow
 pendulumExample =
   -- L   M      T
-  (1ℚᵘ ∷ 0ℚᵘ ∷ -2ℚᵘ ∷ []) ∷ -- acceleration
-  (0ℚᵘ ∷ 1ℚᵘ ∷  0ℚᵘ ∷ []) ∷ -- mass
-  (1ℚᵘ ∷ 0ℚᵘ ∷  0ℚᵘ ∷ []) ∷ -- time
-  (0ℚᵘ ∷ 0ℚᵘ ∷  1ℚᵘ ∷ []) ∷
-  (0ℚᵘ ∷ 0ℚᵘ ∷  0ℚᵘ ∷ []) ∷
+  (1ℚ ∷ 0ℚ ∷ -2ℚ ∷ []) ∷ -- acceleration
+  (0ℚ ∷ 1ℚ ∷  0ℚ ∷ []) ∷ -- mass
+  (1ℚ ∷ 0ℚ ∷  0ℚ ∷ []) ∷ -- time
+  (0ℚ ∷ 0ℚ ∷  1ℚ ∷ []) ∷
+  (0ℚ ∷ 0ℚ ∷  0ℚ ∷ []) ∷
   []
 
 pendulum++id : Matrix (nCol ℕ.+ nRow) nRow
@@ -124,7 +125,7 @@ coeff = drop nCol (lookup pendulumNormed (fromℕ<″ 3 (_ , refl)))
 -- | 0 0 0 | 1 0 -1 2 0
 
 coeffRes : Vec ℚᵘ nRow
-coeffRes = 1ℚᵘ ∷ 0ℚᵘ ∷ -1ℚᵘ ∷ 2ℚᵘ ∷ 0ℚᵘ ∷ []
+coeffRes = 1ℚ ∷ 0ℚ ∷ -1ℚ ∷ 2ℚ ∷ 0ℚ ∷ []
 
 coeff≡coeffRes : coeff ≋v coeffRes
 coeff≡coeffRes = from-yes (coeff ≟v coeffRes)
