@@ -9,3 +9,6 @@ open import Relation.Binary.PropositionalEquality using (refl; _≡_)
 
 _ : solveSimple ((1 ∷ [ 1 ]) ∷ [ 1 ∷ [ -1 ] ]) (3 ∷ [ 1 ]) ≡ 2 ∷ [ 1 ]
 _ = refl
+
+_ : solveComplex ([ 1 ∷ [ -1 ] ]) [ 1 ] ≡ (1 ∷ [ 0 ]) +span [ 1 ∷ [ 1 ] ]
+_ = refl
