@@ -43,7 +43,7 @@ $ vec(x, y) = k dot vec(1, 1) $ <vecK>
 A solution $x = 1 and y = 1$ can be found when $k = 1$.
 
 In the #web("Examples.Paper", 292)[library], after solving a linear system of equations in the simplest case,
-the function returns the solution of rational numbers.
+the function returns its solution (a vector of rational numbers).
 This function is a dependent typed function, so it returns the vector of solution if there is one, 
 but returns unit type if there is no solution or if there are many possible solutions.
 
