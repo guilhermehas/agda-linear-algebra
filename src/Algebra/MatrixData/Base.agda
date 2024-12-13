@@ -22,3 +22,7 @@ matrixFunc→Data = tabulate ∘ (tabulate ∘_)
 
 matrixData→Fun : Matrix A n m → F.Matrix A n m
 matrixData→Fun = (lookup ∘_) ∘ lookup
+
+m→v : ∀ {n} → Matrix A n 1 → Vec A n
+m→v [] = []
+m→v ((x ∷ []) ∷ A₂) = x ∷ m→v A₂

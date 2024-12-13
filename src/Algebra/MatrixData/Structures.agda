@@ -62,3 +62,6 @@ module MRing {a} {ℓ} (rawRing : RawRing a ℓ) where
 
   _*ᴹ_ : Matrix A n m → Matrix A m p → Matrix A n p
   _*ᴹ_ {n} {m} {p} M N = map (λ row → map (λ column → ∑ (zipWith _*_ row column)) (transpose N)) M
+
+  _*ᴹⱽ_ : ∀ {m n} → Matrix A n m → Vec A _ → Vec A n
+  A *ᴹⱽ x = m→v (A *ᴹ transpose [ x ])
