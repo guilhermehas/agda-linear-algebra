@@ -122,3 +122,22 @@ solComplex noSol = _
 
 solveComplex : (A : Matrix F n m) (b : Vec F n) → solComplexT $ solve $ system A b
 solveComplex A b = solComplex $ solve $ system A b
+
+sizeSolutionT : Solution n → Set _
+sizeSolutionT (sol _ _) = ℕ
+sizeSolutionT noSol = ⊤
+
+sizeSolution : (solution : Solution n) → sizeSolutionT solution
+sizeSolution (sol p _) = p
+sizeSolution noSol = _
+
+solMComplexT : Solution m → Set _
+solMComplexT {m} (sol p affine) = Matrix F p m
+solMComplexT noSol = ⊤
+
+solMComplex : (solution : Solution n) → solMComplexT solution
+solMComplex (sol p affine) = coeffs $ vAff→vAffT affine
+solMComplex noSol = _
+
+solveComplex0 : (A : Matrix F n m) → solMComplexT $ solve $ system A $ repeat 0#
+solveComplex0 A = solMComplex $ solve $ system A $ repeat 0#

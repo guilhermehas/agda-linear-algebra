@@ -105,7 +105,7 @@ if it would be a whole subspace:
 
 -}
 
-_ : vecSimpleSolution solution ≡ 1 ∷ 2 ∷ []
+_ : solSimple solution ≡ 1 ∷ 2 ∷ []
 _ = refl
 
 
