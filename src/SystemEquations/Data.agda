@@ -4,6 +4,8 @@ module SystemEquations.Data {c ℓ₁ ℓ₂} (dField : DecidableField c ℓ₁ 
 
 open import Level
 open import Function
+open import Data.Empty
+open import Data.Bool
 open import Data.Unit.Polymorphic
 open import Data.Nat hiding (_⊔_)
 open import Data.Maybe as Maybe
@@ -60,6 +62,25 @@ record SystemEquations (rows cols : ℕ) : Set c where
 data Solution (n : ℕ) : Set (c ⊔ ℓ₁) where
   sol   : ∀ p (affine : VecAffine n p) → Solution n
   noSol : Solution n
+
+
+HasSolution? : Solution n → Bool
+HasSolution? (sol _ _) = true
+HasSolution? noSol = false
+
+HasNoSolution? : Solution n → Bool
+HasNoSolution? = not ∘ HasSolution?
+
+HasNoSolution : Solution n → Set
+HasNoSolution = T ∘ HasNoSolution?
+
+HasUniqueSolution? : Solution n → Bool
+HasUniqueSolution? (sol ℕ.zero affine) = true
+HasUniqueSolution? (sol (ℕ.suc p) affine) = false
+HasUniqueSolution? noSol = false
+
+HasUniqueSolution : Solution n → Set
+HasUniqueSolution = T ∘ HasUniqueSolution?
 
 solve : SystemEquations n m → Solution m
 solve se = help solF
