@@ -63,7 +63,6 @@ data Solution (n : ℕ) : Set (c ⊔ ℓ₁) where
   sol   : ∀ p (affine : VecAffine n p) → Solution n
   noSol : Solution n
 
-
 HasSolution? : Solution n → Bool
 HasSolution? (sol _ _) = true
 HasSolution? noSol = false
@@ -100,72 +99,26 @@ solve se = help solF
     help2 (SE.vAff coeff constant) = vAff (toVec coeff) constant
   help (SE.SystemEquations.noSol _) = noSol
 
-sizeSolutionJust : Solution n → Maybe ℕ
-sizeSolutionJust (sol p affine) = just p
-sizeSolutionJust noSol = nothing
+solSimpleT : Solution m → Set c
+solSimpleT {m} (sol ℕ.zero affine) = Vec F m
+solSimpleT (sol (ℕ.suc p) affine) = ⊤
+solSimpleT noSol = ⊤
 
-sizeSolution : (solution : Solution n) → From-just $ sizeSolutionJust solution
-sizeSolution = from-just ∘ sizeSolutionJust
+solSimple : (solt : Solution m) → solSimpleT solt
+solSimple (sol ℕ.zero affine) = unfoldConstants affine
+solSimple (sol (ℕ.suc p) affine) = _
+solSimple noSol = _
 
-vecAffSolutionJust : Solution n → Maybe $ ∃ $ VecAffine n
-vecAffSolutionJust (sol p affine) = just $ p , affine
-vecAffSolutionJust noSol          = nothing
+solveSimple : (A : Matrix F n m) (b : Vec F n) → solSimpleT $ solve $ system A b
+solveSimple A b = solSimple $ solve $ system A b
 
-vecAffSolution : (solution : Solution n) → From-just $ vecAffSolutionJust solution
-vecAffSolution = from-just ∘ vecAffSolutionJust
+solComplexT : Solution m → Set c
+solComplexT {m} (sol p affine) = AffineTranspose m p
+solComplexT noSol = ⊤
 
-vecSimpleSolutionJust : Solution n → Maybe $ Vec F n
-vecSimpleSolutionJust (sol ℕ.zero affine) =  just (unfoldConstants affine)
-vecSimpleSolutionJust (sol (ℕ.suc p) affine) = nothing
-vecSimpleSolutionJust noSol = nothing
+solComplex : (solt : Solution m) → solComplexT solt
+solComplex (sol _ affine) = vAff→vAffT affine
+solComplex noSol = _
 
-vecSimpleSolution : (solution : Solution n) → From-just $ vecSimpleSolutionJust solution
-vecSimpleSolution = from-just ∘ vecSimpleSolutionJust
-
-vecSpanSolutionJust : Solution n → Maybe $ ∃ $ AffineTranspose n
-vecSpanSolutionJust (sol p affine) = just $ _ , vAff→vAffT affine
-vecSpanSolutionJust noSol = nothing
-
-vecSpanSolutionJust2 : Solution n → Maybe $ Vec F n
-vecSpanSolutionJust2 (sol p affine) = just $ unfoldConstants affine
-vecSpanSolutionJust2 noSol = nothing
-
-matrixSolutionJust : Solution n → Maybe $ ∃ $ flip (Matrix F) n
-matrixSolutionJust (sol p affine) = just $ _ , (coeffs $ vAff→vAffT affine)
-matrixSolutionJust noSol = nothing
-
-private
-  From-just-vec : Maybe $ ∃ $ AffineTranspose n → Set _
-  From-just-vec {n} (just (p , _)) = AffineTranspose n p
-  From-just-vec nothing = ⊤
-
-  from-just-vec : (x : Maybe (∃ $ AffineTranspose n)) → From-just-vec x
-  from-just-vec (just (_ , x)) = x
-  from-just-vec nothing  = _
-
-  From-just-matrix : Maybe $ ∃ $ flip (Matrix F) n → Set _
-  From-just-matrix {n} (just (m , _)) = Matrix F m n
-  From-just-matrix nothing = ⊤
-
-  from-just-matrix : (x : Maybe (∃ $ flip (Matrix F) n)) → From-just-matrix x
-  from-just-matrix (just (_ , x)) = x
-  from-just-matrix nothing  = _
-
-
-vecComplexSolution : (solution : Solution n) → From-just-vec $ vecSpanSolutionJust solution
-vecComplexSolution = from-just-vec ∘ vecSpanSolutionJust
-
-solveComplexSE : (se : SystemEquations n m) → From-just-vec $ vecSpanSolutionJust (solve se)
-solveComplexSE = vecComplexSolution ∘ solve
-
-solveComplex : (A : Matrix F n m) (b : Vec F n) → From-just-vec $ vecSpanSolutionJust $ solve $ system A b
-solveComplex A b = solveComplexSE $ system A b
-
-solveComplex0 : (A : Matrix F n m) → From-just-matrix $ matrixSolutionJust $ solve $ system A $ repeat 0#
-solveComplex0 A = from-just-matrix (matrixSolutionJust $ solve $ system A $ repeat 0#)
-
-solveSimpleSE : (se : SystemEquations n m) → From-just $ vecSpanSolutionJust2 (solve se)
-solveSimpleSE = from-just ∘ vecSpanSolutionJust2 ∘ solve
-
-solveSimple : (A : Matrix F n m) (b : Vec F n) → From-just $ vecSpanSolutionJust2 $ solve $ system A b
-solveSimple A b = solveSimpleSE $ system A b
+solveComplex : (A : Matrix F n m) (b : Vec F n) → solComplexT (solve (system A b))
+solveComplex A b = solComplex $ solve $ system A b
