@@ -120,5 +120,5 @@ solComplex : (solt : Solution m) → solComplexT solt
 solComplex (sol _ affine) = vAff→vAffT affine
 solComplex noSol = _
 
-solveComplex : (A : Matrix F n m) (b : Vec F n) → solComplexT (solve (system A b))
+solveComplex : (A : Matrix F n m) (b : Vec F n) → solComplexT $ solve $ system A b
 solveComplex A b = solComplex $ solve $ system A b
