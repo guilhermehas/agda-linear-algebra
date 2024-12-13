@@ -1,0 +1,9 @@
+#+title: Comparison
+
+* Matlab
+- Every variable has a dimension
+- If the dimension does not match, it can not do a multiplication
+
+* Wolfram Alpha
+- The solution is a set
+- It is possible to use the solution using `x+x.sol`
