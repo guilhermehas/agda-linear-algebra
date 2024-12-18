@@ -1,0 +1,28 @@
+* 2024-12-18: Patrik + Guilherme + Nicola
++ Some discussion about the LinAlg library and its interface.
++ NiBo argues that this type is too hard to understand for the user.
+solveSimple : (A : Matrix F n m) (b : Vec F n) → solSimpleT $ solve $ system A b
++ Perhaps present
+solveSimple' : Matrix F n m -> Vec F n -> Maybe (Vec F m)
++ to the user, together with
+solveSpec1 :  (A : Matrix F n m) (b : Vec F n) (x : Vec F m) ->
+              (solveSimple' A b == Just x) ->
+	      A * x ==  b
++ and some corresponding spec. in the "opposite direction" - perhaps:
+solveSpec2 :  (A : Matrix F n m) (b : Vec F n) (x : Vec F m) ->
+              (A * x ==  b) ->
+	      Exists (Vec F m) \y ->
+	      (solveSimple' A b == Just y)
+** Octave details
++ Comparing to octave
+A = [1 1; 1 -1]
+b = [3 ; 1]
+x = A \ b
+check = A*x-b  -- should be the zero vector
+
+B = [1 1; 1 1]
+y = B\b
+check = B*y-b  -- is not the zero vector
+
+There is also linsolve(A,b), similar to (\).
+
