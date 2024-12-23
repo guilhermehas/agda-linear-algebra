@@ -99,30 +99,6 @@ solve se = help solF
     help2 (SE.vAff coeff constant) = vAff (toVec coeff) constant
   help (SE.SystemEquations.noSol _) = noSol
 
-solSimpleT : Solution m → Set c
-solSimpleT {m} (sol ℕ.zero affine) = Vec F m
-solSimpleT (sol (ℕ.suc p) affine) = ⊤
-solSimpleT noSol = ⊤
-
-solSimple : (solt : Solution m) → solSimpleT solt
-solSimple (sol ℕ.zero affine) = unfoldConstants affine
-solSimple (sol (ℕ.suc p) affine) = _
-solSimple noSol = _
-
-solveSimple : (A : Matrix F n m) (b : Vec F n) → solSimpleT $ solve $ system A b
-solveSimple A b = solSimple $ solve $ system A b
-
-solComplexT : Solution m → Set c
-solComplexT {m} (sol p affine) = AffineTranspose m p
-solComplexT noSol = ⊤
-
-solComplex : (solt : Solution m) → solComplexT solt
-solComplex (sol _ affine) = vAff→vAffT affine
-solComplex noSol = _
-
-solveComplex : (A : Matrix F n m) (b : Vec F n) → solComplexT $ solve $ system A b
-solveComplex A b = solComplex $ solve $ system A b
-
 sizeSolutionT : Solution n → Set _
 sizeSolutionT (sol _ _) = ℕ
 sizeSolutionT noSol = ⊤
@@ -141,3 +117,16 @@ solMComplex noSol = _
 
 solveComplex0 : (A : Matrix F n m) → solMComplexT $ solve $ system A $ repeat 0#
 solveComplex0 A = solMComplex $ solve $ system A $ repeat 0#
+
+solAllT : Solution m → Set c
+solAllT {m} (sol ℕ.zero affine) = Vec F m
+solAllT {m} (sol p@(ℕ.suc _) affine) = AffineTranspose m p
+solAllT noSol = ⊤
+
+solAll : (solt : Solution m) → solAllT solt
+solAll (sol ℕ.zero affine) = unfoldConstants affine
+solAll (sol (ℕ.suc p) affine) = vAff→vAffT affine
+solAll noSol = _
+
+solveAll : (A : Matrix F n m) (b : Vec F n) → solAllT $ solve $ system A b
+solveAll A b = solAll $ solve $ system A b

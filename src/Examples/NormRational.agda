@@ -105,11 +105,11 @@ if it would be a whole subspace:
 
 -}
 
-_ : solSimple solution ≡ 1 ∷ 2 ∷ []
+_ : solAll solution ≡ 1 ∷ 2 ∷ []
 _ = refl
 
 
-_ : solveComplex [ 1 ∷ [ -2 ] ] [ 3 ] ≡ 3 ∷ [ 0 ] +span [ 2 ∷ [ 1 ] ]
+_ : solveAll [ 1 ∷ [ -2 ] ] [ 3 ] ≡ 3 ∷ [ 0 ] +span [ 2 ∷ [ 1 ] ]
 _ = refl
 
 
