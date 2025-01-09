@@ -21,7 +21,7 @@ open import SystemEquations.Definitions dField as SE using ()
 open import SystemEquations.UniqueSolution dField
 
 private variable
-  m n : ℕ
+  m n p : ℕ
 
 infix 6 _+span_
 
@@ -99,6 +99,26 @@ solve se = help solF
     help2 (SE.vAff coeff constant) = vAff (toVec coeff) constant
   help (SE.SystemEquations.noSol _) = noSol
 
+data TSolution (n : ℕ) : Set c where
+  TNoSol  : TSolution n
+  OneSol  : Vec F m → TSolution n
+  MultSol : .⦃ NonZero m ⦄ → AffineTranspose n m → TSolution n
+
+open TSolution
+
+sol→Tsol : Solution n → TSolution n
+sol→Tsol (sol ℕ.zero affine) = OneSol $ unfoldConstants affine
+sol→Tsol (sol (ℕ.suc p) affine) = MultSol $ vAff→vAffT affine
+sol→Tsol noSol = TNoSol
+
+solveT : SystemEquations n m → TSolution m
+solveT = sol→Tsol ∘ solve
+
+solveAllT : (A : Matrix F n m) (b : Vec F n) → TSolution m
+solveAllT A b = solveT $ system A b
+
+
+{-
 sizeSolutionT : Solution n → Set _
 sizeSolutionT (sol _ _) = ℕ
 sizeSolutionT noSol = ⊤
@@ -130,3 +150,4 @@ solAll noSol = _
 
 solveAll : (A : Matrix F n m) (b : Vec F n) → solAllT $ solve $ system A b
 solveAll A b = solAll $ solve $ system A b
+-}
