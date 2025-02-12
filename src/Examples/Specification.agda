@@ -4,6 +4,7 @@ module Examples.Specification where
 
 open import Algebra
 open import Algebra.DecidableField
+open import Data.Product
 open import Data.Rational
 open import Data.Vec.Functional
 open import Data.Fin
@@ -33,13 +34,11 @@ b 0F = 3
 b 1F = 1
 
 sAb = system A b
-open SystemEquations sAb using (Solution)
+problem = Σ[ x ∈ Vector ℚ 2 ] (∀ r → A r ∙ⱽ x ≈ b r)
+open SystemEquations sAb using (Solution; IsSolution)
 
 solAb : Solution
 solAb = solveUniqueSystemEquations sAb
 
-x : Vector ℚ 2
-x with sol _ aff _ ← solAb = aff
-
-spec : ∀ r → A r ∙ⱽ x ≈ b r
-spec with sol _ _ s ← solAb = s
+solX : problem
+solX with sol _ x s ← solAb = x , s
