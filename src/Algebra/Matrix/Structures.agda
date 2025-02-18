@@ -43,6 +43,7 @@ module MMonoid (rawMonoid : RawMonoid a ℓ) where
 
 module MRing {a} {ℓ} (rawRing : RawRing a ℓ) where
   infixl 7 _*ᴹ_
+  infixl 7 _*ᴹⱽ_
   infixl 5 _▹_
 
   open RawRing rawRing renaming (Carrier to A)
