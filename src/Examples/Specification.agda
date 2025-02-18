@@ -7,6 +7,7 @@ open import Algebra.DecidableField
 open import Data.Product
 open import Data.Rational
 open import Data.Vec.Functional
+open import Data.Vec.Functional.Relation.Binary.Pointwise
 open import Data.Fin
 open import Data.Fin.Patterns
 open import Data.Unit using (tt)
@@ -23,6 +24,9 @@ open import SystemEquations.UniqueSolution +-*-decidableField
 open VRing rawRing
 open SystemEquations using (sol)
 
+infix  4 _≋_
+_≋_ = Pointwise _≈_
+
 A : Matrix ℚ 2 2
 A 0F 0F = 1
 A 0F 1F = 1
@@ -34,7 +38,7 @@ b 0F = 3
 b 1F = 1
 
 sAb = system A b
-problem = Σ[ x ∈ Vector ℚ 2 ] (∀ r → A r ∙ⱽ x ≈ b r)
+problem = Σ[ x ∈ Vector ℚ 2 ] (A *ᴹⱽ x ≋ b)
 open SystemEquations sAb using (Solution; IsSolution)
 
 solAb : Solution

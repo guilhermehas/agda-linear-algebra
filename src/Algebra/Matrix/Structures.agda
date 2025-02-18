@@ -6,11 +6,13 @@ open import Algebra
 open import Data.Nat as ℕ using (ℕ)
 open import Data.Fin using (Fin; _≟_)
 open import Data.List
+open import Data.Vec.Functional using (Vector)
 import Algebra.Matrix.Base as MBase
 open import Relation.Binary
 open import Relation.Nullary
 
 open import Algebra.BigOps
+open import Vector.Structures
 
 private variable
   a ℓ : Level
@@ -46,6 +48,7 @@ module MRing {a} {ℓ} (rawRing : RawRing a ℓ) where
   open RawRing rawRing renaming (Carrier to A)
   open SumRawRing rawRing public
   open MMonoid +-rawMonoid public
+  open VRing rawRing using (_∙ⱽ_)
 
   private variable
     xs xs‵ ys zs : Matrix A m n
@@ -55,6 +58,9 @@ module MRing {a} {ℓ} (rawRing : RawRing a ℓ) where
 
   _*ᴹ_ : Matrix A m n → Matrix A n p → Matrix A m p
   (M *ᴹ N) i k = ∑ λ j → M i j * N j k
+
+  _*ᴹⱽ_ : Matrix A m n → Vector A n → Vector A m
+  (M *ᴹⱽ v) i = M i ∙ⱽ v
 
   record IsLinear (T : Matrix A m n → Matrix A k n) : Set (a ⊔ ℓ) where
     field
