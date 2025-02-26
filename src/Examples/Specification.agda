@@ -37,12 +37,18 @@ b : Vector ℚ 2
 b 0F = 3
 b 1F = 1
 
-sAb = system A b
+LinEqProblem : Matrix ℚ 2 2 -> Vector ℚ 2 -> Set
+LinEqProblem A b = Σ[ x ∈ Vector ℚ 2 ] (A *ᴹⱽ x ≋ b)
+
 problem = Σ[ x ∈ Vector ℚ 2 ] (A *ᴹⱽ x ≋ b)
+myLinEqProblem = LinEqProblem A b
+
+sAb = system A b
+
 open SystemEquations sAb using (Solution; IsSolution)
 
 solAb : Solution
 solAb = solveUniqueSystemEquations sAb
 
-solX : problem
-solX with sol _ x s ← solAb = x , s
+-- solX : problem
+-- solX with sol _ x s ← solAb = x , s
