@@ -198,6 +198,43 @@ $ forall i, i', j in "Fin 2" | i eq.not i' and "isPivot"(i, j) \
 By applying @norm to @MNormed with $i = 1, i' = 0, j = 2$,
 we have $"isPivot"(1, 2) = "true"$ and $M'[0][2] = 0$ as expected.
 
+= Recursion steps
+
+== Well-Founded
+
+In the first step of normalization of the matrix, the induction is done by two coefficients *i* and *j*.
+
+In this example, this is the matrix *A*.
+$ A = mat(
+  1, 2, 2, 3;
+  0, 1, 2, 3;
+  0, 2, 5, 7;
+) $
+
+After normalizing with coefficients $$ i = 1 $$ and $$ j = 2 $$, the third row becomes
+$ v_3 := v_3 - 2 dot v_2 $
+$ v_3 := vec(0,2,5,7) - 2 dot vec(0,1,2,3) $
+$ v_3 := vec(0,0,1,1) $
+
+After this step, the normalization becomes:
+$ A = mat(
+  1, 2, 2, 3;
+  0, 1, 2, 3;
+  0, 0, 1, 1;
+  ) $
+
+The first coefficient of the step induction *i* varies from 0 to $$ n - 1 $$ and *j* varies from $$  i + 1 $$ to $$ n - 1 $$.
+These induction steps are done using well-founded of inequality on finite sets.
+
+== Steps
+
+Between running the step *i* and *j*, it is guarantee that the amount of zeros in the position *j* will be higher than in the position *i*.
+For a fixed *i*, it will be known after running with all possibles *j*, that for every element *j* that is greater than *i*, the numbers of zeros
+of row *j* after the normalization will be greater than the row *i*.
+
+After running the normalization in all the matrix in the first part,
+it is truth that for every *i* and *j* that *j* is greater than *i* that the number of zeros of row *j* is greater than the number of zeros of row *i*.
+
 = Solving from normalized matrix
 
 == Vector space property
