@@ -1,4 +1,4 @@
-#import "@preview/charged-ieee:0.1.0": ieee
+#import "@preview/charged-ieee:0.1.3": ieee
 
 #show: ieee.with(
   title: [Agda Linear Algebra],
