@@ -198,7 +198,7 @@ $ forall i, i', j in "Fin 2" | i eq.not i' and "isPivot"(i, j) \
 By applying @norm to @MNormed with $i = 1, i' = 0, j = 2$,
 we have $"isPivot"(1, 2) = "true"$ and $M'[0][2] = 0$ as expected.
 
-= Recursion steps
+= Recursion steps in the first part
 
 == Well-Founded
 
@@ -234,6 +234,60 @@ of row *j* after the normalization will be greater than the row *i*.
 
 After running the normalization in all the matrix in the first part,
 it is truth that for every *i* and *j* that *j* is greater than *i* that the number of zeros of row *j* is greater than the number of zeros of row *i*.
+
+= Recursion steps in the second part
+
+== Well-Founded
+
+The second step is similar to the first one, but it is necessary to assume that the results of the first step do not change.
+In addition, the main difference is that the indices decrease instead of increasing.
+
+For example: this matrix *A*:
+$ A = mat(
+  1, 2, 2, 3;
+  0, 1, 2, 3;
+  0, 0, 1, 1;
+) $
+
+After normalizing with coefficients $i = 2$ and $j = 1$, the third row becomes:
+$ v_2 := v_2 - 2 dot v_3 $
+$ v_2 := vec(0,1,2,3) - 2 dot vec(0,0,1,2) $
+$ v_2 := vec(0,1,0,1) $
+
+After this step, the normalization becomes:
+$ A = mat(
+  1, 2, 2, 3;
+  0, 1, 0, 1;
+  0, 0, 1, 1;
+  ) $
+
+The indice *i* varies from $n - 1$ to 0 and the indice *j* from $i - 1$ to 0.
+This recursion is possible to do because of well-founded of greater operator of finite sets.
+
+== Steps
+
+After each step, it is assumed that the property of the first step is mantained, so in the end, this property will be true.
+After running the step in the rows *i* and *j*, it is known that right zeros of before the pivot of column *j* are maintaned.
+
+For example:
+$ A = mat(
+  1, 0, 2, 3;
+  0, 1, 0, 1;
+  0, 0, 1, 1;
+  ) $
+
+After normalizing with coefficients $i = 2$ and $j = 0$, the first row becomes:
+$ v_1 := v_1 - 2 dot v_3 $
+$ v_1 := vec(1,0,2,3) - 2 dot vec(0,0,1,1) $
+$ v_1 := vec(1,0,0,1) $
+
+The amount of zero at right of the pivot before the normalization in $v_1 = vec(1,0,2,3)$ is one.
+This is because the pivot is 1 in this case.
+After normalizing, the amount of zeros right to the pivot in $v_1 = vec(1,0,0,1)$ is two.
+In this example, the amount of zeros right to the pivot increased.
+
+Futhermore, different from the first part, the row *i* of the matrix is constant and does not modify.
+This makes the second part of the verification easier to do.
 
 = Solving from normalized matrix
 
