@@ -291,6 +291,18 @@ This makes the second part of the verification easier to do.
 
 = Solving from normalized matrix
 
+== Main definitions
+A solution of a system of equation is the vector *x* such that $ A * x = b $.
+
+When the system of equations has more than one solution, usually when the number of rows are less than the number of columns,
+the solution is parametrized. In that case, the parametrized solution is a family of solution with vector affine
+that is defined as record of one constant and another vector of constants.
+The evaluation of vector affine is $ "eval" v = v * "coeff" + c $.
+Which means that vector affine represents a line composed by a point and one direction.
+
+From this vector affine, it is possible to define the family of solution as a linear combination of vectors affine.
+$ x = sum_(i = 0)^k a_i dot v_i $ where *k* $v_k$ are all vectors affine of the solutoin and *a_k* is any constant.
+
 == Vector space property
 The rows of the normalized matrix have the same vector space as the rows of the original matrix.
 This means that all solutions in the normalized matrix are the same as those in the original one.
