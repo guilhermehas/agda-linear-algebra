@@ -301,7 +301,18 @@ The evaluation of vector affine is $ "eval" v = v * "coeff" + c $.
 Which means that vector affine represents a line composed by a point and one direction.
 
 From this vector affine, it is possible to define the family of solution as a linear combination of vectors affine.
-$ x = sum_(i = 0)^k a_i dot v_i $ where *k* $v_k$ are all vectors affine of the solutoin and *a_k* is any constant.
+$ x = sum_(i = 0)^k a_i dot v_i + c $ where *k* $v_k$ are all vectors affine of the solutoin and $a_k$ is any constant.
+
+For example, if $ A = mat(1,-1), b = vec(1) $
+$ x = vec(1,0) + vec(1,1) dot v " for every" v $ 
+
+After multiplying $A dot v$, the result is:
+
+$ A dot x &= mat(1, -1) dot (vec(1,0) + vec(1,1) dot v) \
+          &= mat(1, -1) dot vec(1,0) + mat(1, -1) dot vec(1,1) dot v \
+          &= vec(1,0) + vec(0,0) dot v \
+          &= vec(1,0)
+          $
 
 == Vector space property
 The rows of the normalized matrix have the same vector space as the rows of the original matrix.
@@ -329,6 +340,35 @@ In the end, each variable has a parametrized solution and I proved using all the
 this parametrized solution is valid in all of the equations.
 In addition, I proved that all solutions can be expressed by the parametrized solution,
 which means that it is the most generous one.
+
+== Finding the solutions
+
+After normalizing the matrix, each row has a pivot with value one and in this column, 
+every element in this column and outside of this row should have value zero.
+
+For example:
+$ A = mat(1,1,0; 0,0,1), b = vec(1,1) $ 
+
+In the first row, the pivot is one and the rest of the first column has values zeros.
+
+In addition, at the second row, the pivot appears in the third position (not second).
+The column of this pivot has a zero in the first row.
+
+The final solution, for each row, it is the constant multiplied by the pivot minus a rest of the matrix at this row.
+In this case, it would be:
+
+$ x = vec(1,0,1) + k dot vec(1,-1,0) $
+
+== General solution
+
+The theorem in the library finds the most general solution, so it proves that this solution is unique.
+To prove that, from the solution, for each row, we prove that it is possible to find the constant.
+
+From the previous example:
+$ x = vec(a,b,c) = vec(1,0,1) + k dot vec(1,-1,0) $
+$ A dot x - b = vec(a+b-1,c-1) $
+
+This vector should be equal to zero.
 
 = Discussion
 
