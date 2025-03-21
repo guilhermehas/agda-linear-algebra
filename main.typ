@@ -357,18 +357,20 @@ The column of this pivot has a zero in the first row.
 The final solution, for each row, it is the constant multiplied by the pivot minus a rest of the matrix at this row.
 In this case, it would be:
 
-$ x = vec(1,0,1) + k dot vec(1,-1,0) $
+$ x = vec(1,0,1) + k dot vec(-1,1,0) $
 
 == General solution
 
 The theorem in the library finds the most general solution, so it proves that this solution is unique.
-To prove that, from the solution, for each row, we prove that it is possible to find the constant.
+To prove that, from any solution, it finds the constant of the general solution for this specific solution.
+Remember that any solution with that can be described by these constants is already a solution.
 
-From the previous example:
-$ x = vec(a,b,c) = vec(1,0,1) + k dot vec(1,-1,0) $
-$ A dot x - b = vec(a+b-1,c-1) $
+See the example below:
+$ x = vec(a,b,c) = vec(1,0,1) + k dot vec(-1,1,0) $
+$ a = 1 - k, b = k, c = 1 $
+With these equations, it is easy to find $k = b$.
+$ A dot x - b = vec(a+b-1,c-1) = vec(0,0) $
 
-This vector should be equal to zero.
 
 = Discussion
 
