@@ -199,10 +199,13 @@ By applying @norm to @MNormed with $i = 1, i' = 0, j = 2$,
 we have $"isPivot"(1, 2) = "true"$ and $M'[0][2] = 0$ as expected.
 
 = Recursion steps in the first part
+// TODO: Explain what is the first step
 
 == Well-Founded
 
 In the first step of normalization of the matrix, the induction is done by two coefficients *i* and *j*.
+// TODO: Explain what will be proved
+// TODO: induction is only done in one argument
 
 In this example, this is the matrix *A*.
 $ A = mat(
@@ -361,6 +364,7 @@ $ x = vec(1,0,1) + k dot vec(-1,1,0) $
 
 == General solution
 
+// TODO: Rephrase this sentence
 The theorem in the library finds the most general solution, so it proves that this solution is unique.
 To prove that, from any solution, it finds the constant of the general solution for this specific solution.
 Remember that any solution with that can be described by these constants is already a solution.
